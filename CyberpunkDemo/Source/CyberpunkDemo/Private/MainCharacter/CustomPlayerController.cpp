@@ -17,3 +17,4 @@ void ACustomPlayerController::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("BeginPlay"));
 	}
 }
+

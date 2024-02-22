@@ -11,7 +11,10 @@ UCustomCharacterMovementComponent::UCustomCharacterMovementComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
+	bIsSprinting = false;
+	bIsCrouching = false;
+	Walk_MaxWalkSpeed = 500.0f;
+	Sprint_MaxWalkSpeed = 1000.0f;
 }
 
 
@@ -24,6 +27,24 @@ void UCustomCharacterMovementComponent::BeginPlay()
 	
 }
 
+void UCustomCharacterMovementComponent::OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation,
+	const FVector& OldVelocity)
+{
+	Super::OnMovementUpdated(DeltaSeconds, OldLocation, OldVelocity);
+
+	if (MovementMode == MOVE_Walking)
+	{
+		if (bIsSprinting)
+		{
+			MaxWalkSpeed = Sprint_MaxWalkSpeed;
+		}
+		else
+		{
+			MaxWalkSpeed = Walk_MaxWalkSpeed;
+		}
+	}
+}
+
 
 // Called every frame
 void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -31,6 +52,16 @@ void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTic
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+
+}
+
+void UCustomCharacterMovementComponent::SprintPressed()
+{
+	bIsSprinting = true;
+}
+
+void UCustomCharacterMovementComponent::SprintReleased()
+{
+	bIsSprinting = false;
 }
 

@@ -3,6 +3,7 @@
 #pragma once
 // Includes
 #include "CoreMinimal.h"
+#include "CustomCharacterMovementComponent.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "MainCharacter.generated.h"
@@ -27,6 +28,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Movement")
 	bool bIsCrouching;
+
+protected:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category= Movement)
+	UCustomCharacterMovementComponent* CustomCharacterMovementComponent;
 
 private:
 	
@@ -54,9 +60,13 @@ private:
 		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	    UInputAction* LookAction;
 
+		// Sprint action
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true") )
+		UInputAction* SprintAction;
+
 public:
 	// Sets default values for this character's properties
-	AMainCharacter();
+	AMainCharacter(const FObjectInitializer& ObjectInitializer);
 
 	/** Returns Mesh1P sub-object [!] **/
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
