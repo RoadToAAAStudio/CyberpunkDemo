@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/StateTreeComponent.h"
 #include "GameFramework/Character.h"
 #include "BasicEnemy.generated.h"
 
@@ -10,7 +11,10 @@ UCLASS()
 class CYBERPUNKDEMO_API ABasicEnemy : public ACharacter
 {
 	GENERATED_BODY()
-
+public:
+	UPROPERTY(EditAnywhere, Instanced, Category = "AI Perception")
+	TObjectPtr<UStateTreeComponent> StateTree;
+	
 public:
 	// Sets default values for this character's properties
 	ABasicEnemy();
@@ -25,5 +29,4 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 };

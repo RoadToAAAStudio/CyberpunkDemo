@@ -9,6 +9,7 @@ ABasicEnemy::ABasicEnemy()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	StateTree = CreateDefaultSubobject<UStateTreeComponent>(TEXT("StateTree"));
 }
 
 // Called when the game starts or when spawned
