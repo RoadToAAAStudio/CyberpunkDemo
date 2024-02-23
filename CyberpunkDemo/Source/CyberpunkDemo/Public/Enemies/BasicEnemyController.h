@@ -47,5 +47,6 @@ protected:
 private:
 	void SetupPerceptionSystem();
 	
+	UFUNCTION()
 	void OnTargetDetected(AActor* Actor, const FAIStimulus Stimulus);
 };
