@@ -13,10 +13,6 @@ ABasicEnemyController::ABasicEnemyController(const FObjectInitializer& ObjectIni
 	SetupPerceptionSystem();
 }
 
-void ABasicEnemyController::OnPossess(APawn* PossessedPawn)
-{
-	Super::OnPossess(PossessedPawn);
-}
 
 void ABasicEnemyController::SetupPerceptionSystem()
 {
@@ -67,4 +63,9 @@ void ABasicEnemyController::OnTargetDetected(AActor* Actor, const FAIStimulus St
 	default:
 		break;
 	}
+}
+
+void ABasicEnemyController::OnPossess(APawn* PossessedPawn)
+{
+	Super::OnPossess(PossessedPawn);
 }

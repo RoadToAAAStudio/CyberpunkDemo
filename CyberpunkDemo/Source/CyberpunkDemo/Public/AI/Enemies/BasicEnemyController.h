@@ -36,7 +36,6 @@ public:
 	explicit ABasicEnemyController(const FObjectInitializer& ObjectInitializer);
 
 protected:
-	virtual void OnPossess(APawn* PossessedPawn) override;
 
 	/*Blueprint implementable event called when the player enter in the enemy*/
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnPlayerSeen"))
@@ -53,4 +52,7 @@ private:
 	
 	UFUNCTION()
 	void OnTargetDetected(AActor* Actor, const FAIStimulus Stimulus);
+
+protected:
+	virtual void OnPossess(APawn* PossessedPawn) override;
 };

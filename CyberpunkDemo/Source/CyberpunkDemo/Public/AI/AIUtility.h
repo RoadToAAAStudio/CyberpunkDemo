@@ -15,10 +15,11 @@ UCLASS()
 class CYBERPUNKDEMO_API UAIUtility : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-
-	UFUNCTION()
+public:
+	
+	UFUNCTION(BlueprintCallable, Category = "AIUtility | StateTree")
 	static FName GetCurrentState(const UStateTree* StateTree, const FStateTreeTransitionResult& Transition);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "AIUtility | StateTree")
 	static FName GetSourceState(const UStateTree* StateTree, const FStateTreeTransitionResult& Transition);
 };

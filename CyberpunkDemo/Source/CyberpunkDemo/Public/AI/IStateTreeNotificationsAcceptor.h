@@ -8,7 +8,7 @@
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UIStateTreeNotificationsAcceptor : public UInterface
+class UStateTreeNotificationsAcceptor : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,10 +16,12 @@ class UIStateTreeNotificationsAcceptor : public UInterface
 /**
  * 
  */
-class CYBERPUNKDEMO_API IIStateTreeNotificationsAcceptor
+class CYBERPUNKDEMO_API IStateTreeNotificationsAcceptor
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "State Tree")
+	void AcceptStateTreeNotification(const UStateTree* StateTree, const UDataTable* DataTable, const FStateTreeTransitionResult& Transition);
 };
