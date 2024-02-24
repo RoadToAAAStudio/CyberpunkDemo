@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Enemies/BasicEnemyController.h"
+#include "AI/Enemies/BasicEnemyController.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Perception/AIPerceptionComponent.h"
@@ -25,15 +25,6 @@ void ABasicEnemyController::SetupPerceptionSystem()
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
 	if (SightConfig)
 	{
-		SightConfig->SightRadius = 2000.0f;
-		SightConfig->LoseSightRadius = SightConfig->SightRadius + 20.0f;
-		SightConfig->PeripheralVisionAngleDegrees = 30.0f;
-		SightConfig->SetMaxAge(5.0f);
-		SightConfig->AutoSuccessRangeFromLastSeenLocation = 10.0f;
-		SightConfig->DetectionByAffiliation.bDetectEnemies = true;
-		SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
-		SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
-
 		GetPerceptionComponent()->SetDominantSense(SightConfig->GetSenseImplementation());
 		GetPerceptionComponent()->ConfigureSense(*SightConfig);
 	}
@@ -41,12 +32,6 @@ void ABasicEnemyController::SetupPerceptionSystem()
 	HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("HearingConfig"));
 	if (HearingConfig)
 	{
-		HearingConfig->HearingRange = 600.0f;
-		HearingConfig->SetMaxAge(5.0f);
-		HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
-		HearingConfig->DetectionByAffiliation.bDetectFriendlies = true;
-		HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;
-
 		GetPerceptionComponent()->ConfigureSense(*HearingConfig);
 	}
 	
@@ -76,7 +61,8 @@ void ABasicEnemyController::OnTargetDetected(AActor* Actor, const FAIStimulus St
 		break;
 	case 1:
 		UE_LOG(LogTemp, Display, TEXT("Heard something!"));
-		SomethingIsHeard();
+		SomethingWasHeard(Stimulus);
+		OnHeardSomethingDelegate.Broadcast(Stimulus);
 		break;
 	default:
 		break;

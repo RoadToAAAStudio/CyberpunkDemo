@@ -11,11 +11,12 @@ UCLASS()
 class CYBERPUNKDEMO_API ABasicEnemy : public ACharacter
 {
 	GENERATED_BODY()
+	
 public:
 	UPROPERTY(EditAnywhere, Instanced, Category = "AI Perception")
 	TObjectPtr<UStateTreeComponent> StateTree;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Gameplay Tags")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gameplay Tags")
 	FGameplayTagContainer GameplayTagContainer;
 	
 public:

@@ -9,6 +9,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerSeenSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerLostSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHeardSomethingSignature, const FAIStimulus, Stimulus);
 
 /**
  * 
@@ -18,9 +19,9 @@ class CYBERPUNKDEMO_API ABasicEnemyController : public AAIController
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditDefaultsOnly, Instanced, Category = "AI Perception")
+	UPROPERTY()
 	TObjectPtr<class UAISenseConfig_Sight> SightConfig;
-	UPROPERTY(EditDefaultsOnly, Instanced, Category = "AI Perception")
+	UPROPERTY()
 	TObjectPtr<class UAISenseConfig_Hearing> HearingConfig;
 
 	UPROPERTY(BlueprintAssignable)
@@ -28,6 +29,9 @@ public:
 	
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerLostSignature OnPlayerLostDelegate;
+	
+	UPROPERTY(BlueprintAssignable)
+    FOnHeardSomethingSignature OnHeardSomethingDelegate;
 public:
 	explicit ABasicEnemyController(const FObjectInitializer& ObjectInitializer);
 
@@ -41,8 +45,8 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnPlayerLost"))
 	void PlayerLost();
 
-	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnSomethingIsHeard"))
-	void SomethingIsHeard();
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnSomethingWasHeard"))
+	void SomethingWasHeard(const FAIStimulus Stimulus);
 
 private:
 	void SetupPerceptionSystem();
