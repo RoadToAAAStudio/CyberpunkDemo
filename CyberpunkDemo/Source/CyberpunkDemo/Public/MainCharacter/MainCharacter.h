@@ -64,6 +64,8 @@ private:
 		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true") )
 		UInputAction* SprintAction;
 
+		//UPROPERTY(EditAnywhere)
+
 public:
 	// Sets default values for this character's properties
 	AMainCharacter(const FObjectInitializer& ObjectInitializer);

@@ -30,7 +30,18 @@ protected:
 
 	virtual void OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation, const FVector& OldVelocity) override;
 
+	void BuildStateMachine();
+
 public:
+	// State machine condition methods
+	static bool CanWalkFromIdle();
+	static bool CanRunFromIdle();
+	static bool CanCrouchFromIdle();
+	static bool CanJumpFromIdle();
+
+
+
+
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
@@ -38,4 +49,5 @@ public:
 	// Sprint methods
 	UFUNCTION(BlueprintCallable) void SprintPressed();
 	UFUNCTION(BlueprintCallable) void SprintReleased();
+
 };

@@ -2,3 +2,15 @@
 
 
 #include "Utility/FState.h"
+
+void UFState::EnterState()
+{
+}
+
+void UFState::Tick()
+{
+}
+
+void UFState::ExitState()
+{
+}

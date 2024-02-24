@@ -2,7 +2,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "StateInterface.h"
 #include "FTransition.h"
 #include "UObject/Object.h"
 #include "StateMachine.generated.h"
@@ -13,9 +12,10 @@ class CYBERPUNKDEMO_API UStateMachine : public UObject
 	GENERATED_BODY()
 
 public:
-	TObjectPtr<UStateInterface> CurrentState;
-	TArray<TObjectPtr<UStateInterface>> States;
-	TMap<TObjectPtr<UStateInterface>, TArray<TObjectPtr<UFTransition>>> Transitions;
+	UPROPERTY()
+	TObjectPtr<UFState> CurrentState;
+	TArray<TObjectPtr<UFState>> States;
+	TMap<TObjectPtr<UFState>, TArray<TObjectPtr<UFTransition>>> Transitions;
 	
 protected:
 
@@ -24,11 +24,11 @@ private:
 public:
 	UStateMachine();
 
-	void AddState();
+	void Init(const TObjectPtr<UFState> StartingState);
 
-	void AddTransition();
+	void AddState(const TObjectPtr<UFState> NewState);
+
+	void AddTransition(const TObjectPtr<UFState> FromState, const TObjectPtr<UFTransition> NewTransition);
 	
 	void Tick();
-
-	
 };

@@ -3,15 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/Object.h"
-#include "Utility/StateInterface.h"
-#include "Idle.generated.h"
+#include "Utility/FState.h"
+#include "StateIdle.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class CYBERPUNKDEMO_API UIdle : public UObject, public IStateInterface
+class CYBERPUNKDEMO_API UStateIdle : public UFState
 {
 	GENERATED_BODY()
 };

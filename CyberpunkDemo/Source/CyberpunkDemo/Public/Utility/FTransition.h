@@ -3,9 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "StateInterface.h"
+#include "FState.h"
 #include "UObject/Object.h"
-#include "GenericPlatform/GenericPlatformApplicationMisc.h"
 #include "Templates/Function.h"
 #include "FTransition.generated.h"
 
@@ -18,13 +17,21 @@ class CYBERPUNKDEMO_API UFTransition : public UObject
 
 public:
 
+	// Basic constructor
 	UFTransition();
-	void Init(TObjectPtr<UStateInterface> toState);
-	TObjectPtr<UStateInterface> ToState;
+
+	// Init function that substitutes the constructor
+	void Init(const TObjectPtr<UFState> toState, const TFunction<bool()>& condition);
+
+	// The state this transition points to
+	UPROPERTY()
+	TObjectPtr<UFState> ToState;
 
 public:
-
+	
 	bool CheckTransition();
+
 	FOnCheckConditionSignature OnCheckConditionDelegate;
-	//TFunction<bool> Condition;
+
+	TFunction<bool()> Condition = nullptr;
 };
