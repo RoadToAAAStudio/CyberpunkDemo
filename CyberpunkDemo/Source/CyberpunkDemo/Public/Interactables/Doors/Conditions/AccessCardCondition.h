@@ -3,17 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Interactables/Doors/UnlockCondition.h"
 #include "UObject/Object.h"
-#include "UnlockCondition.generated.h"
+#include "AccessCardCondition.generated.h"
 
-UCLASS(Abstract)
-class CYBERPUNKDEMO_API UUnlockCondition : public UObject
+UCLASS()
+class CYBERPUNKDEMO_API UAccessCardCondition : public UUnlockCondition
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	UUnlockCondition();
+	UAccessCardCondition();
 	
-	virtual bool Check();
+	bool Check() override;
 };

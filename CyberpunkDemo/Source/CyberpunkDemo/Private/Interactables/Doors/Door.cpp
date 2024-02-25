@@ -26,26 +26,31 @@ void ADoor::Tick(float DeltaTime)
 
 void ADoor::Open()
 {
-	ActiveState = FGameplayTag().RequestGameplayTag("Environment.Interactables.Door.State.Opened");
+	ActiveState = FGameplayTag::RequestGameplayTag("Environment.Interactables.Door.State.Opened");
 }
 
 void ADoor::Close()
 {
-	ActiveState = FGameplayTag().RequestGameplayTag("Environment.Interactables.Door.State.Closed");
+	ActiveState = FGameplayTag::RequestGameplayTag("Environment.Interactables.Door.State.Closed");
 }
 
 void ADoor::Unlock()
 {
 	Conditions.Empty();
-	ActiveState = FGameplayTag().RequestGameplayTag("Environment.Interactables.Door.State.Opened");
+	ActiveState = FGameplayTag::RequestGameplayTag("Environment.Interactables.Door.State.Opened");
 }
 
 void ADoor::Inspect()
 {
-	//must be called from inspection system and to be linked to UI
+	for (int i = 0; i < Conditions.Num(); i++)
+	{
+		Conditions[i]->Check();
+	}
+	//must be called from inspection system, check if conditions are met and call relative UI
 }
 
 void ADoor::Interact()
 {
+	//must be called by an input and check if the condition is met to complete and unlock the door
 }
 

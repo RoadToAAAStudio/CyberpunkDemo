@@ -15,7 +15,7 @@ class CYBERPUNKDEMO_API ADoor : public AActor
 
 public:
 	UPROPERTY(EditAnywhere)
-	TArray<AUnlockCondition*> Conditions;
+	TArray<UUnlockCondition*> Conditions;
 	UPROPERTY(BlueprintReadOnly)
 	FGameplayTag ActiveState;
 
@@ -29,14 +29,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION()
+
 	void Open();
-	UFUNCTION()
 	void Close();
-	UFUNCTION()
 	void Unlock();
-	UFUNCTION()
+	
+	UFUNCTION(BlueprintCallable)
 	void Inspect();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void Interact();
 };
