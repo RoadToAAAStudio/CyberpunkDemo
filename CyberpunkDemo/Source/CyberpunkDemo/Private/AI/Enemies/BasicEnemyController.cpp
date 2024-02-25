@@ -13,6 +13,25 @@ ABasicEnemyController::ABasicEnemyController(const FObjectInitializer& ObjectIni
 	SetupPerceptionSystem();
 }
 
+void ABasicEnemyController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (GameplayTagsContainer.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.PlayerInCone"))))
+	{
+		SightBar->AddAmount(SightIncreaseRate * DeltaTime);
+	}
+	else
+	{
+		SightBar->RemoveAmount(SightDecreaseRate * DeltaTime);
+	}
+
+	if (HearingBar->CurrentValue > 0)
+	{
+		HearingBar->RemoveAmount(HearingDecreaseRate * DeltaTime);
+	}
+}
+
 
 void ABasicEnemyController::SetupPerceptionSystem()
 {
@@ -30,11 +49,12 @@ void ABasicEnemyController::SetupPerceptionSystem()
 	{
 		GetPerceptionComponent()->ConfigureSense(*HearingConfig);
 	}
-	
-	GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &ABasicEnemyController::OnTargetDetected);
+
+	SightBar = CreateDefaultSubobject<UAttributeBar>(TEXT("SightBar"));
+	HearingBar = CreateDefaultSubobject<UAttributeBar>(TEXT("HearingBar"));
 }
 
-void ABasicEnemyController::OnTargetDetected(AActor* Actor, const FAIStimulus Stimulus)
+void ABasicEnemyController::ReceiveStimulus(AActor* Actor, const FAIStimulus Stimulus)
 {
 	switch (Stimulus.Type)
 	{
@@ -43,26 +63,44 @@ void ABasicEnemyController::OnTargetDetected(AActor* Actor, const FAIStimulus St
 		{
 			if (Stimulus.WasSuccessfullySensed())
 			{
-				UE_LOG(LogTemp, Display, TEXT("MainCharacter seen!"));
+				GameplayTagsContainer.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.PlayerInCone")));
 				PlayerEnteredInSightCone();
 				OnPlayerEnteredInSightCone.Broadcast();
 			}
 			else
 			{
-				UE_LOG(LogTemp, Display, TEXT("MainCharacter lost!"));
+				GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.PlayerInCone")));
 				PlayerExitedFromSightCone();
 				OnPlayerExitedFromSightCone.Broadcast();
 			}
 		}
 		break;
 	case 1:
-		UE_LOG(LogTemp, Display, TEXT("Heard something!"));
-		SomethingWasHeard(Stimulus);
-		OnHeardSomethingDelegate.Broadcast(Stimulus);
+		//TODO It depends on the Stimulus
+		HearingBar->AddAmount(1.0f);
+		if (HearingBar->bIsFull)
+		{
+			SomethingWasHeard(Stimulus);
+			OnHeardSomethingDelegate.Broadcast(Stimulus);
+		}
+
 		break;
 	default:
 		break;
 	}
+}
+
+void ABasicEnemyController::ReceivePlayerSeen()
+{
+	GameplayTagsContainer.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.PlayerSeen")));
+}
+
+void ABasicEnemyController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &ABasicEnemyController::ReceiveStimulus);
+	SightBar->OnBarFilledDelegate.AddDynamic(this, &ABasicEnemyController::ReceivePlayerSeen);
 }
 
 void ABasicEnemyController::OnPossess(APawn* PossessedPawn)
