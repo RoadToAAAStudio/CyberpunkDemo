@@ -7,8 +7,8 @@
 #include "Perception/AIPerceptionTypes.h"
 #include "BasicEnemyController.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerSeenSignature);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerLostSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerEnteredInSightCone);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerExitedFromSightCone);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHeardSomethingSignature, const FAIStimulus, Stimulus);
 
 /**
@@ -25,10 +25,10 @@ public:
 	TObjectPtr<class UAISenseConfig_Hearing> HearingConfig;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnPlayerSeenSignature OnPlayerSeenDelegate;
+	FOnPlayerEnteredInSightCone OnPlayerEnteredInSightCone;
 	
 	UPROPERTY(BlueprintAssignable)
-	FOnPlayerLostSignature OnPlayerLostDelegate;
+	FOnPlayerExitedFromSightCone OnPlayerExitedFromSightCone;
 	
 	UPROPERTY(BlueprintAssignable)
     FOnHeardSomethingSignature OnHeardSomethingDelegate;
@@ -38,11 +38,11 @@ public:
 protected:
 
 	/*Blueprint implementable event called when the player enter in the enemy*/
-	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnPlayerSeen"))
-	void PlayerSeen();
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnPlayerEnteredInSightCone"))
+	void PlayerEnteredInSightCone();
 
-	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnPlayerLost"))
-	void PlayerLost();
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnPlayerExitedFromSightCone"))
+	void PlayerExitedFromSightCone();
 
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnSomethingWasHeard"))
 	void SomethingWasHeard(const FAIStimulus Stimulus);

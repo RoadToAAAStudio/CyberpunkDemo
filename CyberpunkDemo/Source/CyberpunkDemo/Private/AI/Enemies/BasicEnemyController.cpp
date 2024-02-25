@@ -44,14 +44,14 @@ void ABasicEnemyController::OnTargetDetected(AActor* Actor, const FAIStimulus St
 			if (Stimulus.WasSuccessfullySensed())
 			{
 				UE_LOG(LogTemp, Display, TEXT("MainCharacter seen!"));
-				PlayerSeen();
-				OnPlayerSeenDelegate.Broadcast();
+				PlayerEnteredInSightCone();
+				OnPlayerEnteredInSightCone.Broadcast();
 			}
 			else
 			{
 				UE_LOG(LogTemp, Display, TEXT("MainCharacter lost!"));
-				PlayerLost();
-				OnPlayerLostDelegate.Broadcast();
+				PlayerExitedFromSightCone();
+				OnPlayerExitedFromSightCone.Broadcast();
 			}
 		}
 		break;
