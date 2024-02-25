@@ -4,16 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Door.generated.h"
+#include "UnlockCondition.generated.h"
 
-UCLASS()
-class CYBERPUNKDEMO_API ADoor : public AActor
+UCLASS(Abstract)
+class CYBERPUNKDEMO_API AUnlockCondition : public AActor
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	ADoor();
+	AUnlockCondition();
+
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -22,4 +24,7 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION()
+	virtual bool Interact();
 };
