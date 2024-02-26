@@ -2,3 +2,25 @@
 
 
 #include "Utility/States/StateRunning.h"
+
+void UStateRunning::SetOwner(TObjectPtr<UCustomCharacterMovementComponent> owner)
+{
+	Owner = owner;
+}
+
+void UStateRunning::EnterState()
+{
+	Super::EnterState();
+	Owner->MaxWalkSpeed = Owner->Sprint_MaxWalkSpeed;
+	Owner->SetCurrentMovementState(ECustomMovementState::Running);
+}
+
+void UStateRunning::ExitState()
+{
+	Super::ExitState();
+}
+
+void UStateRunning::Tick()
+{
+	Super::Tick();
+}

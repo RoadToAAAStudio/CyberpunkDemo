@@ -21,7 +21,7 @@ public:
 	UFTransition();
 
 	// Init function that substitutes the constructor
-	void Init(const TObjectPtr<UFState> toState, const TFunction<bool()>& condition);
+	void Init(const TObjectPtr<UFState> toState);
 
 	// The state this transition points to
 	UPROPERTY()

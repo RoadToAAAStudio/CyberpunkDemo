@@ -3,8 +3,6 @@
 
 #include "Utility/StateMachine.h"
 
-#include "EntitySystem/MovieSceneEntitySystemRunner.h"
-
 UStateMachine::UStateMachine()
 {
 }
@@ -19,15 +17,9 @@ void UStateMachine::AddState(const TObjectPtr<UFState> NewState)
 	States.Add(NewState);
 }
 
-void UStateMachine::AddTransition(const TObjectPtr<UFState> FromState, const TObjectPtr<UFTransition> NewTransition)
-{
-	Transitions[FromState].Add(NewTransition);
-}
-
-
 void UStateMachine::Tick()
 {
-	for (auto e : Transitions[CurrentState])
+	for (auto e : CurrentState->Transitions)
 	{
 		if (e->CheckTransition())
 		{

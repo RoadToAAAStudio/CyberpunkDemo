@@ -28,7 +28,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Movement")
 	bool bIsCrouching;
-
+	
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category= Movement)
@@ -67,15 +67,23 @@ private:
 		//UPROPERTY(EditAnywhere)
 
 public:
+	
 	// Sets default values for this character's properties
 	AMainCharacter(const FObjectInitializer& ObjectInitializer);
 
 	/** Returns Mesh1P sub-object [!] **/
-	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
+	UFUNCTION(BlueprintCallable) USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 	/** Returns FirstPersonCameraComponent sub-object [!] **/
-	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+	UFUNCTION(BlueprintCallable) UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	// // Called to bind functionality to input
+	// virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -88,12 +96,4 @@ protected:
 	// APawn interface [!]
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	// End of APawn interface
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// // Called to bind functionality to input
-	// virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 };

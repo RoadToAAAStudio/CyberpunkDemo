@@ -2,3 +2,24 @@
 
 
 #include "Utility/States/StateCrouching.h"
+
+void UStateCrouching::SetOwner(TObjectPtr<UCustomCharacterMovementComponent> owner)
+{
+	Owner = owner;
+}
+
+void UStateCrouching::EnterState()
+{
+	Super::EnterState();
+	Owner->SetCurrentMovementState(ECustomMovementState::Crouching);
+}
+
+void UStateCrouching::ExitState()
+{
+	Super::ExitState();
+}
+
+void UStateCrouching::Tick()
+{
+	Super::Tick();
+}
