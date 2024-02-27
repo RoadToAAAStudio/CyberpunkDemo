@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "AI/Enemies/BasicEnemy.h"
 
 #include "AI/AIUtility.h"
@@ -41,13 +40,11 @@ void ABasicEnemy::BeginPlay()
 void ABasicEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
 void ABasicEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 

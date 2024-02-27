@@ -11,16 +11,21 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerEnteredInSightCone);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerExitedFromSightCone);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHeardSomethingSignature, const FAIStimulus, Stimulus);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerSeenSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSightSenseToogleSignature, const bool, Enabled);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSomethingWasHeardSignature, const FAIStimulus, Stimulus);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHearingSenseToogleSignature, const bool, Enabled);
 
 /**
- * 
+ * Basic Enemy Controller
+ * It encapsulate data and delegates for AI sensors
  */
 UCLASS()
 class CYBERPUNKDEMO_API ABasicEnemyController : public AAIController
 {
 	GENERATED_BODY()
 public:
+	// Dependencies with Configs and Components
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UAttributeBar> SightBar;
 	UPROPERTY(BlueprintReadOnly)
@@ -30,38 +35,58 @@ public:
 	UPROPERTY()
 	TObjectPtr<class UAISenseConfig_Hearing> HearingConfig;
 
+	// Delegates
 	UPROPERTY(BlueprintAssignable)
-	FOnPlayerEnteredInSightCone OnPlayerEnteredInSightCone;
+	FOnPlayerEnteredInSightCone OnPlayerEnteredInSightConeDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerExitedFromSightCone OnPlayerExitedFromSightConeDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerSeenSignature OnPlayerSeenDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnSightSenseToogleSignature OnSightSenseToggledDelegate;
+	UPROPERTY(BlueprintAssignable)
+    FOnSomethingWasHeardSignature OnSomethingWasHeardDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnHearingSenseToogleSignature OnHearingSenseToggledDelegate;
 	
-	UPROPERTY(BlueprintAssignable)
-	FOnPlayerExitedFromSightCone OnPlayerExitedFromSightCone;
-	
-	UPROPERTY(BlueprintAssignable)
-    FOnHeardSomethingSignature OnHeardSomethingDelegate;
+	// Info to be polled
+	UPROPERTY(BlueprintReadOnly)
+	FGameplayTagContainer GameplayTagsContainer;
 
+	// Config variables
 	// Rate for filling the sight bar
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SightIncreaseRate = 0.25f;
 
-	// Rate for empting the sight bar
+	// Rate for emptying the sight bar
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SightDecreaseRate = 0.25f;
 
-	// Rate for empting the hearing bar
+	// Rate for emptying the hearing bar
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float HearingDecreaseRate = 0.25f;
-	
-	UPROPERTY(BlueprintReadOnly)
-	FGameplayTagContainer GameplayTagsContainer;
+
+private:
+	FAIStimulus CurrentHeardStimulus; 
 	
 public:
 	explicit ABasicEnemyController(const FObjectInitializer& ObjectInitializer);
-	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION(BlueprintCallable)
+	void EnableSightSense(bool Enable);
+
+	UFUNCTION(BlueprintCallable)
+	void EnableHearingSense(bool Enable);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsSightEnabled();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsHearingEnabled();
 	
 protected:
 
+	// Derived Blueprints hooks
 	/*Blueprint implementable event called when the player enter in the enemy*/
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnPlayerEnteredInSightCone"))
 	void PlayerEnteredInSightCone();
@@ -82,10 +107,16 @@ private:
 	void ReceiveStimulus(AActor* Actor, const FAIStimulus Stimulus);
 
 	UFUNCTION()
-	void ReceivePlayerSeen();
+	void SightBarFull();
+	
+	UFUNCTION()
+	void HearingBarFull();
+	
+public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
 protected:
-	
 	virtual void BeginPlay() override;
 
 	virtual void OnPossess(APawn* PossessedPawn) override;

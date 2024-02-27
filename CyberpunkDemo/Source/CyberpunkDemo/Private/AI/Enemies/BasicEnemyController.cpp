@@ -13,22 +13,88 @@ ABasicEnemyController::ABasicEnemyController(const FObjectInitializer& ObjectIni
 	SetupPerceptionSystem();
 }
 
+void ABasicEnemyController::EnableSightSense(bool Enable)
+{
+	if (Enable)
+	{
+		GameplayTagsContainer.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
+		SightBar->OnBarFilledDelegate.AddDynamic(this, &ABasicEnemyController::SightBarFull);
+		SightBar->Reset();
+
+		// TODO What if the player is already in the cone?
+
+		OnSightSenseToggledDelegate.Broadcast(true);
+	}
+	else
+	{
+		bool a = GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
+		bool b = GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
+		bool c = GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
+		SightBar->OnBarFilledDelegate.RemoveDynamic(this, &ABasicEnemyController::SightBarFull);
+		SightBar->Reset();
+
+		UE_LOG(LogTemp, Warning, TEXT("%d"), a);
+		UE_LOG(LogTemp, Warning, TEXT("%d"), b);
+		UE_LOG(LogTemp, Warning, TEXT("%d"), c);
+		
+		OnSightSenseToggledDelegate.Broadcast(false);
+	}
+}
+
+void ABasicEnemyController::EnableHearingSense(bool Enable)
+{
+	if (Enable)
+	{
+		GameplayTagsContainer.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Hearing")));
+		HearingBar->OnBarFilledDelegate.AddDynamic(this, &ABasicEnemyController::HearingBarFull);
+		HearingBar->Reset();
+
+		OnHearingSenseToggledDelegate.Broadcast(true);
+	}
+	else
+	{
+		GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Hearing")));
+		HearingBar->OnBarFilledDelegate.RemoveDynamic(this, &ABasicEnemyController::HearingBarFull);
+		HearingBar->Reset();
+		
+		OnHearingSenseToggledDelegate.Broadcast(false);
+	}
+}
+
+bool ABasicEnemyController::IsSightEnabled()
+{
+	return GameplayTagsContainer.HasTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
+}
+
+bool ABasicEnemyController::IsHearingEnabled()
+{
+	return GameplayTagsContainer.HasTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Hearing")));
+}
+
 void ABasicEnemyController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (GameplayTagsContainer.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.PlayerInCone"))))
+	// Sight is Active
+	if (IsSightEnabled())
 	{
-		SightBar->AddAmount(SightIncreaseRate * DeltaTime);
-	}
-	else
-	{
-		SightBar->RemoveAmount(SightDecreaseRate * DeltaTime);
+		if (GameplayTagsContainer.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone"))))
+		{
+			SightBar->AddAmount(SightIncreaseRate * DeltaTime);
+		}
+		else
+		{
+			SightBar->RemoveAmount(SightDecreaseRate * DeltaTime);
+		}
 	}
 
-	if (HearingBar->CurrentValue > 0)
+	// Hearing is Active
+	if (IsHearingEnabled())
 	{
-		HearingBar->RemoveAmount(HearingDecreaseRate * DeltaTime);
+		if (HearingBar->CurrentValue > 0)
+		{
+			HearingBar->RemoveAmount(HearingDecreaseRate * DeltaTime);
+		}
 	}
 }
 
@@ -59,40 +125,50 @@ void ABasicEnemyController::ReceiveStimulus(AActor* Actor, const FAIStimulus Sti
 	switch (Stimulus.Type)
 	{
 	case 0:
+		if (!IsSightEnabled()) break;
+
 		if (Actor == UGameplayStatics::GetPlayerPawn(GetWorld(), 0))
 		{
 			if (Stimulus.WasSuccessfullySensed())
 			{
-				GameplayTagsContainer.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.PlayerInCone")));
+				GameplayTagsContainer.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone")));
 				PlayerEnteredInSightCone();
-				OnPlayerEnteredInSightCone.Broadcast();
+				OnPlayerEnteredInSightConeDelegate.Broadcast();
 			}
 			else
 			{
-				GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.PlayerInCone")));
+				GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone")));
 				PlayerExitedFromSightCone();
-				OnPlayerExitedFromSightCone.Broadcast();
+				OnPlayerExitedFromSightConeDelegate.Broadcast();
 			}
 		}
 		break;
 	case 1:
-		//TODO It depends on the Stimulus
-		HearingBar->AddAmount(1.0f);
-		if (HearingBar->bIsFull)
-		{
-			SomethingWasHeard(Stimulus);
-			OnHeardSomethingDelegate.Broadcast(Stimulus);
-		}
+		if (!IsHearingEnabled()) break;
 
+		if (Stimulus.WasSuccessfullySensed())
+		{
+			//TODO It depends on the Stimulus
+			CurrentHeardStimulus = Stimulus;
+			HearingBar->AddAmount(1.0f);
+		}
+		
 		break;
 	default:
 		break;
 	}
 }
 
-void ABasicEnemyController::ReceivePlayerSeen()
+void ABasicEnemyController::SightBarFull()
 {
-	GameplayTagsContainer.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.PlayerSeen")));
+	PlayerSeen();
+	OnPlayerSeenDelegate.Broadcast();
+}
+
+void ABasicEnemyController::HearingBarFull()
+{
+	SomethingWasHeard(CurrentHeardStimulus);
+	OnSomethingWasHeardDelegate.Broadcast(CurrentHeardStimulus);
 }
 
 void ABasicEnemyController::BeginPlay()
@@ -100,7 +176,8 @@ void ABasicEnemyController::BeginPlay()
 	Super::BeginPlay();
 
 	GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &ABasicEnemyController::ReceiveStimulus);
-	SightBar->OnBarFilledDelegate.AddDynamic(this, &ABasicEnemyController::ReceivePlayerSeen);
+	EnableSightSense(true);
+	EnableHearingSense(true);
 }
 
 void ABasicEnemyController::OnPossess(APawn* PossessedPawn)

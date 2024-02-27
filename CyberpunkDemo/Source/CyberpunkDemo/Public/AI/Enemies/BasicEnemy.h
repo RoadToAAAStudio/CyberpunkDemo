@@ -23,7 +23,7 @@ struct FBasicEnemyStateMapping : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	EBasicEnemyState StateEnum;
+	EBasicEnemyState StateEnum = EBasicEnemyState::Unaware;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBasicEnemyStateChangedSignature, EBasicEnemyState, SourceState, EBasicEnemyState, NewState);
@@ -34,17 +34,18 @@ class CYBERPUNKDEMO_API ABasicEnemy : public ACharacter, public IStateTreeNotifi
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditAnywhere, Instanced, Category = "AI")
-	TObjectPtr<UStateTreeComponent> StateTree;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gameplay Tags")
 	FGameplayTagContainer GameplayTagContainer;
+	
+	UPROPERTY(BlueprintReadOnly)
+	EBasicEnemyState CurrentState = EBasicEnemyState::Unaware;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnBasicEnemyStateChangedSignature OnBasicEnemyStateChangedDelegate;
-
-	UPROPERTY(BlueprintReadOnly)
-	EBasicEnemyState CurrentState;
+	
+protected:
+	UPROPERTY(EditAnywhere, Instanced, Category = "AI")
+	TObjectPtr<UStateTreeComponent> StateTree;
 	
 public:
 	// Sets default values for this character's properties
