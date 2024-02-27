@@ -40,7 +40,6 @@ void UCustomCharacterMovementComponent::OnMovementUpdated(float DeltaSeconds, co
 {
 	Super::OnMovementUpdated(DeltaSeconds, OldLocation, OldVelocity);
 
-	StateMachine->Tick();
 }
 
 
@@ -197,7 +196,7 @@ bool UCustomCharacterMovementComponent::CanJumpFromWalk()
 // FROM RUNNING
 bool UCustomCharacterMovementComponent::CanIdleFromRun()
 {
-	return IsMovingOnGround() && Velocity.IsZero();
+	return IsMovingOnGround() && Velocity.IsZero() && !bWantsToRun;
 }
 
 bool UCustomCharacterMovementComponent::CanWalkFromRun()
@@ -217,6 +216,7 @@ void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTic
                                                       FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	StateMachine->Tick();
 }
 
 void UCustomCharacterMovementComponent::SprintPressed()

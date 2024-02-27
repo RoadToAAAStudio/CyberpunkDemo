@@ -24,7 +24,7 @@ public:
 	void Init(const TObjectPtr<UFState> toState);
 
 	// The state this transition points to
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UFState> ToState;
 
 public:

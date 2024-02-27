@@ -23,5 +23,13 @@ void UFTransition::Init(const TObjectPtr<UFState> toState)
 // Check if the state machine can transition to the state pointed by this transition (by executing the condition bound to the delegate)
 bool UFTransition::CheckTransition()
 {
-	return OnCheckConditionDelegate.Execute();
+	if (OnCheckConditionDelegate.IsBound())
+	{
+		return OnCheckConditionDelegate.Execute();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Transition to %s is not bound"), *ToState->GetName());
+	}
+	return true;
 }

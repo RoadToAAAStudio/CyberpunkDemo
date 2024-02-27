@@ -15,6 +15,7 @@ class CYBERPUNKDEMO_API UFState : public UObject
 
 public:
 
+	UPROPERTY(BlueprintReadWrite)
 	TArray<TObjectPtr<UFTransition>> Transitions;
 	
 	// Called when entering the state

@@ -25,8 +25,12 @@ void UStateMachine::Tick()
 		{
 			CurrentState->ExitState();
 
+			UE_LOG(LogTemp, Warning, TEXT("GOING FROM: %s"), *(CurrentState->GetName()));
+			UE_LOG(LogTemp, Warning, TEXT("TO STATE: %s"), *(e->ToState->GetName()));
+
 			CurrentState = e->ToState;
 
+			
 			CurrentState->EnterState();
 
 			break;

@@ -13,9 +13,10 @@ class CYBERPUNKDEMO_API UStateMachine : public UObject
 
 public:
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UFState> CurrentState;
 
+	UPROPERTY(BlueprintReadWrite)
 	TArray<TObjectPtr<UFState>> States;
 	
 	

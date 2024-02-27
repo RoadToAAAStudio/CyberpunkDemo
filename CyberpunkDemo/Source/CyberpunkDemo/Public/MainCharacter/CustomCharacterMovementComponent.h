@@ -26,10 +26,10 @@ class CYBERPUNKDEMO_API UCustomCharacterMovementComponent : public UCharacterMov
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
+public:
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UStateMachine> StateMachine;
 
-public:
 	
 	// Sets default values for this component's properties
 	UCustomCharacterMovementComponent();
