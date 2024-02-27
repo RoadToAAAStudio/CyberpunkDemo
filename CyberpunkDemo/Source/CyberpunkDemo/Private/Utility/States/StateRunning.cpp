@@ -12,6 +12,7 @@ void UStateRunning::EnterState()
 {
 	Super::EnterState();
 	Owner->MaxWalkSpeed = Owner->Sprint_MaxWalkSpeed;
+	Owner->bWantsToCrouchCustom = false;
 	Owner->SetCurrentMovementState(ECustomMovementState::Running);
 }
 

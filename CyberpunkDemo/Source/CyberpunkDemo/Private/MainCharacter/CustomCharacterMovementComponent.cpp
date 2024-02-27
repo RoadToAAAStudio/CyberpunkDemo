@@ -20,8 +20,9 @@ UCustomCharacterMovementComponent::UCustomCharacterMovementComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	bWantsToJump = false;
 	bWantsToRun = false;
-	bWantsToCrouch = false;
+	bWantsToCrouchCustom = false;
 	Walk_MaxWalkSpeed = 500.0f;
 	Sprint_MaxWalkSpeed = 1000.0f;
 }
@@ -143,6 +144,56 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	StateRunning->Transitions.Add(RunningToJump);
 	RunningToJump->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanJumpFromRun);
 	RunningToJump->Init(StateJumping);
+
+	// JUMP
+	// Jump TO Idle
+	TObjectPtr<UFTransition> JumpToIdle = NewObject<UFTransition>();
+	StateJumping->Transitions.Add(JumpToIdle);
+	JumpToIdle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanIdleFromJump);
+	JumpToIdle->Init(StateIdle);
+
+	// Jump TO Walking
+	TObjectPtr<UFTransition> JumpToWalking = NewObject<UFTransition>();
+	StateJumping->Transitions.Add(JumpToWalking);
+	JumpToWalking->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanWalkFromJump);
+	JumpToWalking->Init(StateWalking);
+
+	// Jump TO Running
+	TObjectPtr<UFTransition> JumpToRunning = NewObject<UFTransition>();
+	StateJumping->Transitions.Add(JumpToRunning);
+	JumpToRunning->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanRunFromJump);
+	JumpToRunning->Init(StateJumping);
+
+	// Jump TO Crouch
+	TObjectPtr<UFTransition> JumpToCrouch = NewObject<UFTransition>();
+	StateJumping->Transitions.Add(JumpToCrouch);
+	JumpToCrouch->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanCrouchFromJump);
+	JumpToCrouch->Init(StateCrouching);
+	
+	// CROUCH
+	// Crouch TO Idle
+	TObjectPtr<UFTransition> CrouchToIdle = NewObject<UFTransition>();
+	StateCrouching->Transitions.Add(CrouchToIdle);
+	CrouchToIdle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanIdleFromCrouch);
+	CrouchToIdle->Init(StateIdle);
+
+	// Crouch TO Walking
+	TObjectPtr<UFTransition> CrouchToWalking = NewObject<UFTransition>();
+	StateCrouching->Transitions.Add(CrouchToWalking);
+	CrouchToWalking->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanWalkFromCrouch);
+	CrouchToWalking->Init(StateWalking);
+
+	// Crouch TO Running
+	TObjectPtr<UFTransition> CrouchToRunning = NewObject<UFTransition>();
+	StateCrouching->Transitions.Add(CrouchToRunning);
+	CrouchToRunning->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanRunFromCrouch);
+	CrouchToRunning->Init(StateRunning);
+
+	// Crouch TO Jump
+	TObjectPtr<UFTransition> CrouchToJump = NewObject<UFTransition>();
+	StateCrouching->Transitions.Add(CrouchToJump);
+	CrouchToJump->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanJumpFromCrouch);
+	CrouchToJump->Init(StateJumping);
 }
 
 void UCustomCharacterMovementComponent::SetCurrentMovementState(ECustomMovementState NewState)
@@ -164,7 +215,7 @@ bool UCustomCharacterMovementComponent::CanRunFromIdle()
 
 bool UCustomCharacterMovementComponent::CanCrouchFromIdle()
 {
-	return bWantsToCrouch;
+	return bWantsToCrouchCustom;
 }
 
 bool UCustomCharacterMovementComponent::CanJumpFromIdle()
@@ -185,7 +236,7 @@ bool UCustomCharacterMovementComponent::CanRunFromWalk()
 
 bool UCustomCharacterMovementComponent::CanCrouchFromWalk()
 {
-	return IsMovingOnGround() && bWantsToCrouch;
+	return IsMovingOnGround() && bWantsToCrouchCustom;
 }
 
 bool UCustomCharacterMovementComponent::CanJumpFromWalk()
@@ -205,6 +256,48 @@ bool UCustomCharacterMovementComponent::CanWalkFromRun()
 }
 
 bool UCustomCharacterMovementComponent::CanJumpFromRun()
+{
+	return IsMovingOnGround() && bWantsToJump;
+}
+
+// FROM JUMP
+bool UCustomCharacterMovementComponent::CanIdleFromJump()
+{
+	return IsMovingOnGround() && Velocity.IsZero();
+}
+
+bool UCustomCharacterMovementComponent::CanWalkFromJump()
+{
+	return IsMovingOnGround() && !Velocity.IsZero();
+}
+
+bool UCustomCharacterMovementComponent::CanRunFromJump()
+{
+	return IsMovingOnGround() && !Velocity.IsZero() && bWantsToRun;
+}
+
+bool UCustomCharacterMovementComponent::CanCrouchFromJump()
+{
+	return IsMovingOnGround() && bWantsToCrouchCustom && !bWantsToJump;
+}
+
+// FROM CROUCH
+bool UCustomCharacterMovementComponent::CanIdleFromCrouch()
+{
+	return IsMovingOnGround() && Velocity.IsZero() && !bWantsToCrouchCustom;
+}
+
+bool UCustomCharacterMovementComponent::CanWalkFromCrouch()
+{
+	return IsMovingOnGround() && !Velocity.IsZero() && !bWantsToCrouchCustom;
+}
+
+bool UCustomCharacterMovementComponent::CanRunFromCrouch()
+{
+	return IsMovingOnGround() && !Velocity.IsZero() && bWantsToRun;
+}
+
+bool UCustomCharacterMovementComponent::CanJumpFromCrouch()
 {
 	return IsMovingOnGround() && bWantsToJump;
 }
@@ -237,6 +330,11 @@ void UCustomCharacterMovementComponent::JumpPressed()
 void UCustomCharacterMovementComponent::JumpReleased()
 {
 	bWantsToJump = false;
+}
+
+void UCustomCharacterMovementComponent::CrouchPressed()
+{
+	bWantsToCrouchCustom = !bWantsToCrouchCustom;
 }
 
 ECustomMovementState UCustomCharacterMovementComponent::GetCurrentMovementState() const

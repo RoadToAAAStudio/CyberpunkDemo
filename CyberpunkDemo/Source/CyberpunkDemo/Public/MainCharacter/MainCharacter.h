@@ -64,6 +64,10 @@ private:
 		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true") )
 		UInputAction* SprintAction;
 
+		// Crouch action
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+		UInputAction* CrouchAction;
+	
 		//UPROPERTY(EditAnywhere)
 
 public:
@@ -82,6 +86,8 @@ public:
 	// // Called to bind functionality to input
 	// virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void StopJumping() override;
+
 protected:
 	
 	// Called when the game starts or when spawned
@@ -96,4 +102,6 @@ protected:
 	// APawn interface [!]
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	// End of APawn interface
+
+	
 };

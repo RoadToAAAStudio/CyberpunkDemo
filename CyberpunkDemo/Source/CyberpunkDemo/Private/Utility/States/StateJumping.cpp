@@ -14,7 +14,6 @@ void UStateJumping::EnterState()
 {
 	Super::EnterState();
 	Owner->SetCurrentMovementState(ECustomMovementState::Jumping);
-
 	Owner->MainCharacter->Jump();
 }
 

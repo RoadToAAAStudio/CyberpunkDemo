@@ -42,9 +42,9 @@ public:
 	UPROPERTY(EditDefaultsOnly) float Sprint_MaxWalkSpeed;
 
 	// Bools used to handle movement state transitions
-	bool bWantsToRun;
-	bool bWantsToCrouch;
-	bool bWantsToJump;
+	UPROPERTY(BlueprintReadOnly) bool bWantsToRun;
+	UPROPERTY(BlueprintReadOnly) bool bWantsToCrouchCustom;
+	UPROPERTY(BlueprintReadOnly) bool bWantsToJump;
 
 	
 private:
@@ -54,20 +54,35 @@ private:
 public:
 	
 	// State machine transitions methods
+	// From IDLE state
 	bool CanWalkFromIdle();
 	bool CanRunFromIdle();
 	bool CanCrouchFromIdle();
 	bool CanJumpFromIdle();
 
+	// From WALKING state
 	bool CanIdleFromWalk();
 	bool CanRunFromWalk();
 	bool CanCrouchFromWalk();
 	bool CanJumpFromWalk();
 
+	// From RUNNING state
 	bool CanIdleFromRun();
 	bool CanWalkFromRun();
 	bool CanJumpFromRun();
 
+	// From JUMP state
+	bool CanIdleFromJump();
+	bool CanWalkFromJump();
+	bool CanRunFromJump();
+	bool CanCrouchFromJump();
+
+	//From CROUCHING state
+	bool CanIdleFromCrouch();
+	bool CanWalkFromCrouch();
+	bool CanRunFromCrouch();
+	bool CanJumpFromCrouch();
+	
 	// Sprint methods
 	UFUNCTION(BlueprintCallable) void SprintPressed();
 	UFUNCTION(BlueprintCallable) void SprintReleased();
@@ -76,8 +91,11 @@ public:
 	UFUNCTION(BlueprintCallable) void JumpPressed();
 	UFUNCTION(BlueprintCallable) void JumpReleased();
 
+	// Crouch methods
+	UFUNCTION(Blueprintable) void CrouchPressed();
+
 	// To get the current state and set
-	ECustomMovementState GetCurrentMovementState() const;
+	UFUNCTION(BlueprintCallable) ECustomMovementState GetCurrentMovementState() const;
 
 	void SetCurrentMovementState(ECustomMovementState NewState);
 
