@@ -14,7 +14,10 @@ void UStateJumping::EnterState()
 {
 	Super::EnterState();
 	Owner->SetCurrentMovementState(ECustomMovementState::Jumping);
-	Owner->MainCharacter->Jump();
+	// if (Owner->MainCharacter->bIsCrouched) Owner->MainCharacter->bIsCrouched = false;
+	//
+	// Owner->MainCharacter->Jump();
+	bHasJumped = false;
 }
 
 void UStateJumping::ExitState()
@@ -27,4 +30,9 @@ void UStateJumping::ExitState()
 void UStateJumping::Tick()
 {
 	Super::Tick();
+	if (!Owner->MainCharacter->bIsCrouched && !bHasJumped)
+	{
+		bHasJumped = true;
+		Owner->MainCharacter->Jump();
+	}
 }

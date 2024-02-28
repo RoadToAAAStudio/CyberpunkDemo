@@ -38,6 +38,8 @@ AMainCharacter::AMainCharacter(const FObjectInitializer& ObjectInitializer)
 	Mesh1P->CastShadow = false;
 	Mesh1P->bCastDynamicShadow = false;
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
+
+	
 }
 
 // Called when the game starts or when spawned
@@ -61,6 +63,22 @@ void AMainCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
+
+void AMainCharacter::Jump()
+{
+	Super::Jump();
+	//LaunchCharacter(FVector(0, 0, 500), false, false);
+}
+
+TObjectPtr<UCustomCharacterMovementComponent> AMainCharacter::GetCustomCharacterComponent()
+{
+	return CustomCharacterMovementComponent;
+}
+
+// void AMainCharacter::Crouch(bool bClientSimulation)
+// {
+// 	//Super::Crouch(bClientSimulation);
+// }
 
 // Called to bind functionality to input [!]
 void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -88,13 +106,6 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		// Crouch
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, CustomCharacterMovementComponent, &UCustomCharacterMovementComponent::CrouchPressed);
 	}
-}
-
-void AMainCharacter::StopJumping()
-{
-	Super::StopJumping();
-
-	//CustomCharacterMovementComponent->bWantsToJump = false;
 }
 
 // Called to apply the direction to the movement [!]

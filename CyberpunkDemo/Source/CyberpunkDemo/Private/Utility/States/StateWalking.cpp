@@ -6,8 +6,8 @@
 void UStateWalking::EnterState()
 {
 	Super::EnterState();
-	Owner->MaxWalkSpeed = Owner->Walk_MaxWalkSpeed;
 	Owner->SetCurrentMovementState(ECustomMovementState::Walking);
+	Owner->MaxWalkSpeed = Owner->Walk_MaxWalkSpeed;
 }
 
 void UStateWalking::ExitState()

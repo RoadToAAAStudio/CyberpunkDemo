@@ -11,9 +11,9 @@ void UStateRunning::SetOwner(TObjectPtr<UCustomCharacterMovementComponent> owner
 void UStateRunning::EnterState()
 {
 	Super::EnterState();
+	Owner->SetCurrentMovementState(ECustomMovementState::Running);
 	Owner->MaxWalkSpeed = Owner->Sprint_MaxWalkSpeed;
 	Owner->bWantsToCrouchCustom = false;
-	Owner->SetCurrentMovementState(ECustomMovementState::Running);
 }
 
 void UStateRunning::ExitState()

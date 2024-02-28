@@ -67,8 +67,6 @@ private:
 		// Crouch action
 		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		UInputAction* CrouchAction;
-	
-		//UPROPERTY(EditAnywhere)
 
 public:
 	
@@ -83,10 +81,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// // Called to bind functionality to input
-	// virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	// Crouch function
+	//virtual void Crouch(bool bClientSimulation) override;
 
-	virtual void StopJumping() override;
+	// Jump function
+	virtual void Jump() override;
+
+	TObjectPtr<UCustomCharacterMovementComponent> GetCustomCharacterComponent();
 
 protected:
 	

@@ -20,11 +20,15 @@ UCustomCharacterMovementComponent::UCustomCharacterMovementComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	NavAgentProps.bCanCrouch = true;
+	bCanWalkOffLedgesWhenCrouching = true;
+
 	bWantsToJump = false;
 	bWantsToRun = false;
 	bWantsToCrouchCustom = false;
 	Walk_MaxWalkSpeed = 500.0f;
 	Sprint_MaxWalkSpeed = 1000.0f;
+	Crouch_MaxWalkSpeed = 250.0f;
 }
 
 
@@ -162,7 +166,7 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	TObjectPtr<UFTransition> JumpToRunning = NewObject<UFTransition>();
 	StateJumping->Transitions.Add(JumpToRunning);
 	JumpToRunning->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanRunFromJump);
-	JumpToRunning->Init(StateJumping);
+	JumpToRunning->Init(StateRunning);
 
 	// Jump TO Crouch
 	TObjectPtr<UFTransition> JumpToCrouch = NewObject<UFTransition>();
@@ -268,7 +272,7 @@ bool UCustomCharacterMovementComponent::CanIdleFromJump()
 
 bool UCustomCharacterMovementComponent::CanWalkFromJump()
 {
-	return IsMovingOnGround() && !Velocity.IsZero();
+	return IsMovingOnGround() && !bWantsToJump;
 }
 
 bool UCustomCharacterMovementComponent::CanRunFromJump()
@@ -289,12 +293,12 @@ bool UCustomCharacterMovementComponent::CanIdleFromCrouch()
 
 bool UCustomCharacterMovementComponent::CanWalkFromCrouch()
 {
-	return IsMovingOnGround() && !Velocity.IsZero() && !bWantsToCrouchCustom;
+	return IsMovingOnGround() && !bWantsToCrouchCustom;
 }
 
 bool UCustomCharacterMovementComponent::CanRunFromCrouch()
 {
-	return IsMovingOnGround() && !Velocity.IsZero() && bWantsToRun;
+	return IsMovingOnGround() && bWantsToRun;
 }
 
 bool UCustomCharacterMovementComponent::CanJumpFromCrouch()
@@ -334,6 +338,7 @@ void UCustomCharacterMovementComponent::JumpReleased()
 
 void UCustomCharacterMovementComponent::CrouchPressed()
 {
+	if (CurrentMovementState == ECustomMovementState::Jumping || CurrentMovementState == ECustomMovementState::Running) return;
 	bWantsToCrouchCustom = !bWantsToCrouchCustom;
 }
 

@@ -18,6 +18,8 @@ class CYBERPUNKDEMO_API UStateJumping : public UFState
 	UPROPERTY()
 	TObjectPtr<UCustomCharacterMovementComponent> Owner;
 
+	bool bHasJumped;
+
 public:
 
 	void SetOwner(TObjectPtr<UCustomCharacterMovementComponent> owner);

@@ -41,6 +41,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly) float Sprint_MaxWalkSpeed;
 
+	UPROPERTY(EditDefaultsOnly) float Crouch_MaxWalkSpeed;
+
 	// Bools used to handle movement state transitions
 	UPROPERTY(BlueprintReadOnly) bool bWantsToRun;
 	UPROPERTY(BlueprintReadOnly) bool bWantsToCrouchCustom;
@@ -54,6 +56,7 @@ private:
 public:
 	
 	// State machine transitions methods
+    #pragma region
 	// From IDLE state
 	bool CanWalkFromIdle();
 	bool CanRunFromIdle();
@@ -82,6 +85,7 @@ public:
 	bool CanWalkFromCrouch();
 	bool CanRunFromCrouch();
 	bool CanJumpFromCrouch();
+#pragma endregion 
 	
 	// Sprint methods
 	UFUNCTION(BlueprintCallable) void SprintPressed();

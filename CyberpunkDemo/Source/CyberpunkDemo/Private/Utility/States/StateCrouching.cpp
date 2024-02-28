@@ -14,6 +14,7 @@ void UStateCrouching::EnterState()
 {
 	Super::EnterState();
 	Owner->SetCurrentMovementState(ECustomMovementState::Crouching);
+	Owner->MaxWalkSpeedCrouched = Owner->Crouch_MaxWalkSpeed;
 	Owner->MainCharacter->Crouch();
 }
 
