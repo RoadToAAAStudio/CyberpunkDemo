@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AI/Enemies/BasicEnemy.h"
-
 #include "AI/AIUtility.h"
 
 // Sets default values
@@ -22,18 +21,52 @@ void ABasicEnemy::AcceptStateTreeNotification_Implementation(const UStateTree* S
 	const FBasicEnemyStateMapping* CurrentStateData = DataTable->FindRow<FBasicEnemyStateMapping>(CurrentStateName, "");
 	const FBasicEnemyStateMapping* SourceStateData = DataTable->FindRow<FBasicEnemyStateMapping>(SourceStateName, "");
 
-	if(!CurrentStateData || ! SourceStateData) return;
+	if(!CurrentStateData || !SourceStateData) return;
 	
 	CurrentState = CurrentStateData->StateEnum;
+
+	switch (CurrentState)
+	{
+	case EBasicEnemyState::Unaware:
+		BasicEnemyController->BrainComponent->StopLogic(FString(""));
+		BasicEnemyController->RunBehaviorTree(BTUnaware);
+		break;
+	case EBasicEnemyState::Combat:
+		BasicEnemyController->BrainComponent->StopLogic(FString(""));
+		BasicEnemyController->RunBehaviorTree(BTCombat);
+		break;
+	case EBasicEnemyState::Alerted:
+		BasicEnemyController->BrainComponent->StopLogic(FString(""));
+		BasicEnemyController->RunBehaviorTree(BTAlerted);
+		break;
+	case EBasicEnemyState::Max:
+		break;
+	default:
+		break;
+	}
+	
 	StateChanged(SourceStateData->StateEnum, CurrentStateData->StateEnum);
 	OnBasicEnemyStateChangedDelegate.Broadcast(SourceStateData->StateEnum, CurrentStateData->StateEnum);
 }
 
-// Called when the game starts or when spawned
-void ABasicEnemy::BeginPlay()
+void ABasicEnemy::ReceiveTriggerUnaware() const
 {
-	Super::BeginPlay();
-	
+	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(TEXT("Character.DecisionMaking.TriggerUnaware")));
+}
+
+void ABasicEnemy::ReceiveTriggerCombat() const
+{
+	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(TEXT("Character.DecisionMaking.TriggerCombat")));
+}
+
+void ABasicEnemy::ReceiveTriggerAlerted() const
+{
+	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(TEXT("Character.DecisionMaking.TriggerAlerted")));
+}
+
+void ABasicEnemy::NotifyPlayerWasSeen()
+{
+	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsSeen")));
 }
 
 // Called every frame
@@ -48,3 +81,12 @@ void ABasicEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
+// Called when the game starts or when spawned
+void ABasicEnemy::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	BasicEnemyController = Cast<ABasicEnemyController>(GetController());
+	BasicEnemyController->RunBehaviorTree(BTUnaware);
+	BasicEnemyController->OnPlayerSeenDelegate.AddDynamic(this, &ABasicEnemy::NotifyPlayerWasSeen);
+}

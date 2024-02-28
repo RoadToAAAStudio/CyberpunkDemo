@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BasicEnemyController.h"
 #include "AI/IStateTreeNotificationsAcceptor.h"
 #include "Components/StateTreeComponent.h"
 #include "GameFramework/Character.h"
@@ -39,25 +40,49 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly)
 	EBasicEnemyState CurrentState = EBasicEnemyState::Unaware;
-
+	
 	UPROPERTY(BlueprintAssignable)
 	FOnBasicEnemyStateChangedSignature OnBasicEnemyStateChangedDelegate;
-	
+
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<ABasicEnemyController> BasicEnemyController;
+
 protected:
-	UPROPERTY(EditAnywhere, Instanced, Category = "AI")
+	
+	UPROPERTY(EditAnywhere, Instanced, Category = "DecisionMaking")
 	TObjectPtr<UStateTreeComponent> StateTree;
+
+	UPROPERTY(EditAnywhere, Category = "Actuation")
+	TObjectPtr<UBehaviorTree> BTUnaware;
+	
+	UPROPERTY(EditAnywhere, Category = "Actuation")
+	TObjectPtr<UBehaviorTree> BTCombat;
+	
+	UPROPERTY(EditAnywhere, Category = "Actuation")
+	TObjectPtr<UBehaviorTree> BTAlerted;
+	
 	
 public:
 	// Sets default values for this character's properties
 	ABasicEnemy();
 
 	// StateTree notifications acceptor
-	void AcceptStateTreeNotification_Implementation(const UStateTree* StateTree, const UDataTable* DataTable, const FStateTreeTransitionResult& Transition) override;
+	void AcceptStateTreeNotification_Implementation(const UStateTree* StateTreeNotifier, const UDataTable* DataTable, const FStateTreeTransitionResult& Transition) override;
 
+	// ReceiveRequests
+	void ReceiveTriggerUnaware() const;
+	void ReceiveTriggerCombat() const;
+	void ReceiveTriggerAlerted() const;
+	
 protected:
 	// Hook for Derived Blueprints when a StateTree's state change
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnStateChanged"))
 	void StateChanged(const EBasicEnemyState SourceState, const EBasicEnemyState NewState);
+	
+private:
+	// Function listeners
+	UFUNCTION()
+	void NotifyPlayerWasSeen();
 	
 public:	
 	// Called every frame
