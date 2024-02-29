@@ -5,9 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Utility/StateMachine.h"
+#include "DrawDebugHelpers.h"
 #include "CustomCharacterMovementComponent.generated.h"
 
 class AMainCharacter;
+
 
 UENUM(BlueprintType)
 enum class ECustomMovementState : uint8
@@ -25,7 +27,7 @@ UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CYBERPUNKDEMO_API UCustomCharacterMovementComponent : public UCharacterMovementComponent
 {
 	GENERATED_BODY()
-
+	
 public:
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UStateMachine> StateMachine;
@@ -45,6 +47,16 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement|Crouch") float Crouch_HalfHeight;
 
+	// MANTLE PROPERTIES
+	
+	UPROPERTY(EditDefaultsOnly) float MantleMaxDistance = 200;
+	UPROPERTY(EditDefaultsOnly) float MantleReachHeight = 50;
+	UPROPERTY(EditDefaultsOnly) float MinMantleDepth = 30;
+	UPROPERTY(EditDefaultsOnly) float MantleMinWallSteepnessAngle = 75;
+	UPROPERTY(EditDefaultsOnly) float MantleMaxSurfaceAngle = 40;
+	UPROPERTY(EditDefaultsOnly) float MantleMaxAlignmentAngle = 45;
+
+	
 	// Bools used to handle movement state transitions
 	UPROPERTY(BlueprintReadOnly) bool bWantsToRun;
 	UPROPERTY(BlueprintReadOnly) bool bWantsToCrouchCustom;
@@ -109,6 +121,10 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 							   FActorComponentTickFunction* ThisTickFunction) override;
 
+	float GetCapsuleRadius() const;
+
+	float GetCapsuleHalfHeight() const;
+
 protected:
 	
 	// Called when the game starts
@@ -117,4 +133,8 @@ protected:
 	virtual void OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation, const FVector& OldVelocity) override;
 
 	void BuildStateMachine();
+
+	// Mantle methods
+
+	bool TryMantle();
 };

@@ -93,6 +93,9 @@ public:
 
 	TObjectPtr<UCustomCharacterMovementComponent> GetCustomCharacterComponent();
 
+	// Method that returns all parameters that should be ignored by raycasts, spherecasts and so on
+	FCollisionQueryParams GetIgnoreCharacterParams() const;
+
 protected:
 	
 	// Called when the game starts or when spawned

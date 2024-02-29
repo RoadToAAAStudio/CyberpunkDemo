@@ -85,6 +85,18 @@ TObjectPtr<UCustomCharacterMovementComponent> AMainCharacter::GetCustomCharacter
 	return CustomCharacterMovementComponent;
 }
 
+FCollisionQueryParams AMainCharacter::GetIgnoreCharacterParams() const
+{
+	FCollisionQueryParams Params;
+
+	TArray<AActor*> CharacterChildren;
+	GetAllChildActors(CharacterChildren);
+	Params.AddIgnoredActors(CharacterChildren);
+	Params.AddIgnoredActor(this);
+
+	return Params;
+}
+
 // void AMainCharacter::Crouch(bool bClientSimulation)
 // {
 // 	//Super::Crouch(bClientSimulation);

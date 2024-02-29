@@ -3,6 +3,7 @@
 
 #include "MainCharacter/CustomCharacterMovementComponent.h"
 
+#include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "MainCharacter/MainCharacter.h"
 #include "Utility/States/StateIdle.h"
@@ -12,8 +13,22 @@
 #include "Utility/States/StateRunning.h"
 #include "Utility/States/StateWalking.h"
 
+// Shortcut macros
+#if 1
+float MacroDuration = 2.0f;
+#define PRINT_SCREEN(x) GEngine->AddOnScreenDebugMessage(-1, MacroDuration ? MacroDuration : -1.f, FColor::Yellow, x);
+#define DRAW_POINT(x, c) DrawDebugPoint(GetWorld(), x, 10, c, !MacroDuration, MacroDuration);
+#define DRAW_LINE(x1, x2, c) DrawDebugLine(GetWorld(), x1, x2, c, !MacroDuration, MacroDuration);
+#define DRAW_CAPSULE(x, c) DrawDebugCapsule(GetWorld(), x, GetCapsuleHalfHeight(), GetCapsuleRadius(), FQuat::Identity, c, !MacroDuration, MacroDuration);
+#else
+#define PRINT_SCREEN(x)
+#define DRAW_POINT(x, c)
+#define DRAW_LINE(x1, x2, c)
+#define DRAW_CAPSULE(x, c)
+#endif
 
-// Sets default values for this component's properties
+
+// CONSTRUCTOR
 UCustomCharacterMovementComponent::UCustomCharacterMovementComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
@@ -32,8 +47,7 @@ UCustomCharacterMovementComponent::UCustomCharacterMovementComponent()
 	Crouch_HalfHeight = 40.0f;
 }
 
-
-// Called when the game starts
+// BEGIN PLAY
 void UCustomCharacterMovementComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -46,9 +60,7 @@ void UCustomCharacterMovementComponent::OnMovementUpdated(float DeltaSeconds, co
 	const FVector& OldVelocity)
 {
 	Super::OnMovementUpdated(DeltaSeconds, OldLocation, OldVelocity);
-
 }
-
 
 // STATE MACHINE
 #pragma region 
@@ -226,7 +238,7 @@ bool UCustomCharacterMovementComponent::CanCrouchFromIdle()
 
 bool UCustomCharacterMovementComponent::CanJumpFromIdle()
 {
-	return bWantsToJump;
+	return bWantsToJump && !TryMantle();
 }
 
 // FROM WALKING
@@ -247,7 +259,7 @@ bool UCustomCharacterMovementComponent::CanCrouchFromWalk()
 
 bool UCustomCharacterMovementComponent::CanJumpFromWalk()
 {
-	return IsMovingOnGround() && bWantsToJump;
+	return IsMovingOnGround() && bWantsToJump && !TryMantle();
 }
 
 // FROM RUNNING
@@ -263,7 +275,7 @@ bool UCustomCharacterMovementComponent::CanWalkFromRun()
 
 bool UCustomCharacterMovementComponent::CanJumpFromRun()
 {
-	return IsMovingOnGround() && bWantsToJump;
+	return IsMovingOnGround() && bWantsToJump && !TryMantle();
 }
 
 // FROM JUMP
@@ -305,7 +317,7 @@ bool UCustomCharacterMovementComponent::CanRunFromCrouch()
 
 bool UCustomCharacterMovementComponent::CanJumpFromCrouch()
 {
-	return IsMovingOnGround() && bWantsToJump;
+	return IsMovingOnGround() && bWantsToJump  && !TryMantle();
 }
 
 #pragma endregion 
@@ -317,6 +329,9 @@ void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTic
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	StateMachine->Tick();
 }
+
+// MOVEMENT
+#pragma region 
 
 void UCustomCharacterMovementComponent::SprintPressed()
 {
@@ -343,10 +358,69 @@ void UCustomCharacterMovementComponent::CrouchPressed()
 	if (CurrentMovementState == ECustomMovementState::Jumping || CurrentMovementState == ECustomMovementState::Running) return;
 	bWantsToCrouchCustom = !bWantsToCrouchCustom;
 }
+#pragma endregion
 
+// CURRENT STATE GETTER
 ECustomMovementState UCustomCharacterMovementComponent::GetCurrentMovementState() const
 {
 	return CurrentMovementState;
 }
 
+float UCustomCharacterMovementComponent::GetCapsuleRadius() const
+{
+	return MainCharacter->GetCapsuleComponent()->GetScaledCapsuleRadius();
+}
 
+float UCustomCharacterMovementComponent::GetCapsuleHalfHeight() const
+{
+	return MainCharacter->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+}
+
+// MANTLE SYSTEM
+#pragma region 
+
+bool UCustomCharacterMovementComponent::TryMantle()
+{
+	// Location of the base of the capsule
+	FVector BaseLocation = UpdatedComponent->GetComponentLocation() + FVector::DownVector * GetCapsuleHalfHeight();
+	// Forward vector
+	// [TODO : HERE MAYBE WE NEED TO GET THE CAMERA FORWARD VECTOR]
+	FVector Forward = UpdatedComponent->GetForwardVector().GetSafeNormal2D();
+	// Actors to ignore
+	auto Params = MainCharacter->GetIgnoreCharacterParams();
+	// Max height reachable by the mantle
+	float MaxHeight = GetCapsuleHalfHeight() * 2 + MantleReachHeight;
+	//
+	float CosMantleMinWallSteepnessAngle = FMath::Cos(FMath::DegreesToRadians(MantleMinWallSteepnessAngle));
+	//
+	float CosMantleMaxSurfaceAngle = FMath::Cos(FMath::DegreesToRadians(MantleMaxSurfaceAngle));
+	//
+	float CosMantleMaxAlignmentAngle = FMath::Cos(FMath::DegreesToRadians(MantleMaxAlignmentAngle));
+
+	PRINT_SCREEN("Starting mantle attempt")
+
+	// CHECK OBSTACLE FRONT FACE
+	
+	FHitResult FrontHit;
+	float CheckDistance = FMath::Clamp(Velocity | Forward, GetCapsuleRadius() + 30, MantleMaxDistance);
+	FVector FrontStart = BaseLocation + FVector::UpVector * (MaxStepHeight - 1);
+
+	for (int i = 0; i < 10; i++)
+	{
+		DRAW_LINE(FrontStart, FrontStart + Forward * CheckDistance, FColor::Red)
+		if (GetWorld()->LineTraceSingleByProfile(FrontHit, FrontStart, FrontStart + Forward * CheckDistance, "BlockAll", Params)) break;
+		FrontStart += FVector::UpVector * (2.f * GetCapsuleHalfHeight() - (MaxStepHeight - 1)) / 9;
+	}
+
+	if (!FrontHit.IsValidBlockingHit()) return false;
+	float CosWallSteepnessAngle = FrontHit.Normal | FVector::UpVector;
+	if (FMath::Abs(CosWallSteepnessAngle) > CosMantleMinWallSteepnessAngle || (Forward | -FrontHit.Normal) <  CosMantleMaxAlignmentAngle) return false;
+	DRAW_POINT(FrontHit.Location, FColor::Red)
+	
+	return true;
+}
+
+
+
+
+#pragma endregion 
