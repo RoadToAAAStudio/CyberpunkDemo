@@ -29,6 +29,7 @@ UCustomCharacterMovementComponent::UCustomCharacterMovementComponent()
 	Walk_MaxWalkSpeed = 500.0f;
 	Sprint_MaxWalkSpeed = 1000.0f;
 	Crouch_MaxWalkSpeed = 250.0f;
+	Crouch_HalfHeight = 40.0f;
 }
 
 
@@ -37,6 +38,7 @@ void UCustomCharacterMovementComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	MainCharacter = Cast<AMainCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	SetCrouchedHalfHeight(Crouch_HalfHeight);
 	BuildStateMachine();
 }
 

@@ -37,11 +37,13 @@ public:
 	UPROPERTY()
 	TObjectPtr<AMainCharacter> MainCharacter;
 
-	UPROPERTY(EditDefaultsOnly) float Walk_MaxWalkSpeed;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Walk") float Walk_MaxWalkSpeed;
 
-	UPROPERTY(EditDefaultsOnly) float Sprint_MaxWalkSpeed;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Sprint") float Sprint_MaxWalkSpeed;
 
-	UPROPERTY(EditDefaultsOnly) float Crouch_MaxWalkSpeed;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Crouch") float Crouch_MaxWalkSpeed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement|Crouch") float Crouch_HalfHeight;
 
 	// Bools used to handle movement state transitions
 	UPROPERTY(BlueprintReadOnly) bool bWantsToRun;

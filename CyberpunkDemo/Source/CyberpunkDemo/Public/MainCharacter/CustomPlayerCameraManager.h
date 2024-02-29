@@ -15,12 +15,12 @@ class CYBERPUNKDEMO_API ACustomPlayerCameraManager : public APlayerCameraManager
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly)
-	float CrouchBlendDuration = 0.25f;
+	float CrouchBlendDuration = 0.5f;
 
 	float CrouchBlendTime;
 
 public:
 	ACustomPlayerCameraManager();
 
-	virtual void UpdateViewTarget(FTViewTarget& OutVT, float DeltaTime) override;
+	// virtual void UpdateViewTarget(FTViewTarget& OutVT, float DeltaTime) override;
 };

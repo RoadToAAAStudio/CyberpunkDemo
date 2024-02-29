@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "CustomCharacterMovementComponent.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Logging/LogMacros.h"
 #include "MainCharacter.generated.h"
 
@@ -39,6 +40,9 @@ private:
 	/** Pawn mesh: 1st person view (arms; seen only by self) [!] */
     	UPROPERTY(VisibleDefaultsOnly, Category=Mesh)
     	USkeletalMeshComponent* Mesh1P;
+
+		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		USpringArmComponent* SpringArmComponent;
     
     	/** First person camera [!] */
     	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
