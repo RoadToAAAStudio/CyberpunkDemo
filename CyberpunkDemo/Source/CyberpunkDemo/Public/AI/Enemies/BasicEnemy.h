@@ -70,9 +70,7 @@ public:
 	void AcceptStateTreeNotification_Implementation(const UStateTree* StateTreeNotifier, const UDataTable* DataTable, const FStateTreeTransitionResult& Transition) override;
 
 	// ReceiveRequests
-	void ReceiveTriggerUnaware() const;
-	void ReceiveTriggerCombat() const;
-	void ReceiveTriggerAlerted() const;
+	void ReceiveTriggerEvent(const FGameplayTag& GameplayTag) const;
 	
 protected:
 	// Hook for Derived Blueprints when a StateTree's state change

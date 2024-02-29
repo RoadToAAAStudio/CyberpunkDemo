@@ -40,6 +40,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnAIZoneManagerStateChangedSignature OnAIZoneManagerStateChangedDelegate;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FTimerHandle TimerHandle;
+	
 protected:
 	UPROPERTY(EditAnywhere, Instanced, Category = "DecisionMaking")
 	TObjectPtr<UStateTreeComponent> StateTree;
@@ -54,6 +57,10 @@ public:
 	// StateTree notifications acceptor
 	void AcceptStateTreeNotification_Implementation(const UStateTree* StateTreeNotifier, const UDataTable* DataTable, const FStateTreeTransitionResult& Transition) override;
 
+	// Notify children enemies
+	UFUNCTION(BlueprintCallable, Category = "Actuation")
+	void NotifyChildrenEnemies(const FGameplayTag& GameplayTag);
+	
 protected:
 	// Hook for Derived Blueprints when a StateTree's state change
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnStateChanged"))
@@ -62,8 +69,14 @@ protected:
 private:
 	// Function listeners
 	UFUNCTION()
+	void NotifyPlayerEnteredInSightCone();
+
+	UFUNCTION()
 	void NotifyPlayerWasSeen();
 	
+	UFUNCTION()
+	void NotifyEnemyChangedState(EBasicEnemyState SourceState, EBasicEnemyState NewState);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -71,5 +84,4 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 };

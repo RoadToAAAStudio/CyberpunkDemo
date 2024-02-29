@@ -75,9 +75,12 @@ void ABasicEnemyController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// TODO Handle locking of sight
+	
 	// Sight is Active
 	if (IsSightEnabled())
 	{
+		// TODO Depends on the crouching and distance
 		if (GameplayTagsContainer.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone"))))
 		{
 			SightBar->AddAmount(SightIncreaseRate * DeltaTime);
@@ -161,6 +164,7 @@ void ABasicEnemyController::ReceiveStimulus(AActor* Actor, const FAIStimulus Sti
 
 void ABasicEnemyController::SightBarFull()
 {
+	GameplayTagsContainer.AddTag(FGameplayTag::RequestGameplayTag(TEXT("Character.Sensing.Sight.PlayerIsSeen")));
 	PlayerSeen();
 	OnPlayerSeenDelegate.Broadcast();
 }

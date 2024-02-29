@@ -49,24 +49,14 @@ void ABasicEnemy::AcceptStateTreeNotification_Implementation(const UStateTree* S
 	OnBasicEnemyStateChangedDelegate.Broadcast(SourceStateData->StateEnum, CurrentStateData->StateEnum);
 }
 
-void ABasicEnemy::ReceiveTriggerUnaware() const
+void ABasicEnemy::ReceiveTriggerEvent(const FGameplayTag& GameplayTag) const
 {
-	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(TEXT("Character.DecisionMaking.TriggerUnaware")));
-}
-
-void ABasicEnemy::ReceiveTriggerCombat() const
-{
-	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(TEXT("Character.DecisionMaking.TriggerCombat")));
-}
-
-void ABasicEnemy::ReceiveTriggerAlerted() const
-{
-	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(TEXT("Character.DecisionMaking.TriggerAlerted")));
+	StateTree->SendStateTreeEvent(GameplayTag);
 }
 
 void ABasicEnemy::NotifyPlayerWasSeen()
 {
-	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsSeen")));
+	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(TEXT("Character.Sensing.Sight.PlayerIsSeen")));
 }
 
 // Called every frame
