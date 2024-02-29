@@ -48,7 +48,6 @@ public:
 	TObjectPtr<ABasicEnemyController> BasicEnemyController;
 
 protected:
-	
 	UPROPERTY(EditAnywhere, Instanced, Category = "DecisionMaking")
 	TObjectPtr<UStateTreeComponent> StateTree;
 

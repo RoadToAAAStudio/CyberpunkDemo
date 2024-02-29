@@ -41,6 +41,17 @@ void AAIZoneManager::NotifyChildrenEnemies(const FGameplayTag& GameplayTag)
 void AAIZoneManager::NotifyPlayerEnteredInSightCone()
 {
 	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone")));
+	NumberOfConesPlayerIsIn++;
+}
+
+void AAIZoneManager::NotifyPlayerExitedInSightCone()
+{
+	NumberOfConesPlayerIsIn--;
+
+	if (NumberOfConesPlayerIsIn == 0)
+	{
+		OnPlayerIsInNoSightConeDelegate.Broadcast();
+	}
 }
 
 void AAIZoneManager::NotifyPlayerWasSeen()
@@ -72,6 +83,7 @@ void AAIZoneManager::BeginPlay()
 		const TObjectPtr<ABasicEnemyController> EnemyController = Cast<ABasicEnemyController>(Enemy->GetController());
 		
 		EnemyController->OnPlayerEnteredInSightConeDelegate.AddDynamic(this, &AAIZoneManager::NotifyPlayerEnteredInSightCone);
+		EnemyController->OnPlayerExitedFromSightConeDelegate.AddDynamic(this, &AAIZoneManager::NotifyPlayerExitedInSightCone);
 		EnemyController->OnPlayerSeenDelegate.AddDynamic(this, &AAIZoneManager::NotifyPlayerWasSeen);
 		Enemy->OnBasicEnemyStateChangedDelegate.AddDynamic(this, &AAIZoneManager::NotifyEnemyChangedState);
 	}

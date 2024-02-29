@@ -83,7 +83,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsHearingEnabled();
-	
+
 protected:
 
 	// Derived Blueprints hooks

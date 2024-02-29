@@ -27,6 +27,7 @@ struct FAIZoneManagerMapping : public FTableRowBase
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAIZoneManagerStateChangedSignature, EAIZoneManagerState, SourceState, EAIZoneManagerState, NewState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerIsInNoSightConeSignature);
 
 UCLASS()
 class CYBERPUNKDEMO_API AAIZoneManager : public AActor, public IStateTreeNotificationsAcceptor
@@ -39,9 +40,15 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnAIZoneManagerStateChangedSignature OnAIZoneManagerStateChangedDelegate;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerIsInNoSightConeSignature OnPlayerIsInNoSightConeDelegate;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTimerHandle TimerHandle;
+
+	UPROPERTY(BlueprintReadOnly)
+	int NumberOfConesPlayerIsIn = 0;
 	
 protected:
 	UPROPERTY(EditAnywhere, Instanced, Category = "DecisionMaking")
@@ -71,6 +78,9 @@ private:
 	UFUNCTION()
 	void NotifyPlayerEnteredInSightCone();
 
+	UFUNCTION()
+	void NotifyPlayerExitedInSightCone();
+	
 	UFUNCTION()
 	void NotifyPlayerWasSeen();
 	
