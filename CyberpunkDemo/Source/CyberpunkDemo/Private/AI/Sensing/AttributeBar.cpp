@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AI/AttributeBar.h"
+#include "AI/Sensing/AttributeBar.h"
 
 // Sets default values for this component's properties
 UAttributeBar::UAttributeBar()

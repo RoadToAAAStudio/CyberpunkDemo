@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
-#include "AI/AttributeBar.h"
+#include "AI/Sensing/AttributeBar.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "GameplayTagContainer.h"
 #include "BasicEnemyController.generated.h"

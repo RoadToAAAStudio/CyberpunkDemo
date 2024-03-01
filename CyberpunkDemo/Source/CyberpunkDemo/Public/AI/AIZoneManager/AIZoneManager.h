@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "IStateTreeNotificationsAcceptor.h"
-#include "AI/Enemies/BasicEnemy.h"
+#include "AI/IStateTreeNotificationsAcceptor.h"
+#include "AI/BasicEnemy/BasicEnemy.h"
 #include "GameFramework/Actor.h"
 #include "AIZoneManager.generated.h"
 

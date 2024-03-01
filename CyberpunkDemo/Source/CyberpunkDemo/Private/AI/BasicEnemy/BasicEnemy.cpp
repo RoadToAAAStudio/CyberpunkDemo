@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "AI/Enemies/BasicEnemy.h"
+#include "AI/BasicEnemy/BasicEnemy.h"
 #include "AI/AIUtility.h"
 
 // Sets default values
