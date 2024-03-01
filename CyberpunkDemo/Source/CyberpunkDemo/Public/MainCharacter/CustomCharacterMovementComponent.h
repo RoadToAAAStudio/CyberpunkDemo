@@ -49,12 +49,12 @@ public:
 
 	// MANTLE PROPERTIES
 	
-	UPROPERTY(EditDefaultsOnly) float MantleMaxDistance = 200;
-	UPROPERTY(EditDefaultsOnly) float MantleReachHeight = 50;
-	UPROPERTY(EditDefaultsOnly) float MinMantleDepth = 30;
-	UPROPERTY(EditDefaultsOnly) float MantleMinWallSteepnessAngle = 75;
-	UPROPERTY(EditDefaultsOnly) float MantleMaxSurfaceAngle = 40;
-	UPROPERTY(EditDefaultsOnly) float MantleMaxAlignmentAngle = 45;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxDistance = 200;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleReachHeight = 70;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MinMantleDepth = 30;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMinWallSteepnessAngle = 75;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxSurfaceAngle = 40;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxAlignmentAngle = 45;
 
 	
 	// Bools used to handle movement state transitions

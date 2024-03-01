@@ -402,7 +402,10 @@ bool UCustomCharacterMovementComponent::TryMantle()
 	// CHECK OBSTACLE FRONT FACE
 	
 	FHitResult FrontHit;
+
+	// Scale the distance in which we check for a possible hit with the velocity of the character 
 	float CheckDistance = FMath::Clamp(Velocity | Forward, GetCapsuleRadius() + 30, MantleMaxDistance);
+	// The starting point of the raycast takes into account the step height
 	FVector FrontStart = BaseLocation + FVector::UpVector * (MaxStepHeight - 1);
 
 	for (int i = 0; i < 10; i++)
@@ -414,8 +417,63 @@ bool UCustomCharacterMovementComponent::TryMantle()
 
 	if (!FrontHit.IsValidBlockingHit()) return false;
 	float CosWallSteepnessAngle = FrontHit.Normal | FVector::UpVector;
-	if (FMath::Abs(CosWallSteepnessAngle) > CosMantleMinWallSteepnessAngle || (Forward | -FrontHit.Normal) <  CosMantleMaxAlignmentAngle) return false;
+	// Check if the front of the object is too step OR if the 
+	if (FMath::Abs(CosWallSteepnessAngle) > CosMantleMinWallSteepnessAngle /*|| (Forward | -FrontHit.Normal) <  CosMantleMaxAlignmentAngle*/) return false;
 	DRAW_POINT(FrontHit.Location, FColor::Red)
+
+	// CHECK OBSTACLE HEIGHT
+	
+	TArray<FHitResult> HeightHits;
+	FHitResult SurfaceHit;
+
+	// Project the UP vector onto the normal vector of the object hit and normalize it
+		// This give us a vector that goes UP in the direction of the wall
+	FVector WallUpVector = FVector::VectorPlaneProject(FVector::UpVector, FrontHit.Normal).GetSafeNormal();
+	float WallCos = FVector::UpVector | FrontHit.Normal;
+	float WallSin = FMath::Sqrt(1 - WallCos * WallCos);
+
+	// The starting point for the raycast is the location of the wall + a forward vector scaled by the WALLUP vector times the magnitude we want this vector (the max height we can perform the mantle), all divided by WALLSIN
+		// WALLSIN will be between 0 and 1 thus making TRACESTART bigger to account for the potential steepness of the wall (to ensure that TRACESTART is always of the same lenght)
+	FVector TraceStart = FrontHit.Location + Forward + WallUpVector * (MaxHeight - (MaxStepHeight - 1)) / WallSin;
+	DRAW_LINE(TraceStart, FrontHit.Location + Forward, FColor::Orange);
+
+	if(!GetWorld()->LineTraceMultiByProfile(HeightHits, TraceStart, FrontHit.Location + Forward, "BlockAll", Params)) return false;
+	for(const FHitResult& Hit : HeightHits)
+	{
+		if (Hit.IsValidBlockingHit())
+		{
+			SurfaceHit = Hit;
+			break;
+		}
+	}
+
+	// Check if the surface hit is valid OR if the surface is too steep to perform the mantle
+	if (!SurfaceHit.IsValidBlockingHit() || (SurfaceHit.Normal | FVector::UpVector) < CosMantleMaxSurfaceAngle) return false;
+
+	// We can consider the value of the dot product as the component of the first vector over the second one, thus giving us the height of the surface from the base location
+	float Height = (SurfaceHit.Location - BaseLocation) | FVector::UpVector;
+
+	PRINT_SCREEN(FString::Printf(TEXT("Height: %f"), Height));
+
+	DRAW_POINT(SurfaceHit.Location, FColor::Blue);
+
+	if (Height > MaxHeight) return false;
+
+	// CHECK CLEARANCE
+
+	float SurfaceCos = FVector::UpVector | SurfaceHit.Normal;
+	float SurfaceSin = FMath::Sqrt(1 - SurfaceCos * SurfaceCos);
+	// WHY THE SIN ???
+	FVector ClearanceCapsuleLocation = SurfaceHit.Location + Forward * GetCapsuleRadius() + FVector::UpVector * (GetCapsuleHalfHeight() + 1 + GetCapsuleRadius() * 2 * SurfaceSin);
+	FCollisionShape CapsuleShape = FCollisionShape::MakeCapsule(GetCapsuleRadius(), GetCapsuleHalfHeight());
+
+	if (GetWorld()->OverlapAnyTestByProfile(ClearanceCapsuleLocation, FQuat::Identity, "BlockAll", CapsuleShape, Params))
+	{
+		DRAW_CAPSULE(ClearanceCapsuleLocation, FColor::Red)
+		return false;
+	}
+
+	DRAW_CAPSULE(ClearanceCapsuleLocation, FColor::Green)
 	
 	return true;
 }
