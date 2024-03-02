@@ -56,11 +56,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxSurfaceAngle = 40;
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxAlignmentAngle = 45;
 
+	UPROPERTY(BlueprintReadOnly) FVector MantleLocation;
+
 	
 	// Bools used to handle movement state transitions
 	UPROPERTY(BlueprintReadOnly) bool bWantsToRun;
 	UPROPERTY(BlueprintReadOnly) bool bWantsToCrouchCustom;
 	UPROPERTY(BlueprintReadOnly) bool bWantsToJump;
+	UPROPERTY(BlueprintReadWrite) bool bCanMantle = false;
 
 	
 private:
@@ -99,6 +102,13 @@ public:
 	bool CanWalkFromCrouch();
 	bool CanRunFromCrouch();
 	bool CanJumpFromCrouch();
+
+	// From MANTLE state
+	bool CanIdleFromMantle();
+
+	// From ANY
+	bool CanMantleFromAny();
+	
 #pragma endregion 
 	
 	// Sprint methods

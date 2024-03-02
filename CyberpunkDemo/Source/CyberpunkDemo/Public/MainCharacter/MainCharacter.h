@@ -91,6 +91,8 @@ public:
 	// Jump function
 	virtual void Jump() override;
 
+	UFUNCTION(BlueprintImplementableEvent) void Mantle();
+
 	TObjectPtr<UCustomCharacterMovementComponent> GetCustomCharacterComponent();
 
 	// Method that returns all parameters that should be ignored by raycasts, spherecasts and so on

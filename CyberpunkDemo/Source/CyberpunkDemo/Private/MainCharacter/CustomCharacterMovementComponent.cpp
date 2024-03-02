@@ -12,6 +12,7 @@
 #include "Utility/States/StateJumping.h"
 #include "Utility/States/StateRunning.h"
 #include "Utility/States/StateWalking.h"
+#include "Utility/States/UStateMantle.h"
 
 // Shortcut macros
 #if 1
@@ -91,6 +92,10 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	StateMachine->AddState(StateCrouching);
 	StateCrouching->SetOwner(this);
 
+	TObjectPtr<UUStateMantle> StateMantle = NewObject<UUStateMantle>();
+	StateMachine->AddState(StateMantle);
+	StateMantle->SetOwner(this);
+
 	StateMachine->Init(StateIdle);
 
 	// Create the transitions and add them to the state machine
@@ -119,6 +124,12 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	IdleToRunning->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanRunFromIdle);
 	IdleToRunning->Init(StateRunning);
 
+	// Idle TO Mantle
+	TObjectPtr<UFTransition> IdleToMantle = NewObject<UFTransition>();
+	StateIdle->Transitions.Add(IdleToMantle);
+	IdleToMantle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanMantleFromAny);
+	IdleToMantle->Init(StateMantle);
+
 	// WALKING
 	// Walking TO Idle
 	TObjectPtr<UFTransition> WalkingToIdle = NewObject<UFTransition>();
@@ -144,6 +155,12 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	WalkingToJump->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanJumpFromWalk);
 	WalkingToJump->Init(StateJumping);
 
+	// Walking TO Mantle
+	TObjectPtr<UFTransition> WalkingToMantle = NewObject<UFTransition>();
+	StateWalking->Transitions.Add(WalkingToMantle);
+	WalkingToMantle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanMantleFromAny);
+	WalkingToMantle->Init(StateMantle);
+
 	// RUNNING
 	// Running TO Idle
 	TObjectPtr<UFTransition> RunningToIdle = NewObject<UFTransition>();
@@ -162,6 +179,12 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	StateRunning->Transitions.Add(RunningToJump);
 	RunningToJump->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanJumpFromRun);
 	RunningToJump->Init(StateJumping);
+
+	// Running TO Mantle
+	TObjectPtr<UFTransition> RunningToMantle = NewObject<UFTransition>();
+	StateRunning->Transitions.Add(RunningToMantle);
+	RunningToMantle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanMantleFromAny);
+	RunningToMantle->Init(StateMantle);
 
 	// JUMP
 	// Jump TO Idle
@@ -212,6 +235,13 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	StateCrouching->Transitions.Add(CrouchToJump);
 	CrouchToJump->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanJumpFromCrouch);
 	CrouchToJump->Init(StateJumping);
+
+	// MANTLE
+	// Mantle TO Idle
+	TObjectPtr<UFTransition> MantleToJump = NewObject<UFTransition>();
+	StateMantle->Transitions.Add(MantleToJump);
+	MantleToJump->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanIdleFromMantle);
+	MantleToJump->Init(StateIdle);
 }
 
 void UCustomCharacterMovementComponent::SetCurrentMovementState(ECustomMovementState NewState)
@@ -320,6 +350,18 @@ bool UCustomCharacterMovementComponent::CanJumpFromCrouch()
 	return IsMovingOnGround() && bWantsToJump  && !TryMantle();
 }
 
+// FROM MANTLE
+bool UCustomCharacterMovementComponent::CanIdleFromMantle()
+{
+	return !bCanMantle;
+}
+
+bool UCustomCharacterMovementComponent::CanMantleFromAny()
+{
+	return bCanMantle;
+}
+
+
 #pragma endregion 
 
 // Called every frame
@@ -405,7 +447,7 @@ bool UCustomCharacterMovementComponent::TryMantle()
 
 	// Scale the distance in which we check for a possible hit with the velocity of the character 
 	float CheckDistance = FMath::Clamp(Velocity | Forward, GetCapsuleRadius() + 30, MantleMaxDistance);
-	// The starting point of the raycast takes into account the step height
+	// The starting point of the line trace takes into account the step height
 	FVector FrontStart = BaseLocation + FVector::UpVector * (MaxStepHeight - 1);
 
 	for (int i = 0; i < 10; i++)
@@ -418,13 +460,13 @@ bool UCustomCharacterMovementComponent::TryMantle()
 	if (!FrontHit.IsValidBlockingHit()) return false;
 	float CosWallSteepnessAngle = FrontHit.Normal | FVector::UpVector;
 	// Check if the front of the object is too step OR if the 
-	if (FMath::Abs(CosWallSteepnessAngle) > CosMantleMinWallSteepnessAngle /*|| (Forward | -FrontHit.Normal) <  CosMantleMaxAlignmentAngle*/) return false;
+	if (FMath::Abs(CosWallSteepnessAngle) > CosMantleMinWallSteepnessAngle || (Forward | -FrontHit.Normal) <  CosMantleMaxAlignmentAngle) return false;
 	DRAW_POINT(FrontHit.Location, FColor::Red)
 
 	// CHECK OBSTACLE HEIGHT
 	
 	TArray<FHitResult> HeightHits;
-	FHitResult SurfaceHit;
+	FHitResult SurfaceHit; 
 
 	// Project the UP vector onto the normal vector of the object hit and normalize it
 		// This give us a vector that goes UP in the direction of the wall
@@ -432,8 +474,8 @@ bool UCustomCharacterMovementComponent::TryMantle()
 	float WallCos = FVector::UpVector | FrontHit.Normal;
 	float WallSin = FMath::Sqrt(1 - WallCos * WallCos);
 
-	// The starting point for the raycast is the location of the wall + a forward vector scaled by the WALLUP vector times the magnitude we want this vector (the max height we can perform the mantle), all divided by WALLSIN
-		// WALLSIN will be between 0 and 1 thus making TRACESTART bigger to account for the potential steepness of the wall (to ensure that TRACESTART is always of the same lenght)
+	// The starting point for the line trace is the location of the wall + a forward vector scaled by the WALL-UP vector times the magnitude we want this vector (the max height we can perform the mantle), all divided by WALL-SIN
+		// WALL-SIN will be between 0 and 1 thus making TRACE-START bigger to account for the potential steepness of the wall (to ensure that TRACE-START is always of the same length)
 	FVector TraceStart = FrontHit.Location + Forward + WallUpVector * (MaxHeight - (MaxStepHeight - 1)) / WallSin;
 	DRAW_LINE(TraceStart, FrontHit.Location + Forward, FColor::Orange);
 
@@ -463,7 +505,8 @@ bool UCustomCharacterMovementComponent::TryMantle()
 
 	float SurfaceCos = FVector::UpVector | SurfaceHit.Normal;
 	float SurfaceSin = FMath::Sqrt(1 - SurfaceCos * SurfaceCos);
-	// WHY THE SIN ???
+
+	// The point the capsule should mantle to, it takes into account the size of the capsule and any potential steepness of the surface
 	FVector ClearanceCapsuleLocation = SurfaceHit.Location + Forward * GetCapsuleRadius() + FVector::UpVector * (GetCapsuleHalfHeight() + 1 + GetCapsuleRadius() * 2 * SurfaceSin);
 	FCollisionShape CapsuleShape = FCollisionShape::MakeCapsule(GetCapsuleRadius(), GetCapsuleHalfHeight());
 
@@ -475,6 +518,8 @@ bool UCustomCharacterMovementComponent::TryMantle()
 
 	DRAW_CAPSULE(ClearanceCapsuleLocation, FColor::Green)
 	
+	MantleLocation = ClearanceCapsuleLocation;
+	bCanMantle = true;
 	return true;
 }
 
