@@ -35,4 +35,9 @@ void UStateJumping::Tick()
 		bHasJumped = true;
 		Owner->MainCharacter->Jump();
 	}
+
+	// if (Owner->Velocity.Z < 0)
+	// {
+	// 	Owner->TryMantle();
+	// }
 }

@@ -52,6 +52,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxDistance = 200;
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleReachHeight = 70;
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MinMantleDepth = 30;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleBaseStartOffset = 40;
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMinWallSteepnessAngle = 75;
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxSurfaceAngle = 40;
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxAlignmentAngle = 45;
@@ -96,6 +97,7 @@ public:
 	bool CanWalkFromJump();
 	bool CanRunFromJump();
 	bool CanCrouchFromJump();
+	bool CanMantleFromJump();
 
 	//From CROUCHING state
 	bool CanIdleFromCrouch();
@@ -108,6 +110,8 @@ public:
 
 	// From ANY
 	bool CanMantleFromAny();
+
+	bool TryMantle();
 	
 #pragma endregion 
 	
@@ -146,5 +150,5 @@ protected:
 
 	// Mantle methods
 
-	bool TryMantle();
+
 };

@@ -44,6 +44,9 @@ class ACyberpunkDemoCharacter : public ACharacter
 public:
 	ACyberpunkDemoCharacter();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Mouse Sensibility")
+	float MouseSensibility = 1;
+
 protected:
 	virtual void BeginPlay();
 

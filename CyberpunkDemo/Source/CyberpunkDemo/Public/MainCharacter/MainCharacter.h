@@ -4,6 +4,7 @@
 // Includes
 #include "CoreMinimal.h"
 #include "CustomCharacterMovementComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Logging/LogMacros.h"
@@ -29,6 +30,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Movement")
 	bool bIsCrouching;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Aiming")
+	float MouseSensibility = 1;
 	
 protected:
 
@@ -47,10 +51,16 @@ private:
     	/** First person camera [!] */
     	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
     	UCameraComponent* FirstPersonCameraComponent;
+
+		UPROPERTY()
+		UEnhancedInputLocalPlayerSubsystem* Subsystem;
     
     	/** MappingContext [!] */
     	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
     	UInputMappingContext* DefaultMappingContext;
+
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+		UInputMappingContext* EmptyMappingContext;
     
     	/** Jump Input Action [!] */
     	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
@@ -97,6 +107,8 @@ public:
 
 	// Method that returns all parameters that should be ignored by raycasts, spherecasts and so on
 	FCollisionQueryParams GetIgnoreCharacterParams() const;
+
+	void DisableMappingContext (bool Enable);
 
 protected:
 	

@@ -3,6 +3,7 @@
 
 #include "MainCharacter/CustomCharacterMovementComponent.h"
 
+#include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "MainCharacter/MainCharacter.h"
@@ -210,6 +211,12 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	StateJumping->Transitions.Add(JumpToCrouch);
 	JumpToCrouch->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanCrouchFromJump);
 	JumpToCrouch->Init(StateCrouching);
+
+	// Jump TO Mantle
+	TObjectPtr<UFTransition> JumpToMantle = NewObject<UFTransition>();
+	StateJumping->Transitions.Add(JumpToMantle);
+	JumpToMantle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::TryMantle); // TODO Rethink the condition that from jump let the player mantle
+	JumpToMantle->Init(StateMantle);
 	
 	// CROUCH
 	// Crouch TO Idle
@@ -327,6 +334,11 @@ bool UCustomCharacterMovementComponent::CanRunFromJump()
 bool UCustomCharacterMovementComponent::CanCrouchFromJump()
 {
 	return IsMovingOnGround() && bWantsToCrouchCustom && !bWantsToJump;
+}
+
+bool UCustomCharacterMovementComponent::CanMantleFromJump()
+{
+	return TryMantle() && Velocity.Z < 0;
 }
 
 // FROM CROUCH
@@ -447,20 +459,24 @@ bool UCustomCharacterMovementComponent::TryMantle()
 
 	// Scale the distance in which we check for a possible hit with the velocity of the character 
 	float CheckDistance = FMath::Clamp(Velocity | Forward, GetCapsuleRadius() + 30, MantleMaxDistance);
-	// The starting point of the line trace takes into account the step height
+
+	// The starting point of the line trace takes into account the step height and a customisable offset
 	FVector FrontStart = BaseLocation + FVector::UpVector * (MaxStepHeight - 1);
+	FrontStart.Z += MantleBaseStartOffset;
 
 	for (int i = 0; i < 10; i++)
 	{
 		DRAW_LINE(FrontStart, FrontStart + Forward * CheckDistance, FColor::Red)
+
 		if (GetWorld()->LineTraceSingleByProfile(FrontHit, FrontStart, FrontStart + Forward * CheckDistance, "BlockAll", Params)) break;
 		FrontStart += FVector::UpVector * (2.f * GetCapsuleHalfHeight() - (MaxStepHeight - 1)) / 9;
 	}
-
+	
 	if (!FrontHit.IsValidBlockingHit()) return false;
 	float CosWallSteepnessAngle = FrontHit.Normal | FVector::UpVector;
-	// Check if the front of the object is too step OR if the 
+	// Check if the front of the object is too steep OR if the 
 	if (FMath::Abs(CosWallSteepnessAngle) > CosMantleMinWallSteepnessAngle || (Forward | -FrontHit.Normal) <  CosMantleMaxAlignmentAngle) return false;
+
 	DRAW_POINT(FrontHit.Location, FColor::Red)
 
 	// CHECK OBSTACLE HEIGHT
@@ -495,7 +511,7 @@ bool UCustomCharacterMovementComponent::TryMantle()
 	// We can consider the value of the dot product as the component of the first vector over the second one, thus giving us the height of the surface from the base location
 	float Height = (SurfaceHit.Location - BaseLocation) | FVector::UpVector;
 
-	PRINT_SCREEN(FString::Printf(TEXT("Height: %f"), Height));
+	//PRINT_SCREEN(FString::Printf(TEXT("Height: %f"), Height));
 
 	DRAW_POINT(SurfaceHit.Location, FColor::Blue);
 

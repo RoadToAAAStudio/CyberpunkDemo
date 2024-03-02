@@ -6,10 +6,10 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "CyberpunkDemo/CyberpunkDemoCharacter.h"
 #include "Engine/LocalPlayer.h"
+#include "MainCharacter/CustomPlayerController.h"
 
 // Sets default values and create the components
 AMainCharacter::AMainCharacter(const FObjectInitializer& ObjectInitializer)
@@ -58,13 +58,12 @@ void AMainCharacter::BeginPlay()
 	// Add Input Mapping Context [!]
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+		if (Subsystem)
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-
-	
 }
 
 // Called every frame
@@ -95,6 +94,22 @@ FCollisionQueryParams AMainCharacter::GetIgnoreCharacterParams() const
 	Params.AddIgnoredActor(this);
 
 	return Params;
+}
+
+void AMainCharacter::DisableMappingContext(bool Enable)
+{
+	if (Subsystem)
+	{
+		if (Enable)
+		{
+			Subsystem->RemoveMappingContext(DefaultMappingContext);
+			//Subsystem->AddMappingContext(EmptyMappingContext, 0);
+		}
+		else
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
 }
 
 // void AMainCharacter::Crouch(bool bClientSimulation)
@@ -151,8 +166,8 @@ void AMainCharacter::Look(const FInputActionValue& Value)
 	if (Controller != nullptr)
 	{
 		// add yaw and pitch input to controller
-		AddControllerYawInput(LookAxisVector.X);
-		AddControllerPitchInput(LookAxisVector.Y);
+		AddControllerYawInput(LookAxisVector.X * MouseSensibility);
+		AddControllerPitchInput(LookAxisVector.Y * MouseSensibility);
 	}
 }
 
