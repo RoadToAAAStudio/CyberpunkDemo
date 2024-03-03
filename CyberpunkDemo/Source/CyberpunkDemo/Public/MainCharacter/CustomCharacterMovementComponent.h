@@ -20,6 +20,7 @@ enum class ECustomMovementState : uint8
 	Crouching,
 	Jumping,
 	Sliding,
+	Mantling,
 	Max UMETA(Hidden)
 };
 
@@ -48,12 +49,18 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement|Crouch") float Crouch_HalfHeight;
 
 	// MANTLE PROPERTIES
-	
-	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxDistance = 200;
+	// Max distance to check for a possible mantle
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxDistance = 10;
+	// Max height to check for a possible mantle
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleReachHeight = 70;
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MinMantleDepth = 30;
+	// Offset used to ignore obstacles under a certain height
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleBaseStartOffset = 40;
+	// Height used to decide if a mantle should be a "high" or "low" one
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float LowMantleCutoff = 120;
+	// Minimum steepness accepted for the wall the character should mantle on (expressed in degrees)
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMinWallSteepnessAngle = 75;
+	// Max steepness accepted for the surface the character should mantle to (expressed in degrees)
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxSurfaceAngle = 40;
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxAlignmentAngle = 45;
 
@@ -65,6 +72,7 @@ public:
 	UPROPERTY(BlueprintReadOnly) bool bWantsToCrouchCustom;
 	UPROPERTY(BlueprintReadOnly) bool bWantsToJump;
 	UPROPERTY(BlueprintReadWrite) bool bCanMantle = false;
+	UPROPERTY(BlueprintReadOnly) bool bHighMantle;
 
 	
 private:

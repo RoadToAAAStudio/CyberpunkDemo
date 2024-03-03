@@ -16,7 +16,7 @@
 #include "Utility/States/UStateMantle.h"
 
 // Shortcut macros
-#if 1
+#if 0
 float MacroDuration = 2.0f;
 #define PRINT_SCREEN(x) GEngine->AddOnScreenDebugMessage(-1, MacroDuration ? MacroDuration : -1.f, FColor::Yellow, x);
 #define DRAW_POINT(x, c) DrawDebugPoint(GetWorld(), x, 10, c, !MacroDuration, MacroDuration);
@@ -458,8 +458,8 @@ bool UCustomCharacterMovementComponent::TryMantle()
 	FHitResult FrontHit;
 
 	// Scale the distance in which we check for a possible hit with the velocity of the character 
-	float CheckDistance = FMath::Clamp(Velocity | Forward, GetCapsuleRadius() + 30, MantleMaxDistance);
-
+	//float CheckDistance = FMath::Clamp(Velocity | Forward, GetCapsuleRadius() + 30, MantleMaxDistance);
+	float CheckDistance = GetCapsuleRadius() + MantleMaxDistance;
 	// The starting point of the line trace takes into account the step height and a customisable offset
 	FVector FrontStart = BaseLocation + FVector::UpVector * (MaxStepHeight - 1);
 	FrontStart.Z += MantleBaseStartOffset;
@@ -536,6 +536,10 @@ bool UCustomCharacterMovementComponent::TryMantle()
 	
 	MantleLocation = ClearanceCapsuleLocation;
 	bCanMantle = true;
+	bHighMantle = true;
+
+	if (Height < LowMantleCutoff) bHighMantle = false;
+	
 	return true;
 }
 

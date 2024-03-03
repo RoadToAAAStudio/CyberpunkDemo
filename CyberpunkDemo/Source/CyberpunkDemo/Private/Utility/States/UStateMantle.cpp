@@ -15,10 +15,11 @@ void UUStateMantle::SetOwner(TObjectPtr<UCustomCharacterMovementComponent> owner
 void UUStateMantle::EnterState()
 {
 	Super::EnterState();
+	Owner->SetCurrentMovementState(ECustomMovementState::Mantling);
 	// Reset the jump boolean
 	Owner->bWantsToJump = false;
 	// Set the player velocity to 0
-	Owner->Velocity = FVector(0,0,Owner->Velocity.Z);
+	Owner->Velocity = FVector(0,0,0);
 	Owner->MainCharacter->DisableMappingContext(true);
 	Owner->MainCharacter->Mantle();
 }
