@@ -6,16 +6,17 @@
 #include "GameplayTagContainer.h"
 #include "UnlockCondition.h"
 #include "GameFramework/Actor.h"
+#include "Interactables/IInspectable.h"
 #include "Door.generated.h"
 
 UCLASS()
-class CYBERPUNKDEMO_API ADoor : public AActor
+class CYBERPUNKDEMO_API ADoor : public AActor, public IInspectable
 {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(EditAnywhere)
-	TArray<UUnlockCondition*> Conditions;
+	TArray<TObjectPtr<UUnlockCondition>> Conditions;
 	UPROPERTY(BlueprintReadOnly)
 	FGameplayTag ActiveState;
 
@@ -34,8 +35,8 @@ public:
 	void Close();
 	void Unlock();
 	
-	UFUNCTION(BlueprintCallable)
-	void Inspect();
+	void Inspect() override;
+	
 	UFUNCTION(BlueprintCallable)
 	void Interact();
 };
