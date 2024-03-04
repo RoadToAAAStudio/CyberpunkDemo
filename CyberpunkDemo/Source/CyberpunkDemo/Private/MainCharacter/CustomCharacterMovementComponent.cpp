@@ -55,7 +55,7 @@ void UCustomCharacterMovementComponent::BeginPlay()
 	Super::BeginPlay();
 	MainCharacter = Cast<AMainCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 	SetCrouchedHalfHeight(Crouch_HalfHeight);
-	GravityScale = 1.5f;
+	GravityScale = CustomGravity;
 	BuildStateMachine();
 }
 
@@ -303,7 +303,7 @@ bool UCustomCharacterMovementComponent::CanCrouchFromWalk()
 
 bool UCustomCharacterMovementComponent::CanJumpFromWalk()
 {
-	return IsMovingOnGround() && bWantsToJump && !TryMantle();
+	return bWantsToJump && !TryMantle();
 }
 
 // FROM RUNNING
@@ -319,7 +319,7 @@ bool UCustomCharacterMovementComponent::CanWalkFromRun()
 
 bool UCustomCharacterMovementComponent::CanJumpFromRun()
 {
-	return IsMovingOnGround() && bWantsToJump && !TryMantle();
+	return bWantsToJump && !TryMantle();
 }
 
 // FROM JUMP
@@ -371,7 +371,7 @@ bool UCustomCharacterMovementComponent::CanRunFromCrouch()
 
 bool UCustomCharacterMovementComponent::CanJumpFromCrouch()
 {
-	return IsMovingOnGround() && bWantsToJump  && !TryMantle();
+	return bWantsToJump  && !TryMantle();
 }
 
 // FROM MANTLE
@@ -384,7 +384,6 @@ bool UCustomCharacterMovementComponent::CanMantleFromAny()
 {
 	return bCanMantle;
 }
-
 
 #pragma endregion 
 

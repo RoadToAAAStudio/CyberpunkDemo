@@ -54,6 +54,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Jump") float JumpForce = 500;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Jump") float SecondJumpForce = 700;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Jump") bool bCanDoubleJump = false;
+
+	// GRAVITY PROPERTIES
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Gravity") float CustomGravity = 1.5f;
 	
 
 	// MANTLE PROPERTIES
