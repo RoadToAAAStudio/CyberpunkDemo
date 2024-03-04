@@ -371,7 +371,7 @@ bool UCustomCharacterMovementComponent::CanRunFromCrouch()
 
 bool UCustomCharacterMovementComponent::CanJumpFromCrouch()
 {
-	return bWantsToJump  && !TryMantle();
+	return bWantsToJump;
 }
 
 // FROM MANTLE
@@ -423,6 +423,12 @@ void UCustomCharacterMovementComponent::CrouchPressed()
 	if (CurrentMovementState == ECustomMovementState::Jumping || CurrentMovementState == ECustomMovementState::Running) return;
 	bWantsToCrouchCustom = !bWantsToCrouchCustom;
 }
+
+void UCustomCharacterMovementComponent::DashPressed()
+{
+	
+}
+
 #pragma endregion
 
 // CURRENT STATE GETTER

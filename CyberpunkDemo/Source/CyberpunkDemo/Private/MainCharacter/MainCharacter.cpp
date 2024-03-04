@@ -144,6 +144,9 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 		// Crouch
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, CustomCharacterMovementComponent, &UCustomCharacterMovementComponent::CrouchPressed);
+
+		// Dash
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, CustomCharacterMovementComponent, &UCustomCharacterMovementComponent::DashPressed);
 	}
 }
 

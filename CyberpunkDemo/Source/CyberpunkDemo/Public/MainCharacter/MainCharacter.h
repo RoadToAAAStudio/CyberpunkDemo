@@ -82,6 +82,9 @@ private:
 		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		UInputAction* CrouchAction;
 
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta =(AllowPrivateAccess = "true"))
+		UInputAction* DashAction;
+
 public:
 	
 	// Sets default values for this character's properties

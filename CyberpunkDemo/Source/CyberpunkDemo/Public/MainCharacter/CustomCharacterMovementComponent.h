@@ -56,7 +56,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Jump") bool bCanDoubleJump = false;
 
 	// GRAVITY PROPERTIES
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Gravity") float CustomGravity = 1.5f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Gravity") float CustomGravity = 2.f;
 	
 
 	// MANTLE PROPERTIES
@@ -145,7 +145,10 @@ public:
 	UFUNCTION(BlueprintCallable) void JumpReleased();
 
 	// Crouch methods
-	UFUNCTION(Blueprintable) void CrouchPressed();
+	UFUNCTION(BlueprintCallable) void CrouchPressed();
+
+	// Dash methods
+	UFUNCTION(BlueprintCallable) void DashPressed();
 
 	// To get the current state and set
 	UFUNCTION(BlueprintCallable) ECustomMovementState GetCurrentMovementState() const;
