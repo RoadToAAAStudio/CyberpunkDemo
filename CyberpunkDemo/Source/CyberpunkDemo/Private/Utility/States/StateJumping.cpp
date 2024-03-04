@@ -14,16 +14,14 @@ void UStateJumping::EnterState()
 {
 	Super::EnterState();
 	Owner->SetCurrentMovementState(ECustomMovementState::Jumping);
-	// if (Owner->MainCharacter->bIsCrouched) Owner->MainCharacter->bIsCrouched = false;
-	//
-	// Owner->MainCharacter->Jump();
 	bHasJumped = false;
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, "I AM JUMPING");
 }
 
 void UStateJumping::ExitState()
 {
 	Super::ExitState();
-
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, "I AM NOT JUMPING");
 	Owner->MainCharacter->StopJumping();
 }
 
@@ -32,12 +30,17 @@ void UStateJumping::Tick()
 	Super::Tick();
 	if (!Owner->MainCharacter->bIsCrouched && !bHasJumped)
 	{
-		bHasJumped = true;
-		Owner->MainCharacter->Jump();
-	}
+		if (!Owner->IsMovingOnGround())
+		{
+			Owner->JumpZVelocity = Owner->SecondJumpForce;
+		}
+		else
+		{
+			Owner->JumpZVelocity = Owner->JumpForce;
+		}
 
-	// if (Owner->Velocity.Z < 0)
-	// {
-	// 	Owner->TryMantle();
-	// }
+		Owner->MainCharacter->Jump();
+		bHasJumped = true;
+		Owner->bWantsToJump = false;
+	}
 }

@@ -40,13 +40,21 @@ public:
 	UPROPERTY()
 	TObjectPtr<AMainCharacter> MainCharacter;
 
+	// WALK PROPERTIES
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Walk") float Walk_MaxWalkSpeed;
 
+	// RUN PROPERTIES
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Sprint") float Sprint_MaxWalkSpeed;
 
+	// CROUCH PROPERTIES
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Crouch") float Crouch_MaxWalkSpeed;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement|Crouch") float Crouch_HalfHeight;
+
+	// JUMP PROPERTIES
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Jump") float JumpForce = 500;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Jump") float SecondJumpForce = 700;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Jump") bool bCanDoubleJump = false;
+	
 
 	// MANTLE PROPERTIES
 	// Max distance to check for a possible mantle
@@ -73,6 +81,7 @@ public:
 	UPROPERTY(BlueprintReadOnly) bool bWantsToJump;
 	UPROPERTY(BlueprintReadWrite) bool bCanMantle = false;
 	UPROPERTY(BlueprintReadOnly) bool bHighMantle;
+	
 
 	
 private:
@@ -106,6 +115,7 @@ public:
 	bool CanRunFromJump();
 	bool CanCrouchFromJump();
 	bool CanMantleFromJump();
+	bool CanJumpFromJump();
 
 	//From CROUCHING state
 	bool CanIdleFromCrouch();
@@ -156,7 +166,7 @@ protected:
 
 	void BuildStateMachine();
 
-	// Mantle methods
+	
 
 
 };

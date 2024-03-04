@@ -64,6 +64,8 @@ void AMainCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	JumpMaxCount = 2;
 }
 
 // Called every frame

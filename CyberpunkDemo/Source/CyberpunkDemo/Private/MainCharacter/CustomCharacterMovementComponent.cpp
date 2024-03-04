@@ -55,6 +55,7 @@ void UCustomCharacterMovementComponent::BeginPlay()
 	Super::BeginPlay();
 	MainCharacter = Cast<AMainCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 	SetCrouchedHalfHeight(Crouch_HalfHeight);
+	GravityScale = 1.5f;
 	BuildStateMachine();
 }
 
@@ -215,8 +216,14 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	// Jump TO Mantle
 	TObjectPtr<UFTransition> JumpToMantle = NewObject<UFTransition>();
 	StateJumping->Transitions.Add(JumpToMantle);
-	JumpToMantle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::TryMantle); // TODO Rethink the condition that from jump let the player mantle
+	JumpToMantle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::TryMantle);
 	JumpToMantle->Init(StateMantle);
+
+	// Jump TO Jump
+	TObjectPtr<UFTransition> JumpToJump = NewObject<UFTransition>();
+	StateJumping->Transitions.Add(JumpToJump);
+	JumpToJump->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanJumpFromJump);
+	JumpToJump->Init(StateJumping);
 	
 	// CROUCH
 	// Crouch TO Idle
@@ -339,6 +346,11 @@ bool UCustomCharacterMovementComponent::CanCrouchFromJump()
 bool UCustomCharacterMovementComponent::CanMantleFromJump()
 {
 	return TryMantle() && Velocity.Z < 0;
+}
+
+bool UCustomCharacterMovementComponent::CanJumpFromJump()
+{
+	return bCanDoubleJump && bWantsToJump && !IsMovingOnGround();
 }
 
 // FROM CROUCH
@@ -511,7 +523,7 @@ bool UCustomCharacterMovementComponent::TryMantle()
 	// We can consider the value of the dot product as the component of the first vector over the second one, thus giving us the height of the surface from the base location
 	float Height = (SurfaceHit.Location - BaseLocation) | FVector::UpVector;
 
-	//PRINT_SCREEN(FString::Printf(TEXT("Height: %f"), Height));
+	PRINT_SCREEN(FString::Printf(TEXT("Height: %f"), Height));
 
 	DRAW_POINT(SurfaceHit.Location, FColor::Blue);
 
