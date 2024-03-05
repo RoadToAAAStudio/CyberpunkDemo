@@ -57,7 +57,11 @@ public:
 
 	// GRAVITY PROPERTIES
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Gravity") float CustomGravity = 2.f;
-	
+
+	// DASH PROPERTIES
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Dash") float DashDuration = 0.15f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Dash") float DashSpeedMultiplier = 2;
+	FTimerHandle DashTimer;
 	
 	// MANTLE PROPERTIES
 	// Max distance to check for a possible mantle
@@ -84,7 +88,7 @@ public:
 	UPROPERTY(BlueprintReadOnly) bool bWantsToCrouchCustom;
 	UPROPERTY(BlueprintReadOnly) bool bWantsToJump;
 	UPROPERTY(BlueprintReadWrite) bool bCanMantle = false;
-	UPROPERTY(BlueprintReadOnly) bool bHighMantle;
+	UPROPERTY(BlueprintReadOnly) bool bHighMantle = false;
 	
 
 	
@@ -151,6 +155,7 @@ public:
 
 	// Dash methods
 	UFUNCTION(BlueprintCallable) void DashPressed();
+	UFUNCTION() void ResetDashSpeed();
 
 	// To get the current state and set
 	UFUNCTION(BlueprintCallable) ECustomMovementState GetCurrentMovementState() const;

@@ -3,7 +3,6 @@
 
 #include "MainCharacter/CustomCharacterMovementComponent.h"
 
-#include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "MainCharacter/MainCharacter.h"
@@ -431,7 +430,23 @@ void UCustomCharacterMovementComponent::CrouchPressed()
 
 void UCustomCharacterMovementComponent::DashPressed()
 {
-	
+	if (CurrentMovementState == ECustomMovementState::Crouching || CurrentMovementState == ECustomMovementState::Jumping) return;
+	MaxWalkSpeed *= DashSpeedMultiplier;
+	GEngine->AddOnScreenDebugMessage(-1, DashDuration, FColor::Emerald, "I AM DASHING");
+	GetWorld()->GetTimerManager().SetTimer(DashTimer, this, &UCustomCharacterMovementComponent::ResetDashSpeed, DashDuration, false);
+}
+
+void UCustomCharacterMovementComponent::ResetDashSpeed()
+{
+	switch (CurrentMovementState)
+	{
+	case ECustomMovementState::Walking:
+		MaxWalkSpeed = Walk_MaxWalkSpeed;
+		break;
+	case ECustomMovementState::Running:
+		MaxWalkSpeed = Sprint_MaxWalkSpeed;
+		break;
+	}
 }
 
 #pragma endregion
