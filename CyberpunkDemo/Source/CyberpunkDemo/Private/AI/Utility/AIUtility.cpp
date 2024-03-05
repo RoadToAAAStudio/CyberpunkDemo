@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AI/AIUtility.h"
+#include "AI/Utility/AIUtility.h"
 
 FName UAIUtility::GetCurrentState(const UStateTree* StateTree, const FStateTreeTransitionResult& Transition)
 {

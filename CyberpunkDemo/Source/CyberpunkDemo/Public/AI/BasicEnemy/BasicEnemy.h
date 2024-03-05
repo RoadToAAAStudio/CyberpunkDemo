@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "BasicEnemyController.h"
-#include "AI/IStateTreeNotificationsAcceptor.h"
+#include "AI/Utility/IStateTreeNotificationsAcceptor.h"
+#include "AI/Utility/SplineContainer.h"
 #include "Components/StateTreeComponent.h"
+#include "Engine/SplineMeshActor.h"
 #include "GameFramework/Character.h"
 #include "BasicEnemy.generated.h"
 
@@ -50,7 +52,7 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, Instanced, Category = "DecisionMaking")
 	TObjectPtr<UStateTreeComponent> StateTree;
-
+	
 	UPROPERTY(EditAnywhere, Category = "Actuation")
 	TObjectPtr<UBehaviorTree> BTUnaware;
 	
@@ -59,8 +61,10 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category = "Actuation")
 	TObjectPtr<UBehaviorTree> BTAlerted;
-	
-	
+
+	UPROPERTY(EditAnywhere, Category = "Actuation")
+	TObjectPtr<ASplineContainer> PatrolSpline;
+
 public:
 	// Sets default values for this character's properties
 	ABasicEnemy();

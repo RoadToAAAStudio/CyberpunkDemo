@@ -1,7 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AI/BasicEnemy/BasicEnemy.h"
-#include "AI/AIUtility.h"
+#include "AI/Utility/AIUtility.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 // Sets default values
 ABasicEnemy::ABasicEnemy()
@@ -79,4 +80,9 @@ void ABasicEnemy::BeginPlay()
 	BasicEnemyController = Cast<ABasicEnemyController>(GetController());
 	BasicEnemyController->RunBehaviorTree(BTUnaware);
 	BasicEnemyController->OnPlayerSeenDelegate.AddDynamic(this, &ABasicEnemy::NotifyPlayerWasSeen);
+
+	if (PatrolSpline)
+	{
+		BasicEnemyController->GetBlackboardComponent()->SetValueAsObject("PatrolSpline", PatrolSpline);
+	}
 }
