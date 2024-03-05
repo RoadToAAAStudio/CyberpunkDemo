@@ -27,6 +27,7 @@ void UUStateMantle::EnterState()
 void UUStateMantle::ExitState()
 {
 	Super::ExitState();
+	Owner->SetLastMovementState(ECustomMovementState::Mantling);
 	Owner->MainCharacter->DisableMappingContext(false);
 }
 

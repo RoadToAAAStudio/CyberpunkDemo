@@ -13,6 +13,7 @@ void UStateWalking::EnterState()
 void UStateWalking::ExitState()
 {
 	Super::ExitState();
+	Owner->SetLastMovementState(ECustomMovementState::Walking);
 }
 
 void UStateWalking::Tick()

@@ -263,6 +263,11 @@ void UCustomCharacterMovementComponent::SetCurrentMovementState(ECustomMovementS
 	CurrentMovementState = NewState;
 }
 
+void UCustomCharacterMovementComponent::SetLastMovementState(ECustomMovementState NewState)
+{
+	LastMovementState = NewState;
+}
+
 // STATE MACHINE CONDITION CHECKER METHODS
 // FROM IDLE
 bool UCustomCharacterMovementComponent::CanWalkFromIdle()
@@ -325,7 +330,7 @@ bool UCustomCharacterMovementComponent::CanJumpFromRun()
 // FROM JUMP
 bool UCustomCharacterMovementComponent::CanIdleFromJump()
 {
-	return IsMovingOnGround() && Velocity.IsZero();
+	return IsMovingOnGround() && Velocity.IsZero() && !bWantsToJump;
 }
 
 bool UCustomCharacterMovementComponent::CanWalkFromJump()
@@ -343,14 +348,14 @@ bool UCustomCharacterMovementComponent::CanCrouchFromJump()
 	return IsMovingOnGround() && bWantsToCrouchCustom && !bWantsToJump;
 }
 
-bool UCustomCharacterMovementComponent::CanMantleFromJump()
-{
-	return TryMantle() && Velocity.Z < 0;
-}
+// bool UCustomCharacterMovementComponent::CanMantleFromJump()
+// {
+// 	return TryMantle() && Velocity.Z < 0;
+// }
 
 bool UCustomCharacterMovementComponent::CanJumpFromJump()
 {
-	return bCanDoubleJump && bWantsToJump && !IsMovingOnGround();
+	return bCanDoubleJump && bWantsToJump && MovementMode == MOVE_Falling;
 }
 
 // FROM CROUCH
@@ -361,7 +366,7 @@ bool UCustomCharacterMovementComponent::CanIdleFromCrouch()
 
 bool UCustomCharacterMovementComponent::CanWalkFromCrouch()
 {
-	return IsMovingOnGround() && !bWantsToCrouchCustom;
+	return IsMovingOnGround() && !Velocity.IsZero() && !bWantsToCrouchCustom;
 }
 
 bool UCustomCharacterMovementComponent::CanRunFromCrouch()
@@ -435,6 +440,11 @@ void UCustomCharacterMovementComponent::DashPressed()
 ECustomMovementState UCustomCharacterMovementComponent::GetCurrentMovementState() const
 {
 	return CurrentMovementState;
+}
+
+ECustomMovementState UCustomCharacterMovementComponent::GetLastMovementState() const
+{
+	return LastMovementState;
 }
 
 float UCustomCharacterMovementComponent::GetCapsuleRadius() const

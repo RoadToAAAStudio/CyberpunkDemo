@@ -18,6 +18,7 @@ void UStateIdle::EnterState()
 void UStateIdle::ExitState()
 {
 	Super::ExitState();
+	Owner->SetLastMovementState(ECustomMovementState::Idle);
 }
 
 void UStateIdle::Tick()

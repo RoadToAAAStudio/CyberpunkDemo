@@ -58,7 +58,7 @@ public:
 	// GRAVITY PROPERTIES
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Gravity") float CustomGravity = 2.f;
 	
-
+	
 	// MANTLE PROPERTIES
 	// Max distance to check for a possible mantle
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxDistance = 10;
@@ -73,10 +73,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMinWallSteepnessAngle = 75;
 	// Max steepness accepted for the surface the character should mantle to (expressed in degrees)
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxSurfaceAngle = 40;
+	//
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxAlignmentAngle = 45;
-
+	
 	UPROPERTY(BlueprintReadOnly) FVector MantleLocation;
-
+	
 	
 	// Bools used to handle movement state transitions
 	UPROPERTY(BlueprintReadOnly) bool bWantsToRun;
@@ -90,6 +91,7 @@ public:
 private:
 
 	ECustomMovementState CurrentMovementState = ECustomMovementState::Idle;
+	ECustomMovementState LastMovementState = ECustomMovementState::Idle;
 	
 public:
 	
@@ -117,7 +119,7 @@ public:
 	bool CanWalkFromJump();
 	bool CanRunFromJump();
 	bool CanCrouchFromJump();
-	bool CanMantleFromJump();
+	//bool CanMantleFromJump();
 	bool CanJumpFromJump();
 
 	//From CROUCHING state
@@ -152,8 +154,10 @@ public:
 
 	// To get the current state and set
 	UFUNCTION(BlueprintCallable) ECustomMovementState GetCurrentMovementState() const;
+	UFUNCTION(BlueprintCallable) ECustomMovementState GetLastMovementState() const;
 
 	void SetCurrentMovementState(ECustomMovementState NewState);
+	void SetLastMovementState(ECustomMovementState NewState);
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,

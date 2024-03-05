@@ -21,7 +21,9 @@ void UStateCrouching::EnterState()
 void UStateCrouching::ExitState()
 {
 	Super::ExitState();
+	Owner->bWantsToCrouchCustom = false;
 	Owner->MainCharacter->UnCrouch();
+	Owner->SetLastMovementState(ECustomMovementState::Crouching);
 }
 
 void UStateCrouching::Tick()
