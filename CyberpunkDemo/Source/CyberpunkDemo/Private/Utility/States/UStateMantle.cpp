@@ -18,6 +18,7 @@ void UUStateMantle::EnterState()
 	Owner->SetCurrentMovementState(ECustomMovementState::Mantling);
 	// Reset the jump boolean
 	Owner->bWantsToJump = false;
+	Owner->bWantsToRun = false;
 	// Set the player velocity to 0
 	Owner->Velocity = FVector(0,0,0);
 	Owner->MainCharacter->DisableMappingContext(true);
