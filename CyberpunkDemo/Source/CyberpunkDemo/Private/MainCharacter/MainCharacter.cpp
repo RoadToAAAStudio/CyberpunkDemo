@@ -25,19 +25,11 @@ AMainCharacter::AMainCharacter(const FObjectInitializer& ObjectInitializer)
 	// Set size for a collision capsule [!]
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.f);
 
-	// Create a spring arm component
-	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
-	SpringArmComponent->SetupAttachment(GetCapsuleComponent());
-	SpringArmComponent->SetRelativeLocation(FVector(-10.f, 0.f, 70));
-	SpringArmComponent->TargetArmLength = 0;
-	SpringArmComponent->bEnableCameraLag = true;
-	SpringArmComponent->CameraLagSpeed = 20;
-	SpringArmComponent->bUsePawnControlRotation = true;
-
 	// Create a camera component [!]
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	FirstPersonCameraComponent->SetupAttachment(SpringArmComponent);
+	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
+	FirstPersonCameraComponent->SetRelativeLocation(FVector(-10.f, 0.f, 70));
 
 	// Create a mesh component [!]
 	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh"));

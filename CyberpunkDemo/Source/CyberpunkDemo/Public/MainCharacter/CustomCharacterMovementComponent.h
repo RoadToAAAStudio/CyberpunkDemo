@@ -48,7 +48,8 @@ public:
 
 	// CROUCH PROPERTIES
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Crouch") float Crouch_MaxWalkSpeed;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement|Crouch") float Crouch_HalfHeight;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement|Crouch", meta = (ClampMin = 55.f)) float Crouch_HalfHeight = 55.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement|Crouch") float Crouch_BlendSpeed = .3f;
 
 	// JUMP PROPERTIES
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Jump") float JumpForce = 500;
