@@ -26,15 +26,11 @@ void ABasicEnemyController::EnableSightSense(bool Enable)
 	}
 	else
 	{
-		bool a = GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
-		bool b = GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
-		bool c = GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
+		GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
+		GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone")));
+		GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsSeen")));
 		SightBar->OnBarFilledDelegate.RemoveDynamic(this, &ABasicEnemyController::SightBarFull);
 		SightBar->Reset();
-
-		UE_LOG(LogTemp, Warning, TEXT("%d"), a);
-		UE_LOG(LogTemp, Warning, TEXT("%d"), b);
-		UE_LOG(LogTemp, Warning, TEXT("%d"), c);
 		
 		OnSightSenseToggledDelegate.Broadcast(false);
 	}
@@ -62,12 +58,12 @@ void ABasicEnemyController::EnableHearingSense(bool Enable)
 
 bool ABasicEnemyController::IsSightEnabled()
 {
-	return GameplayTagsContainer.HasTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
+	return GameplayTagsContainer.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
 }
 
 bool ABasicEnemyController::IsHearingEnabled()
 {
-	return GameplayTagsContainer.HasTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Hearing")));
+	return GameplayTagsContainer.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Hearing")));
 }
 
 void ABasicEnemyController::Tick(float DeltaTime)

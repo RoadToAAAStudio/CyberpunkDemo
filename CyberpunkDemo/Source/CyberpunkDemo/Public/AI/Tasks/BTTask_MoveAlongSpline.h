@@ -27,6 +27,9 @@ class CYBERPUNKDEMO_API UBTTask_MoveAlongSpline : public UBTTask_BlackboardBase
 public:
 	UPROPERTY(Category = Node, EditAnywhere, AdvancedDisplay)
 	float StartToSlowDownDistance;
+
+	UPROPERTY(Category = Node, EditAnywhere, AdvancedDisplay)
+	float SpeedMultiplierwhenSlowDown = 1.0f;
 	
 	UPROPERTY(Category = Node, EditAnywhere, AdvancedDisplay)
 	bool bStartsFromEnd;
