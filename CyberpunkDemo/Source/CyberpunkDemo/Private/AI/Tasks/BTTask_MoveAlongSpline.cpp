@@ -20,11 +20,58 @@ UBTTask_MoveAlongSpline::UBTTask_MoveAlongSpline(const FObjectInitializer& Objec
 
 void UBTTask_MoveAlongSpline::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
+	FBTMoveAlongSplineMemory* MyMemory = (FBTMoveAlongSplineMemory*) NodeMemory;
+	if (!MyMemory) return;
+	ACharacter* Owner = MyMemory->Owner;
+	if (!Owner) return;
+	
+	float Speed = MyMemory->MovementComponent->MaxWalkSpeed;
+	float SplineLength = MyMemory->Spline->GetSplineLength();
+	float PositionOnSpline = MyMemory->PositionOnSpline;
+	float PositionOnSplineInSpaceUnits = PositionOnSpline * SplineLength;
+	if (!bStartsFromEnd)
+	{
+		// if (SplineLength - PositionOnSplineInSpaceUnits <= StartToSlowDownDistance)
+		// {
+		// 	Speed = FMath::Lerp(Speed, Speed / 2, FMath::GetMappedRangeValueClamped(UE::Math::TVector2<float>(StartToSlowDownDistance, 0.0f), UE::Math::TVector2(0.0f, 1.0f), SplineLength - PositionOnSplineInSpaceUnits));
+		// }
+		PositionOnSplineInSpaceUnits += Speed * DeltaSeconds;
+	}
+	else
+	{
+		// if (PositionOnSplineInSpaceUnits <= StartToSlowDownDistance)
+		// {
+		// 	Speed = FMath::Lerp(Speed, Speed / 2, FMath::GetMappedRangeValueClamped(UE::Math::TVector2<float>(StartToSlowDownDistance, 0.0f), UE::Math::TVector2(0.0f, 1.0f), PositionOnSplineInSpaceUnits));
+		// }
+		PositionOnSplineInSpaceUnits += (-1) * Speed * DeltaSeconds;
+	}
+	MyMemory->PositionOnSpline = FMath::Clamp(PositionOnSplineInSpaceUnits / SplineLength, 0.0f, 1.0f);
+	FVector SplineLocation = MyMemory->Spline->GetLocationAtDistanceAlongSpline(PositionOnSplineInSpaceUnits, ESplineCoordinateSpace::World);
+	SplineLocation.Set(SplineLocation.X, SplineLocation.Y, Owner->GetActorLocation().Z);
+	Owner->SetActorLocation(SplineLocation);
+	FRotator SplineRotator = MyMemory->Spline->GetRotationAtDistanceAlongSpline(PositionOnSplineInSpaceUnits, ESplineCoordinateSpace::Local);
+	SplineRotator.Yaw = bStartsFromEnd? SplineRotator.Yaw - 180.0f : SplineRotator.Yaw;
+	Owner->SetActorRelativeRotation(SplineRotator.Quaternion());
+
+	if (!bStartsFromEnd)
+	{
+		if (MyMemory->PositionOnSpline >= 1.0f)
+		{
+			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		}
+	}
+	else
+	{
+		if (MyMemory->PositionOnSpline <= 0.0f)
+		{
+			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		}
+	}
 }
 
 EBTNodeResult::Type UBTTask_MoveAlongSpline::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+	FBTMoveAlongSplineMemory* MyMemory = CastInstanceNodeMemory<FBTMoveAlongSplineMemory>(NodeMemory);
 	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
 	
 	UObject* KeyValue = Blackboard->GetValue<UBlackboardKeyType_Object>(BlackboardKey.GetSelectedKeyID());
@@ -34,14 +81,24 @@ EBTNodeResult::Type UBTTask_MoveAlongSpline::ExecuteTask(UBehaviorTreeComponent&
 	UActorComponent* ActorComponent = Actor->GetComponentByClass(USplineComponent::StaticClass());
 	if (!ActorComponent) return EBTNodeResult::Failed;
 	
-	Spline = Cast<USplineComponent>(ActorComponent);
+	USplineComponent* Spline = Cast<USplineComponent>(ActorComponent);
+	if (!Spline)  return EBTNodeResult::Failed;
+	
 	ACharacter* Owner = Cast<ACharacter>(OwnerComp.GetAIOwner()->GetPawn());
+	if (!Owner) return EBTNodeResult::Failed;
+	
 	UCharacterMovementComponent* MovementComponent = Owner->GetCharacterMovement();
-	float speed = MovementComponent->MaxWalkSpeed;
+	if (!MovementComponent) return EBTNodeResult::Failed;
 
-	// Spline->GetLocationAtDistanceAlongSpline()
-	// Spline->GetSplineLength();
-	// Owner->SetActorLocationAndRotation();
-	FinishLatentTask(OwnerComp, EBTNodeResult::InProgress);
+	MyMemory->Owner = Owner;
+	MyMemory->MovementComponent = MovementComponent;
+	MyMemory->Spline = Spline;
+	MyMemory->PositionOnSpline = bStartsFromEnd ? 1.0f : 0.0f;
+
 	return EBTNodeResult::InProgress;
+}
+
+uint16 UBTTask_MoveAlongSpline::GetInstanceMemorySize() const
+{
+	return sizeof(FBTMoveAlongSplineMemory);
 }
