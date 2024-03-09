@@ -29,7 +29,7 @@ AMainCharacter::AMainCharacter(const FObjectInitializer& ObjectInitializer)
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
-	FirstPersonCameraComponent->SetRelativeLocation(FVector(-10.f, 0.f, 70));
+	FirstPersonCameraComponent->SetRelativeLocation(FVector(-10.f, 0.f, 65));
 
 	// Create a mesh component [!]
 	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh"));

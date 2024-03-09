@@ -3,6 +3,7 @@
 
 #include "Utility/States/StateCrouching.h"
 
+#include "Camera/CameraComponent.h"
 #include "MainCharacter/MainCharacter.h"
 
 void UStateCrouching::SetOwner(TObjectPtr<UCustomCharacterMovementComponent> owner)
@@ -29,4 +30,5 @@ void UStateCrouching::ExitState()
 void UStateCrouching::Tick()
 {
 	Super::Tick();
+	
 }
