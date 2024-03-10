@@ -3,8 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "DataProviders/AIDataProvider.h"
 #include "EnvironmentQuery/Generators/EnvQueryGenerator_ProjectedPoints.h"
+#include "GameplayTagAssetInterface.h"
 #include "EnvQueryGenerator_ActorPositions.generated.h"
 
 /**
@@ -32,8 +34,14 @@ class CYBERPUNKDEMO_API UEnvQueryGenerator_ActorPositions : public UEnvQueryGene
 	UPROPERTY(EditAnywhere, Category=Generator)
 	TSubclassOf<UEnvQueryContext> SearchCenter;
 
-	virtual void GenerateItems(FEnvQueryInstance& QueryInstance) const override;
+	UPROPERTY(EditAnywhere, Category=GameplayTagCheck)
+	FGameplayTagQuery TagQueryToMatch;
 
+private:
+	bool SatisfiesTest(const IGameplayTagAssetInterface* ItemGameplayTagAssetInterface) const;
+	
+public:
+	virtual void GenerateItems(FEnvQueryInstance& QueryInstance) const override;
 	virtual FText GetDescriptionTitle() const override;
 	virtual FText GetDescriptionDetails() const override;
 };

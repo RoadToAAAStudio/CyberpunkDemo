@@ -2,6 +2,7 @@
 
 #include "AI/WorldInterfacing/EnvQueryGenerator_ActorPositions.h"
 #include "EngineUtils.h"
+#include "GameplayTagContainer.h"
 #include "EnvironmentQuery/Contexts/EnvQueryContext_Querier.h"
 #include "EnvironmentQuery/Items/EnvQueryItemType_Point.h"
 
@@ -51,8 +52,13 @@ void UEnvQueryGenerator_ActorPositions::GenerateItems(FEnvQueryInstance& QueryIn
 		const float RadiusValue = SearchRadius.GetValue();
 		const float RadiusSq = FMath::Square(RadiusValue);
 
-		for (TActorIterator<AActor> ItActor = TActorIterator<AActor>(World, SearchedActorClass); ItActor; ++ItActor)
+		for (TActorIterator<AActor> ItActor = TActorIterator(World, SearchedActorClass); ItActor; ++ItActor)
 		{
+			if (!TagQueryToMatch.IsEmpty() && !SatisfiesTest(Cast<IGameplayTagAssetInterface>(*ItActor)))
+			{
+				continue;
+			}
+			
 			for (int32 ContextIndex = 0; ContextIndex < ContextLocations.Num(); ++ContextIndex)
 			{
 				if (FVector::DistSquared(ContextLocations[ContextIndex], ItActor->GetActorLocation()) < RadiusSq)
@@ -74,6 +80,20 @@ void UEnvQueryGenerator_ActorPositions::GenerateItems(FEnvQueryInstance& QueryIn
 	
 	ProjectAndFilterNavPoints(MatchingActorsLocations, QueryInstance);
 	StoreNavPoints(MatchingActorsLocations, QueryInstance);
+}
+
+bool UEnvQueryGenerator_ActorPositions::SatisfiesTest(const IGameplayTagAssetInterface* ItemGameplayTagAssetInterface) const
+{
+	// Currently we're requiring that the test only be run on items that implement the interface.  In theory, we could
+	// (instead of checking) support correctly passing or failing on items that don't implement the interface or
+	// just have a nullptr item by testing them as though they have the interface with no gameplay tags.  However, that
+	// seems potentially confusing, since certain tests could actually pass.
+	check(ItemGameplayTagAssetInterface != nullptr);
+	
+	FGameplayTagContainer OwnedGameplayTags;
+	ItemGameplayTagAssetInterface->GetOwnedGameplayTags(OwnedGameplayTags);
+
+	return OwnedGameplayTags.MatchesQuery(TagQueryToMatch);
 }
 
 FText UEnvQueryGenerator_ActorPositions::GetDescriptionTitle() const
