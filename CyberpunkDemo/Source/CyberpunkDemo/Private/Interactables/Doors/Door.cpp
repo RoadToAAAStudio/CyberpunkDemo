@@ -65,6 +65,7 @@ void ADoor::Inspect()
 
 void ADoor::Interact()
 {
+	
 	//must be called by an input and check if the condition is met to complete and unlock the door
 }
 

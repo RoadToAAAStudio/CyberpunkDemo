@@ -2,8 +2,8 @@
 
 
 #include "MainCharacter/InteractionSystemComponent.h"
-
 #include "Interactables/IInspectable.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values for this component's properties
@@ -20,6 +20,14 @@ void UInteractionSystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+	{
+		Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+		if (Subsystem)
+		{
+			Subsystem->AddMappingContext(InteractionMappingContext, 0);
+		}
+	}
 
 	
 }

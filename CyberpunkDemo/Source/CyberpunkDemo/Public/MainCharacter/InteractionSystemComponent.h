@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Components/SceneComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "InteractionSystemComponent.generated.h"
 
 
@@ -14,6 +15,11 @@ class CYBERPUNKDEMO_API UInteractionSystemComponent : public USceneComponent
 	GENERATED_BODY()
 
 public:
+	UPROPERTY()
+	TObjectPtr<UEnhancedInputLocalPlayerSubsystem> Subsystem;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	TObjectPtr<UInputMappingContext> InteractionMappingContext;
+	
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<AActor> InspectedActor;
 	UPROPERTY(BlueprintReadOnly)
