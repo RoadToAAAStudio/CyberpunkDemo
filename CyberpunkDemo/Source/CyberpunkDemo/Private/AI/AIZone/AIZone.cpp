@@ -4,7 +4,7 @@
 #include "AI/Utility/AIUtility.h"
 
 // Sets default values
-AAIZoneManager::AAIZoneManager()
+AAIZone::AAIZone()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -12,7 +12,37 @@ AAIZoneManager::AAIZoneManager()
 	StateTree = CreateDefaultSubobject<UStateTreeComponent>(TEXT("StateTree"));
 }
 
-void AAIZoneManager::AcceptStateTreeNotification_Implementation(const UStateTree* StateTreeNotifier, const UDataTable* DataTable, const FStateTreeTransitionResult& Transition)
+const AActor* AAIZone::GetPlayer()
+{
+	return Player;
+}
+
+FTimerHandle AAIZone::GetCombatTimerHandle()
+{
+	return CombatTimer;
+}
+
+FTimerHandle AAIZone::GetAlertedimerHandle()
+{
+	return AlertedTimer;
+}
+
+int AAIZone::GetNumberOfSightConesThePlayerIsIn()
+{
+	return NumberOfSightConesThePlayerIsIn;
+}
+
+const TArray<ABasicEnemy*> AAIZone::GetEnemies()
+{
+	return Enemies;
+}
+
+const TArray<ALocation*> AAIZone::GetCoverLocations()
+{
+	return CoverLocations;
+}
+
+void AAIZone::AcceptStateTreeNotification_Implementation(const UStateTree* StateTreeNotifier, const UDataTable* DataTable, const FStateTreeTransitionResult& Transition)
 {
 	IStateTreeNotificationsAcceptor::AcceptStateTreeNotification_Implementation(StateTreeNotifier, DataTable, Transition);
 	const FName CurrentStateName = UAIUtility::GetCurrentState(StateTreeNotifier, Transition);
@@ -28,36 +58,28 @@ void AAIZoneManager::AcceptStateTreeNotification_Implementation(const UStateTree
 	OnAIZoneManagerStateChangedDelegate.Broadcast(SourceStateData->StateEnum, CurrentStateData->StateEnum);
 }
 
-void AAIZoneManager::NotifyChildrenEnemies(const FGameplayTag& GameplayTag)
-{
-	for (const auto Enemy : Enemies)
-	{
-		Enemy->ReceiveTriggerEvent(GameplayTag);
-	}
-}
-
-void AAIZoneManager::NotifyPlayerEnteredInSightCone()
+void AAIZone::NotifyPlayerEnteredInSightCone()
 {
 	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone")));
-	NumberOfConesPlayerIsIn++;
+	NumberOfSightConesThePlayerIsIn++;
 }
 
-void AAIZoneManager::NotifyPlayerExitedInSightCone()
+void AAIZone::NotifyPlayerExitedInSightCone()
 {
-	NumberOfConesPlayerIsIn--;
+	NumberOfSightConesThePlayerIsIn--;
 
-	if (NumberOfConesPlayerIsIn == 0)
+	if (NumberOfSightConesThePlayerIsIn == 0)
 	{
 		OnPlayerIsInNoSightConeDelegate.Broadcast();
 	}
 }
 
-void AAIZoneManager::NotifyPlayerWasSeen()
+void AAIZone::NotifyPlayerWasSeen()
 {
 	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsSeen")));
 }
 
-void AAIZoneManager::NotifyEnemyChangedState(EBasicEnemyState SourceState, EBasicEnemyState NewState)
+void AAIZone::NotifyEnemyChangedState(EBasicEnemyState SourceState, EBasicEnemyState NewState)
 {
 	if (NewState == EBasicEnemyState::Combat)
 	{
@@ -66,13 +88,13 @@ void AAIZoneManager::NotifyEnemyChangedState(EBasicEnemyState SourceState, EBasi
 }
 
 // Called every frame
-void AAIZoneManager::Tick(float DeltaTime)
+void AAIZone::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
 // Called when the game starts or when spawned
-void AAIZoneManager::BeginPlay()
+void AAIZone::BeginPlay()
 {
 	Super::BeginPlay();
 	
@@ -80,10 +102,10 @@ void AAIZoneManager::BeginPlay()
 	{
 		const TObjectPtr<ABasicEnemyController> EnemyController = Cast<ABasicEnemyController>(Enemy->GetController());
 		
-		EnemyController->OnPlayerEnteredInSightConeDelegate.AddDynamic(this, &AAIZoneManager::NotifyPlayerEnteredInSightCone);
-		EnemyController->OnPlayerExitedFromSightConeDelegate.AddDynamic(this, &AAIZoneManager::NotifyPlayerExitedInSightCone);
-		EnemyController->OnPlayerSeenDelegate.AddDynamic(this, &AAIZoneManager::NotifyPlayerWasSeen);
-		Enemy->OnBasicEnemyStateChangedDelegate.AddDynamic(this, &AAIZoneManager::NotifyEnemyChangedState);
+		EnemyController->OnPlayerEnteredInSightConeDelegate.AddDynamic(this, &AAIZone::NotifyPlayerEnteredInSightCone);
+		EnemyController->OnPlayerExitedFromSightConeDelegate.AddDynamic(this, &AAIZone::NotifyPlayerExitedInSightCone);
+		EnemyController->OnPlayerSeenDelegate.AddDynamic(this, &AAIZone::NotifyPlayerWasSeen);
+		Enemy->OnBasicEnemyStateChangedDelegate.AddDynamic(this, &AAIZone::NotifyEnemyChangedState);
 	}
 }
 
