@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "AI/AIZoneManager/AIZoneManager.h"
+#include "AI/AIZone/AIZone.h"
 #include "AI/Utility/AIUtility.h"
 
 // Sets default values

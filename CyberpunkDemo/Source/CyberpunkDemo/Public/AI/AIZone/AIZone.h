@@ -6,7 +6,7 @@
 #include "AI/Utility/IStateTreeNotificationsAcceptor.h"
 #include "AI/BasicEnemy/BasicEnemy.h"
 #include "GameFramework/Actor.h"
-#include "AIZoneManager.generated.h"
+#include "AIZone.generated.h"
 
 UENUM(BlueprintType)
 enum class EAIZoneManagerState : uint8
@@ -33,16 +33,16 @@ UCLASS()
 class CYBERPUNKDEMO_API AAIZoneManager : public AActor, public IStateTreeNotificationsAcceptor
 {
 	GENERATED_BODY()
-	
 public:
-	UPROPERTY(BlueprintReadOnly)
-	EAIZoneManagerState CurrentState = EAIZoneManagerState::Unaware;
-
 	UPROPERTY(BlueprintAssignable)
 	FOnAIZoneManagerStateChangedSignature OnAIZoneManagerStateChangedDelegate;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerIsInNoSightConeSignature OnPlayerIsInNoSightConeDelegate;
+	
+protected:
+	UPROPERTY(BlueprintReadOnly, Category= "Knowledge | Shared")
+	EAIZoneManagerState CurrentState = EAIZoneManagerState::Unaware;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTimerHandle TimerHandle;
@@ -50,7 +50,6 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	int NumberOfConesPlayerIsIn = 0;
 	
-protected:
 	UPROPERTY(EditAnywhere, Instanced, Category = "DecisionMaking")
 	TObjectPtr<UStateTreeComponent> StateTree;
 
