@@ -3,12 +3,16 @@
 
 #include "AI/WorldInterfacing/Location.h"
 
+#include "Components/SphereComponent.h"
+
 // Sets default values
 ALocation::ALocation()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
+	SphereTrigger = CreateDefaultSubobject<USphereComponent>("SphereTrigger");
+	RootComponent = SphereTrigger;
 }
 
 // Called when the game starts or when spawned

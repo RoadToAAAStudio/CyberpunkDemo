@@ -2,6 +2,9 @@
 
 #include "AI/AIZone/AIZone.h"
 #include "AI/Utility/AIUtility.h"
+#include "AI/WorldInterfacing/Location.h"
+#include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AAIZone::AAIZone()
@@ -10,6 +13,9 @@ AAIZone::AAIZone()
 	PrimaryActorTick.bCanEverTick = true;
 
 	StateTree = CreateDefaultSubobject<UStateTreeComponent>(TEXT("StateTree"));
+	BoxTrigger = CreateDefaultSubobject<UBoxComponent>("BoxTrigger");
+	bGenerateOverlapEventsDuringLevelStreaming = true;
+	BoxTrigger->OnComponentBeginOverlap.AddDynamic(this, &AAIZone::NotifySomethingEnteredInTheTrigger);
 }
 
 const AActor* AAIZone::GetPlayer()
@@ -22,7 +28,7 @@ FTimerHandle AAIZone::GetCombatTimerHandle()
 	return CombatTimer;
 }
 
-FTimerHandle AAIZone::GetAlertedimerHandle()
+FTimerHandle AAIZone::GetAlertedTimerHandle()
 {
 	return AlertedTimer;
 }
@@ -32,14 +38,19 @@ int AAIZone::GetNumberOfSightConesThePlayerIsIn()
 	return NumberOfSightConesThePlayerIsIn;
 }
 
-const TArray<ABasicEnemy*> AAIZone::GetEnemies()
+TArray<ABasicEnemy*> AAIZone::GetEnemies()
 {
 	return Enemies;
 }
 
-const TArray<ALocation*> AAIZone::GetCoverLocations()
+TArray<ALocation*> AAIZone::GetCoverLocations()
 {
 	return CoverLocations;
+}
+
+EAIZoneState AAIZone::GetCurrentState()
+{
+	return CurrentState;
 }
 
 void AAIZone::AcceptStateTreeNotification_Implementation(const UStateTree* StateTreeNotifier, const UDataTable* DataTable, const FStateTreeTransitionResult& Transition)
@@ -47,43 +58,134 @@ void AAIZone::AcceptStateTreeNotification_Implementation(const UStateTree* State
 	IStateTreeNotificationsAcceptor::AcceptStateTreeNotification_Implementation(StateTreeNotifier, DataTable, Transition);
 	const FName CurrentStateName = UAIUtility::GetCurrentState(StateTreeNotifier, Transition);
 	const FName SourceStateName = UAIUtility::GetSourceState(StateTreeNotifier, Transition);
-	const FAIZoneManagerMapping* CurrentStateData = DataTable->FindRow<FAIZoneManagerMapping>(CurrentStateName, "");
-	const FAIZoneManagerMapping* SourceStateData = DataTable->FindRow<FAIZoneManagerMapping>(SourceStateName, "");
+	const FAIZoneMapping* CurrentStateData = DataTable->FindRow<FAIZoneMapping>(CurrentStateName, "");
+	const FAIZoneMapping* SourceStateData = DataTable->FindRow<FAIZoneMapping>(SourceStateName, "");
 
 	if(!CurrentStateData || !SourceStateData) return;
 	
 	CurrentState = CurrentStateData->StateEnum;
 	
+	switch (SourceStateData->StateEnum)
+	{
+	case EAIZoneState::Unaware:
+		break;
+		
+	case EAIZoneState::Combat:
+		Player = nullptr;
+		break;
+		
+	case EAIZoneState::Alerted:
+		break;
+		
+	case EAIZoneState::Max:
+		break;
+		
+	}
+	
+	switch (CurrentState)
+	{
+	case EAIZoneState::Unaware:
+		break;
+		
+	case EAIZoneState::Combat:
+		break;
+		
+	case EAIZoneState::Alerted:
+		{
+			// Start Alerted Timer
+			FTimerDelegate TimerCallback = FTimerDelegate::CreateLambda([this]()
+			{
+				StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.AlertedTimerFinished")));
+				AlertedTimerFinished();
+				OnAlertedTimerFinishedDelegate.Broadcast();
+			});
+
+			GetWorld()->GetTimerManager().SetTimer(AlertedTimer, TimerCallback, 4.0f, false);
+			AlertedTimerStarted();
+			OnAlertedTimerStartedDelegate.Broadcast();
+		}
+		break;
+		
+	case EAIZoneState::Max:
+		break;
+		
+	}
+	
 	StateChanged(SourceStateData->StateEnum, CurrentStateData->StateEnum);
 	OnAIZoneManagerStateChangedDelegate.Broadcast(SourceStateData->StateEnum, CurrentStateData->StateEnum);
 }
 
-void AAIZone::NotifyPlayerEnteredInSightCone()
+// Something entered the BoxTrigger
+void AAIZone::NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone")));
-	NumberOfSightConesThePlayerIsIn++;
+	if (Cast<ABasicEnemy>(OtherActor))
+	{
+		ABasicEnemy* Enemy = Cast<ABasicEnemy>(OtherActor);
+		Enemies.Add(Enemy);
+
+		const TObjectPtr<ABasicEnemyController> EnemyController = Cast<ABasicEnemyController>(Enemy->GetController());
+		
+		EnemyController->OnPlayerEnteredInSightConeDelegate.AddDynamic(this, &AAIZone::NotifyPlayerEnteredInSightCone);
+		EnemyController->OnPlayerExitedFromSightConeDelegate.AddDynamic(this, &AAIZone::NotifyPlayerExitedInSightCone);
+		EnemyController->OnPlayerSeenDelegate.AddDynamic(this, &AAIZone::NotifyPlayerWasSeen);
+	}
+	else if (Cast<ALocation>(OtherActor))
+	{
+		CoverLocations.Add(Cast<ALocation>(OtherActor));
+	}
 }
 
+// Player entered a sight cone
+void AAIZone::NotifyPlayerEnteredInSightCone()
+{
+	NumberOfSightConesThePlayerIsIn++;
+
+	if (NumberOfSightConesThePlayerIsIn == 1)
+	{
+		if (CurrentState == EAIZoneState::Combat)
+		{
+			GetWorld()->GetTimerManager().ClearTimer(CombatTimer);
+		}
+	}
+}
+
+// Player exited from a sight cone
 void AAIZone::NotifyPlayerExitedInSightCone()
 {
 	NumberOfSightConesThePlayerIsIn--;
 
 	if (NumberOfSightConesThePlayerIsIn == 0)
 	{
+		if (CurrentState == EAIZoneState::Combat)
+		{
+			// Start Combat Timer
+			FTimerDelegate TimerCallback = FTimerDelegate::CreateLambda([this]()
+			{
+				StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.CombatTimerFinished")));
+				CombatTimerFinished();
+				OnCombatTimerFinishedDelegate.Broadcast();
+			});
+
+			GetWorld()->GetTimerManager().SetTimer(CombatTimer, TimerCallback,4.0f, false);
+			CombatTimerStarted();
+			OnCombatTimerStartedDelegate.Broadcast();
+		}
+		PlayerIsInNoSightCone();
 		OnPlayerIsInNoSightConeDelegate.Broadcast();
 	}
 }
 
+// Player was seen by a BasicEnemy
 void AAIZone::NotifyPlayerWasSeen()
 {
-	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsSeen")));
-}
-
-void AAIZone::NotifyEnemyChangedState(EBasicEnemyState SourceState, EBasicEnemyState NewState)
-{
-	if (NewState == EBasicEnemyState::Combat)
+	if (CurrentState == EAIZoneState::Unaware || CurrentState == EAIZoneState::Alerted)
 	{
-		StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.DecisionMaking.TriggerCombat")));	
+		if (CurrentState == EAIZoneState::Alerted)
+		{
+			GetWorld()->GetTimerManager().ClearTimer(AlertedTimer);
+		}
+		Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+		StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.PlayerWasSeen")));
 	}
 }
 
@@ -97,15 +199,4 @@ void AAIZone::Tick(float DeltaTime)
 void AAIZone::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	for (const auto Enemy : Enemies)
-	{
-		const TObjectPtr<ABasicEnemyController> EnemyController = Cast<ABasicEnemyController>(Enemy->GetController());
-		
-		EnemyController->OnPlayerEnteredInSightConeDelegate.AddDynamic(this, &AAIZone::NotifyPlayerEnteredInSightCone);
-		EnemyController->OnPlayerExitedFromSightConeDelegate.AddDynamic(this, &AAIZone::NotifyPlayerExitedInSightCone);
-		EnemyController->OnPlayerSeenDelegate.AddDynamic(this, &AAIZone::NotifyPlayerWasSeen);
-		Enemy->OnBasicEnemyStateChangedDelegate.AddDynamic(this, &AAIZone::NotifyEnemyChangedState);
-	}
 }
-

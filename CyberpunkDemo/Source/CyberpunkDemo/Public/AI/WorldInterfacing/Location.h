@@ -7,6 +7,8 @@
 #include "GameFramework/Actor.h"
 #include "Location.generated.h"
 
+class USphereComponent;
+
 UCLASS()
 class CYBERPUNKDEMO_API ALocation : public AActor, public IGameplayTagAssetInterface
 {
@@ -17,6 +19,9 @@ public:
 	// Sets default values for this actor's properties
 	ALocation();
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<USphereComponent> SphereTrigger;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FGameplayTagContainer GameplayTagContainer;
 	

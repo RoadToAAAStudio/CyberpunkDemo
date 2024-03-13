@@ -7,7 +7,6 @@
 #include "AI/Utility/IStateTreeNotificationsAcceptor.h"
 #include "AI/Utility/SplineContainer.h"
 #include "Components/StateTreeComponent.h"
-#include "Engine/SplineMeshActor.h"
 #include "GameFramework/Character.h"
 #include "BasicEnemy.generated.h"
 
