@@ -2,6 +2,8 @@
 
 
 #include "MainCharacter/MainCharacter.h"
+
+#include "AbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -9,7 +11,10 @@
 #include "InputActionValue.h"
 #include "CyberpunkDemo/CyberpunkDemoCharacter.h"
 #include "Engine/LocalPlayer.h"
+#include "GameplayAbilitySystem/Abilities/GA_Shoot.h"
 #include "MainCharacter/CustomPlayerController.h"
+
+
 
 // Sets default values and create the components
 AMainCharacter::AMainCharacter(const FObjectInitializer& ObjectInitializer)
@@ -39,6 +44,8 @@ AMainCharacter::AMainCharacter(const FObjectInitializer& ObjectInitializer)
 	Mesh1P->bCastDynamicShadow = false;
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
+	// Create Ability System Component
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 	
 }
 
@@ -58,6 +65,8 @@ void AMainCharacter::BeginPlay()
 	}
 
 	JumpMaxCount = 2;
+
+	ShootSpec = AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(UGA_Shoot::StaticClass()));
 }
 
 // Called every frame
@@ -76,6 +85,11 @@ void AMainCharacter::Jump()
 TObjectPtr<UCustomCharacterMovementComponent> AMainCharacter::GetCustomCharacterComponent()
 {
 	return CustomCharacterMovementComponent;
+}
+
+UAbilitySystemComponent* AMainCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
 }
 
 FCollisionQueryParams AMainCharacter::GetIgnoreCharacterParams() const
@@ -139,7 +153,15 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 		// Dash
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, CustomCharacterMovementComponent, &UCustomCharacterMovementComponent::DashPressed);
+
+		// Shoot
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &AMainCharacter::Shoot);
 	}
+}
+
+void AMainCharacter::Shoot()
+{
+	AbilitySystemComponent->TryActivateAbility(ShootSpec);
 }
 
 // Called to apply the direction to the movement [!]

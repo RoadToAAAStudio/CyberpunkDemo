@@ -3,13 +3,15 @@
 #pragma once
 // Includes
 #include "CoreMinimal.h"
+#include "AbilitySystemInterface.h"
 #include "CustomCharacterMovementComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameplayAbilitySpecHandle.h"
 #include "GameFramework/Character.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "Logging/LogMacros.h"
 #include "MainCharacter.generated.h"
 
+struct FGameplayAbilitySpec;
 // Forward declarations
 class UInputComponent;
 class USkeletalMeshComponent;
@@ -19,7 +21,7 @@ class UInputMappingContext;
 struct FInputActionValue;
 
 UCLASS(config=Game)
-class CYBERPUNKDEMO_API AMainCharacter : public ACharacter
+class CYBERPUNKDEMO_API AMainCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -49,9 +51,18 @@ private:
     	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
     	UCameraComponent* FirstPersonCameraComponent;
 
+		// Ability System Component
+		UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "ASC", meta=(AllowPrivateAccess = "true"))
+		UAbilitySystemComponent* AbilitySystemComponent;
+
 		UPROPERTY()
 		UEnhancedInputLocalPlayerSubsystem* Subsystem;
-    
+
+		UPROPERTY()
+		FGameplayAbilitySpecHandle ShootSpec;
+
+	// Input Actions
+#pragma region 
     	/** MappingContext [!] */
     	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
     	UInputMappingContext* DefaultMappingContext;
@@ -82,8 +93,17 @@ private:
 		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta =(AllowPrivateAccess = "true"))
 		UInputAction* DashAction;
 
-public:
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta =(AllowPrivateAccess = "true"))
+		UInputAction* ShootAction;
 	
+#pragma endregion 
+
+public:
+
+	// Getter for the ASC
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+
 	// Sets default values for this character's properties
 	AMainCharacter(const FObjectInitializer& ObjectInitializer);
 
@@ -110,6 +130,9 @@ public:
 
 	void DisableMappingContext (bool Enable);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void PerformShoot();
+
 protected:
 	
 	// Called when the game starts or when spawned
@@ -124,6 +147,8 @@ protected:
 	// APawn interface [!]
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	// End of APawn interface
+
+	void Shoot();
 
 	
 };
