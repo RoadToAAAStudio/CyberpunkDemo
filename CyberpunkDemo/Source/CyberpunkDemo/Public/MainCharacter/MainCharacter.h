@@ -7,6 +7,7 @@
 #include "CustomCharacterMovementComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameplayAbilitySpecHandle.h"
+#include "QuickhackSystemComponent.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "MainCharacter.generated.h"
@@ -55,6 +56,10 @@ private:
 		UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "ASC", meta=(AllowPrivateAccess = "true"))
 		UAbilitySystemComponent* AbilitySystemComponent;
 
+		// Quickhack System Component
+		UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "QSC", meta=(AllowPrivateAccess = "true"))
+		UQuickhackSystemComponent* QuickhackSystemComponent;
+
 		UPROPERTY()
 		UEnhancedInputLocalPlayerSubsystem* Subsystem;
 
@@ -62,7 +67,7 @@ private:
 		FGameplayAbilitySpecHandle ShootSpec;
 
 	// Input Actions
-#pragma region 
+	#pragma region 
     	/** MappingContext [!] */
     	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
     	UInputMappingContext* DefaultMappingContext;
@@ -95,8 +100,11 @@ private:
 
 		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta =(AllowPrivateAccess = "true"))
 		UInputAction* ShootAction;
+
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta =(AllowPrivateAccess = "true"))
+		UInputAction* AnalysisAction;
 	
-#pragma endregion 
+	#pragma endregion 
 
 public:
 

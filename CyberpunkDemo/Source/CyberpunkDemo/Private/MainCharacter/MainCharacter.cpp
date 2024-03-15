@@ -46,7 +46,10 @@ AMainCharacter::AMainCharacter(const FObjectInitializer& ObjectInitializer)
 
 	// Create Ability System Component
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
-	
+
+	// Create Quickhack System Component
+	QuickhackSystemComponent = CreateDefaultSubobject<UQuickhackSystemComponent>(TEXT("QuickhackSystemComponent"));
+	QuickhackSystemComponent->SetIgnoredParams(GetIgnoreCharacterParams());
 }
 
 // Called when the game starts or when spawned
@@ -120,11 +123,6 @@ void AMainCharacter::DisableMappingContext(bool Enable)
 	}
 }
 
-// void AMainCharacter::Crouch(bool bClientSimulation)
-// {
-// 	//Super::Crouch(bClientSimulation);
-// }
-
 // Called to bind functionality to input [!]
 void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -135,8 +133,6 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		// Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, CustomCharacterMovementComponent, &UCustomCharacterMovementComponent::JumpPressed);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, CustomCharacterMovementComponent, &UCustomCharacterMovementComponent::JumpReleased);
-		// EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
-		// EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		//Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMainCharacter::Move);
@@ -155,7 +151,12 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, CustomCharacterMovementComponent, &UCustomCharacterMovementComponent::DashPressed);
 
 		// Shoot
-		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &AMainCharacter::Shoot);
+		//EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &AMainCharacter::Shoot);
+
+		// Analysis
+		EnhancedInputComponent->BindAction(AnalysisAction, ETriggerEvent::Started, QuickhackSystemComponent, &UQuickhackSystemComponent::HandleAnalysisWidget);
+		EnhancedInputComponent->BindAction(AnalysisAction, ETriggerEvent::Ongoing, QuickhackSystemComponent, &UQuickhackSystemComponent::Inspect);
+		EnhancedInputComponent->BindAction(AnalysisAction, ETriggerEvent::Completed, QuickhackSystemComponent, &UQuickhackSystemComponent::HandleAnalysisWidget);
 	}
 }
 

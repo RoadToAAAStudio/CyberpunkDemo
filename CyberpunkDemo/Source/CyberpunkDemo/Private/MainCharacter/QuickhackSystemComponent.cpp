@@ -3,7 +3,7 @@
 
 #include "MainCharacter/QuickhackSystemComponent.h"
 
-#include "NavigationSystemTypes.h"
+#include "Blueprint/UserWidget.h"
 
 
 // Sets default values for this component's properties
@@ -18,8 +18,8 @@ UQuickhackSystemComponent::UQuickhackSystemComponent()
 
 void UQuickhackSystemComponent::Inspect()
 {
-	FVector LineStart = GetOwner()->GetActorLocation();
-	FVector LineEnd = GetOwner()->GetActorForwardVector() * 1000;
+	FVector LineStart = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetCameraLocation();
+	FVector LineEnd = LineStart + GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetActorForwardVector() * QuickHackDistance;
 	FHitResult HitResult;
 	IHackerable* HackerableTarget = nullptr;
 	if (GetWorld()->LineTraceSingleByProfile(HitResult, LineStart, LineEnd, "BlockAll", Params))
@@ -32,6 +32,7 @@ void UQuickhackSystemComponent::Inspect()
 		else
 		{
 			DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor::Red, false, 2);
+			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString("NO VALID HIT"));
 		}
 	}
 }
@@ -39,11 +40,35 @@ void UQuickhackSystemComponent::Inspect()
 void UQuickhackSystemComponent::CreateHacks(const IHackerable* HackTarget)
 {
 	TSet<TSubclassOf<UGameplayAbility>> PossibleHacks = HackTarget->GetPossibleHacks();
+	if (PossibleHacks.Num() <= 0) return;
 	for (auto Hack : PossibleHacks)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Orange, FString(Hack->GetClass()->GetName()));
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Orange, FString(Hack->GetName()));
 	}
-	
+}
+
+void UQuickhackSystemComponent::HandleAnalysisWidget()
+{
+	if (!AnalysisWidget)
+	{
+		AnalysisWidget = Cast<UAnalysisWidget>(CreateWidget(GetWorld()->GetFirstPlayerController(), UAnalysisWidget::StaticClass()));
+		AnalysisWidget->AddToViewport();
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Green, FString("CREATING WIDGET"));
+	}
+	else
+	{
+		if (AnalysisWidget->IsInViewport())
+		{
+			AnalysisWidget->RemoveFromParent();
+			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString("REMOVING WIDGET"));
+		}
+		else
+		{
+			AnalysisWidget->AddToViewport();
+			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Green, FString("ADDING WIDGET"));
+		}
+	}
+
 }
 
 
@@ -64,5 +89,10 @@ void UQuickhackSystemComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+void UQuickhackSystemComponent::SetIgnoredParams(const FCollisionQueryParams ParamsToIgnore)
+{
+	Params = ParamsToIgnore;
 }
 
