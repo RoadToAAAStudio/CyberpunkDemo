@@ -108,7 +108,7 @@ void ABasicEnemy::NotifyPlayerWasSeen(const ABasicEnemyController* NotifierContr
 	 */ 
 	
 	if (CurrentState == EBasicEnemyState::Combat) return;
-	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(TEXT("Character.Sensing.Sight.PlayerIsSeen")));
+	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(TEXT("Character.Sensing.Sight.Events.PlayerWasSeen")));
 }
 
 void ABasicEnemy::NotifyCombatTimerFinished()

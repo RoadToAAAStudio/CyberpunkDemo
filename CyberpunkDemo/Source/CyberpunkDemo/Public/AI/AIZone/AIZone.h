@@ -170,7 +170,7 @@ public:
 	
 protected:
 
-#pragma region BLUEPRINTS_EVENTS
+#pragma region BLUEPRINT_EVENTS
 	// Hook for Derived Blueprints when a StateTree's state change
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnPlayerIsSensed"))
 	void PlayerIsSensed();

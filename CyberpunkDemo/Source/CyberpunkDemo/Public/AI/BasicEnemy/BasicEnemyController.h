@@ -25,6 +25,8 @@ class CYBERPUNKDEMO_API ABasicEnemyController : public AAIController
 {
 	GENERATED_BODY()
 public:
+	
+#pragma region COMPONENTS
 	// Dependencies with Configs and Components
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UAttributeBar> SightBar;
@@ -34,7 +36,9 @@ public:
 	TObjectPtr<class UAISenseConfig_Sight> SightConfig;
 	UPROPERTY()
 	TObjectPtr<class UAISenseConfig_Hearing> HearingConfig;
-
+#pragma endregion
+	
+#pragma region DELEGATES
 	// Delegates
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerEnteredInSightCone OnPlayerEnteredInSightConeDelegate;
@@ -48,11 +52,8 @@ public:
     FOnSomethingWasHeardSignature OnSomethingWasHeardDelegate;
 	UPROPERTY(BlueprintAssignable)
 	FOnHearingSenseToogleSignature OnHearingSenseToggledDelegate;
+#pragma endregion
 	
-	// Info to be polled
-	UPROPERTY(BlueprintReadOnly)
-	FGameplayTagContainer GameplayTagsContainer;
-
 	// Config variables
 	// Rate for filling the sight bar
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -66,12 +67,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float HearingDecreaseRate = 0.25f;
 
+protected:
+	// Info to be polled
+	UPROPERTY()
+	FGameplayTagContainer GameplayTagsContainer;
+	
 private:
 	FAIStimulus CurrentHeardStimulus; 
 	
 public:
 	explicit ABasicEnemyController(const FObjectInitializer& ObjectInitializer);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FGameplayTagContainer GetGameplayTagContainer() const;
+	
 	UFUNCTION(BlueprintCallable)
 	void EnableSightSense(bool Enable);
 
@@ -86,6 +95,7 @@ public:
 
 protected:
 
+#pragma region BLUEPRINT_EVENTS
 	// Derived Blueprints hooks
 	/*Blueprint implementable event called when the player enter in the enemy*/
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnPlayerEnteredInSightCone"))
@@ -99,10 +109,12 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnSomethingWasHeard"))
 	void SomethingWasHeard(const FAIStimulus Stimulus);
-
+#pragma endregion
+	
 private:
 	void SetupPerceptionSystem();
-	
+
+#pragma region FUNCTIONS_LISTENERS
 	UFUNCTION()
 	void NotifyReceiveStimulus(AActor* Actor, const FAIStimulus Stimulus);
 
@@ -111,7 +123,9 @@ private:
 	
 	UFUNCTION()
 	void NotifyHearingBarFull();
-	
+#pragma endregion 
+
+#pragma region FUNCTIONS_OVERRIDES
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -120,4 +134,5 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void OnPossess(APawn* PossessedPawn) override;
+#pragma endregion 
 };

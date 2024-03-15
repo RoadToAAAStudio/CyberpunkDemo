@@ -12,6 +12,11 @@ ABasicEnemyController::ABasicEnemyController(const FObjectInitializer& ObjectIni
 	SetupPerceptionSystem();
 }
 
+FGameplayTagContainer ABasicEnemyController::GetGameplayTagContainer() const
+{
+	return GameplayTagsContainer;
+}
+
 void ABasicEnemyController::EnableSightSense(bool Enable)
 {
 	if (Enable)
@@ -66,37 +71,6 @@ bool ABasicEnemyController::IsHearingEnabled()
 	return GameplayTagsContainer.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Hearing")));
 }
 
-void ABasicEnemyController::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	// TODO Handle locking of sight
-	
-	// Sight is Active
-	if (IsSightEnabled())
-	{
-		// TODO Depends on the crouching and distance
-		if (GameplayTagsContainer.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone"))))
-		{
-			SightBar->AddAmount(SightIncreaseRate * DeltaTime);
-		}
-		else
-		{
-			SightBar->RemoveAmount(SightDecreaseRate * DeltaTime);
-		}
-	}
-
-	// Hearing is Active
-	if (IsHearingEnabled())
-	{
-		if (HearingBar->CurrentValue > 0)
-		{
-			HearingBar->RemoveAmount(HearingDecreaseRate * DeltaTime);
-		}
-	}
-}
-
-
 void ABasicEnemyController::SetupPerceptionSystem()
 {
 	SetPerceptionComponent(*CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("PerceptionComponent")));
@@ -118,6 +92,7 @@ void ABasicEnemyController::SetupPerceptionSystem()
 	HearingBar = CreateDefaultSubobject<UAttributeBar>(TEXT("HearingBar"));
 }
 
+#pragma region FUNCTIONS_LISTENERS
 void ABasicEnemyController::NotifyReceiveStimulus(AActor* Actor, const FAIStimulus Stimulus)
 {
 	switch (Stimulus.Type)
@@ -168,6 +143,38 @@ void ABasicEnemyController::NotifyHearingBarFull()
 	SomethingWasHeard(CurrentHeardStimulus);
 	OnSomethingWasHeardDelegate.Broadcast(CurrentHeardStimulus);
 }
+#pragma endregion 
+
+#pragma region FUNCTIONS_OVERRIDES
+void ABasicEnemyController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// TODO Handle locking of sight
+	
+	// Sight is Active
+	if (IsSightEnabled())
+	{
+		// TODO Depends on the crouching and distance
+		if (GameplayTagsContainer.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone"))))
+		{
+			SightBar->AddAmount(SightIncreaseRate * DeltaTime);
+		}
+		else
+		{
+			SightBar->RemoveAmount(SightDecreaseRate * DeltaTime);
+		}
+	}
+
+	// Hearing is Active
+	if (IsHearingEnabled())
+	{
+		if (HearingBar->CurrentValue > 0)
+		{
+			HearingBar->RemoveAmount(HearingDecreaseRate * DeltaTime);
+		}
+	}
+}
 
 void ABasicEnemyController::BeginPlay()
 {
@@ -182,3 +189,4 @@ void ABasicEnemyController::OnPossess(APawn* PossessedPawn)
 {
 	Super::OnPossess(PossessedPawn);
 }
+#pragma endregion 
