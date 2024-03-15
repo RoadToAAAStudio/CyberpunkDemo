@@ -17,7 +17,7 @@ void ABasicEnemyController::EnableSightSense(bool Enable)
 	if (Enable)
 	{
 		GameplayTagsContainer.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
-		SightBar->OnBarFilledDelegate.AddDynamic(this, &ABasicEnemyController::SightBarFull);
+		SightBar->OnBarFilledDelegate.AddDynamic(this, &ABasicEnemyController::NotifySightBarFull);
 		SightBar->Reset();
 
 		// TODO What if the player is already in the cone?
@@ -29,7 +29,7 @@ void ABasicEnemyController::EnableSightSense(bool Enable)
 		GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
 		GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone")));
 		GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsSeen")));
-		SightBar->OnBarFilledDelegate.RemoveDynamic(this, &ABasicEnemyController::SightBarFull);
+		SightBar->OnBarFilledDelegate.RemoveDynamic(this, &ABasicEnemyController::NotifySightBarFull);
 		SightBar->Reset();
 		
 		OnSightSenseToggledDelegate.Broadcast(false);
@@ -41,7 +41,7 @@ void ABasicEnemyController::EnableHearingSense(bool Enable)
 	if (Enable)
 	{
 		GameplayTagsContainer.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Hearing")));
-		HearingBar->OnBarFilledDelegate.AddDynamic(this, &ABasicEnemyController::HearingBarFull);
+		HearingBar->OnBarFilledDelegate.AddDynamic(this, &ABasicEnemyController::NotifyHearingBarFull);
 		HearingBar->Reset();
 
 		OnHearingSenseToggledDelegate.Broadcast(true);
@@ -49,7 +49,7 @@ void ABasicEnemyController::EnableHearingSense(bool Enable)
 	else
 	{
 		GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Hearing")));
-		HearingBar->OnBarFilledDelegate.RemoveDynamic(this, &ABasicEnemyController::HearingBarFull);
+		HearingBar->OnBarFilledDelegate.RemoveDynamic(this, &ABasicEnemyController::NotifyHearingBarFull);
 		HearingBar->Reset();
 		
 		OnHearingSenseToggledDelegate.Broadcast(false);
@@ -118,7 +118,7 @@ void ABasicEnemyController::SetupPerceptionSystem()
 	HearingBar = CreateDefaultSubobject<UAttributeBar>(TEXT("HearingBar"));
 }
 
-void ABasicEnemyController::ReceiveStimulus(AActor* Actor, const FAIStimulus Stimulus)
+void ABasicEnemyController::NotifyReceiveStimulus(AActor* Actor, const FAIStimulus Stimulus)
 {
 	switch (Stimulus.Type)
 	{
@@ -131,13 +131,13 @@ void ABasicEnemyController::ReceiveStimulus(AActor* Actor, const FAIStimulus Sti
 			{
 				GameplayTagsContainer.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone")));
 				PlayerEnteredInSightCone();
-				OnPlayerEnteredInSightConeDelegate.Broadcast();
+				OnPlayerEnteredInSightConeDelegate.Broadcast(this);
 			}
 			else
 			{
 				GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone")));
 				PlayerExitedFromSightCone();
-				OnPlayerExitedFromSightConeDelegate.Broadcast();
+				OnPlayerExitedFromSightConeDelegate.Broadcast(this);
 			}
 		}
 		break;
@@ -157,14 +157,13 @@ void ABasicEnemyController::ReceiveStimulus(AActor* Actor, const FAIStimulus Sti
 	}
 }
 
-void ABasicEnemyController::SightBarFull()
+void ABasicEnemyController::NotifySightBarFull()
 {
-	GameplayTagsContainer.AddTag(FGameplayTag::RequestGameplayTag(TEXT("Character.Sensing.Sight.PlayerIsSeen")));
 	PlayerSeen();
-	OnPlayerSeenDelegate.Broadcast();
+	OnPlayerSeenDelegate.Broadcast(this);
 }
 
-void ABasicEnemyController::HearingBarFull()
+void ABasicEnemyController::NotifyHearingBarFull()
 {
 	SomethingWasHeard(CurrentHeardStimulus);
 	OnSomethingWasHeardDelegate.Broadcast(CurrentHeardStimulus);
@@ -174,7 +173,7 @@ void ABasicEnemyController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &ABasicEnemyController::ReceiveStimulus);
+	GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &ABasicEnemyController::NotifyReceiveStimulus);
 	EnableSightSense(true);
 	EnableHearingSense(true);
 }

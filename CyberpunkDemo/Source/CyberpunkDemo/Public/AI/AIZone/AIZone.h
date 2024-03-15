@@ -3,13 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/StateTreeComponent.h"
 #include "AI/Utility/IStateTreeNotificationsAcceptor.h"
-#include "AI/BasicEnemy/BasicEnemy.h"
 #include "GameFramework/Actor.h"
 #include "AIZone.generated.h"
 
 class UBoxComponent;
 class ALocation;
+class ABasicEnemy;
 
 UENUM(BlueprintType)
 enum class EAIZoneState : uint8
@@ -29,7 +30,7 @@ struct FAIZoneMapping : public FTableRowBase
 	EAIZoneState StateEnum = EAIZoneState::Unaware;
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerIsSensed);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerIsSensed, const ABasicEnemyController*, Controller);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerIsForgotten);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCombatTimerStarted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCombatTimerFinished);
@@ -42,8 +43,10 @@ UCLASS()
 class CYBERPUNKDEMO_API AAIZone : public AActor, public IStateTreeNotificationsAcceptor
 {
 	GENERATED_BODY()
-	
+	friend class ABasicEnemy;
 public:
+
+#pragma region DELEGATES
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerIsSensed OnPlayerIsSensedDelegate;
 
@@ -67,8 +70,11 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnAIZoneManagerStateChangedSignature OnAIZoneManagerStateChangedDelegate;
-	
+#pragma endregion
+
 protected:
+	
+#pragma region SHARED_KNOWLEDGE
 	/*
 	 * If Player is not null it means all enemies know where the main character is (i.e. Combat State).
 	 * This is set if AIZone is in Unaware or Alerted State and some BasicEnemy sees the player
@@ -109,9 +115,6 @@ protected:
 	UPROPERTY()
 	TArray<TObjectPtr<ALocation>> CoverLocations;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Personal")
-	TObjectPtr<UBoxComponent> BoxTrigger;
-
 	/*
 	 * This reflects AIZone State Tree current state
 	 * Transitions:
@@ -125,39 +128,49 @@ protected:
 	 */
 	UPROPERTY()
 	EAIZoneState CurrentState = EAIZoneState::Unaware;
-
+#pragma endregion
+	
+#pragma region PERSONAL_COMPONENTS
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Personal")
+	TObjectPtr<UBoxComponent> BoxTrigger;
+	
 	UPROPERTY(EditAnywhere, Instanced, Category = "Personal")
 	TObjectPtr<UStateTreeComponent> StateTree;
+#pragma endregion
 
 public:	
 	// Sets default values for this actor's properties
 	AAIZone();
+	
+#pragma region SHARED_KNOWLEDGE_GETTERS
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
+	const AActor* GetPlayer() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
-	const AActor* GetPlayer();
+	FTimerHandle GetCombatTimerHandle() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
-	FTimerHandle GetCombatTimerHandle();
+	FTimerHandle GetAlertedTimerHandle() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
-	FTimerHandle GetAlertedTimerHandle();
+	int GetNumberOfSightConesThePlayerIsIn() const; 
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
-	int GetNumberOfSightConesThePlayerIsIn(); 
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
-	TArray<ABasicEnemy*> GetEnemies();
+	TArray<ABasicEnemy*> GetEnemies() const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
-	TArray<ALocation*> GetCoverLocations();
+	TArray<ALocation*> GetCoverLocations() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
-	EAIZoneState GetCurrentState();
+	EAIZoneState GetCurrentState() const;
+#pragma endregion
 	
 	// StateTree notifications acceptor
 	void AcceptStateTreeNotification_Implementation(const UStateTree* StateTreeNotifier, const UDataTable* DataTable, const FStateTreeTransitionResult& Transition) override;
 	
 protected:
+
+#pragma region BLUEPRINTS_EVENTS
 	// Hook for Derived Blueprints when a StateTree's state change
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnPlayerIsSensed"))
 	void PlayerIsSensed();
@@ -182,21 +195,26 @@ protected:
 	
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnStateChanged"))
 	void StateChanged(const EAIZoneState SourceState, const EAIZoneState NewState);
-
+#pragma endregion
+	
 private:
+
+#pragma region FUNCTIONS_LISTENERS
 	// Function listeners
 	UFUNCTION()
 	void NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 	
 	UFUNCTION()
-	void NotifyPlayerEnteredInSightCone();
+	void NotifyPlayerEnteredInSightCone(const ABasicEnemyController* Controller);
 
 	UFUNCTION()
-	void NotifyPlayerExitedInSightCone();
+	void NotifyPlayerExitedInSightCone(const ABasicEnemyController* Controller);
 	
 	UFUNCTION()
-	void NotifyPlayerWasSeen();
-	
+	void NotifyPlayerWasSeen(const ABasicEnemyController* Controller);
+#pragma endregion 
+
+#pragma region FUNCTIONS_OVERRIDES	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -204,4 +222,5 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+#pragma endregion 
 };

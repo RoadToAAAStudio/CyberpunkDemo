@@ -9,12 +9,12 @@
 #include "GameplayTagContainer.h"
 #include "BasicEnemyController.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerEnteredInSightCone);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerExitedFromSightCone);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerSeenSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerEnteredInSightCone, const ABasicEnemyController*, Controller);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerExitedFromSightCone, const ABasicEnemyController*, Controller);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerSeenSignature, const ABasicEnemyController*, Controller);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSightSenseToogleSignature, const bool, Enabled);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSomethingWasHeardSignature, const FAIStimulus, Stimulus);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHearingSenseToogleSignature, const bool, Enabled);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSomethingWasHeardSignature, const FAIStimulus, Stimulus);
 
 /**
  * Basic Enemy Controller
@@ -104,13 +104,13 @@ private:
 	void SetupPerceptionSystem();
 	
 	UFUNCTION()
-	void ReceiveStimulus(AActor* Actor, const FAIStimulus Stimulus);
+	void NotifyReceiveStimulus(AActor* Actor, const FAIStimulus Stimulus);
 
 	UFUNCTION()
-	void SightBarFull();
+	void NotifySightBarFull();
 	
 	UFUNCTION()
-	void HearingBarFull();
+	void NotifyHearingBarFull();
 	
 public:
 	// Called every frame

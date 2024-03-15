@@ -3,6 +3,7 @@
 #include "AI/BasicEnemy/BasicEnemy.h"
 #include "AI/Utility/AIUtility.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 ABasicEnemy::ABasicEnemy()
@@ -11,7 +12,30 @@ ABasicEnemy::ABasicEnemy()
 	PrimaryActorTick.bCanEverTick = true;
 
 	StateTree = CreateDefaultSubobject<UStateTreeComponent>(TEXT("StateTree"));
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABasicEnemy::NotifySomethingEnteredInTheTrigger);
 }
+
+const AAIZone* ABasicEnemy::GetSharedKnowledge() const
+{
+	return SharedKnowledge;
+}
+
+#pragma region KNOWLEDGE_GETTERS
+FGameplayTagContainer ABasicEnemy::GetGameplayTagContainer() const
+{
+	return GameplayTagContainer;
+}
+
+EBasicEnemyState ABasicEnemy::GetCurrentState() const
+{
+	return CurrentState;
+}
+
+const ASplineContainer* ABasicEnemy::GetPatrolSpline() const
+{
+	return PatrolSpline;
+}
+#pragma endregion 
 
 // Called when the State Tree notifies a change of state
 void ABasicEnemy::AcceptStateTreeNotification_Implementation(const UStateTree* StateTreeNotifier, const UDataTable* DataTable, const FStateTreeTransitionResult& Transition)
@@ -50,16 +74,56 @@ void ABasicEnemy::AcceptStateTreeNotification_Implementation(const UStateTree* S
 	OnBasicEnemyStateChangedDelegate.Broadcast(SourceStateData->StateEnum, CurrentStateData->StateEnum);
 }
 
-void ABasicEnemy::ReceiveTriggerEvent(const FGameplayTag& GameplayTag) const
+#pragma region FUNCTIONS_LISTENERS
+void ABasicEnemy::NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	StateTree->SendStateTreeEvent(GameplayTag);
+	if (Cast<AAIZone>(OtherActor))
+	{
+		AAIZone* AIZone = Cast<AAIZone>(OtherActor);
+
+		// Link BasicEnemy with what it needs
+		SharedKnowledge = AIZone;
+		SharedKnowledge->OnPlayerIsSensedDelegate.AddDynamic(this, &ABasicEnemy::NotifyPlayerWasSeen);
+		SharedKnowledge->OnCombatTimerFinishedDelegate.AddDynamic(this, &ABasicEnemy::NotifyCombatTimerFinished);
+		SharedKnowledge->OnAlertedTimerFinishedDelegate.AddDynamic(this, &ABasicEnemy::NotifyAlertedTimerFinished);
+
+
+		// Link AIZone with what it needs
+		SharedKnowledge->Enemies.Add(this);
+
+		const TObjectPtr<ABasicEnemyController> EnemyController = Cast<ABasicEnemyController>(GetController());
+		
+		EnemyController->OnPlayerEnteredInSightConeDelegate.AddDynamic(SharedKnowledge, &AAIZone::NotifyPlayerEnteredInSightCone);
+		EnemyController->OnPlayerExitedFromSightConeDelegate.AddDynamic(SharedKnowledge, &AAIZone::NotifyPlayerExitedInSightCone);
+		EnemyController->OnPlayerSeenDelegate.AddDynamic(SharedKnowledge, &AAIZone::NotifyPlayerWasSeen);
+	}
 }
 
-void ABasicEnemy::NotifyPlayerWasSeen()
+void ABasicEnemy::NotifyPlayerWasSeen(const ABasicEnemyController* NotifierController)
 {
+	/*
+	 * This listener is called when this actor sees the player or someone else did (via AIZone shared knowledge)
+	 * This means that it will be called twice on the actor who actually saw the Player
+	 * So the message to the StateTree should be called only once
+	 */ 
+	
+	if (CurrentState == EBasicEnemyState::Combat) return;
 	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(TEXT("Character.Sensing.Sight.PlayerIsSeen")));
 }
 
+void ABasicEnemy::NotifyCombatTimerFinished()
+{
+	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.CombatTimerFinished")));
+}
+
+void ABasicEnemy::NotifyAlertedTimerFinished()
+{
+	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.AlertedTimerFinished")));
+}
+
+#pragma endregion 
+
+#pragma region FUNCTIONS_OVERRIDES
 // Called every frame
 void ABasicEnemy::Tick(float DeltaTime)
 {
@@ -86,3 +150,4 @@ void ABasicEnemy::BeginPlay()
 		BasicEnemyController->GetBlackboardComponent()->SetValueAsObject("PatrolSpline", PatrolSpline);
 	}
 }
+#pragma endregion 

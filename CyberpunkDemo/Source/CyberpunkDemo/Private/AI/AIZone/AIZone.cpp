@@ -18,40 +18,44 @@ AAIZone::AAIZone()
 	BoxTrigger->OnComponentBeginOverlap.AddDynamic(this, &AAIZone::NotifySomethingEnteredInTheTrigger);
 }
 
-const AActor* AAIZone::GetPlayer()
+#pragma region SHARED_KNOWLEDGE_GETTERS
+const AActor* AAIZone::GetPlayer() const
 {
 	return Player;
 }
 
-FTimerHandle AAIZone::GetCombatTimerHandle()
+FTimerHandle AAIZone::GetCombatTimerHandle() const
 {
 	return CombatTimer;
 }
 
-FTimerHandle AAIZone::GetAlertedTimerHandle()
+FTimerHandle AAIZone::GetAlertedTimerHandle() const
 {
 	return AlertedTimer;
 }
 
-int AAIZone::GetNumberOfSightConesThePlayerIsIn()
+int AAIZone::GetNumberOfSightConesThePlayerIsIn() const
 {
 	return NumberOfSightConesThePlayerIsIn;
 }
 
-TArray<ABasicEnemy*> AAIZone::GetEnemies()
+TArray<ABasicEnemy*> AAIZone::GetEnemies() const
 {
-	return Enemies;
+	TArray<ABasicEnemy*> Copy = Enemies;
+	return Copy;
 }
 
-TArray<ALocation*> AAIZone::GetCoverLocations()
+TArray<ALocation*> AAIZone::GetCoverLocations() const
 {
-	return CoverLocations;
+	TArray<ALocation*> Copy = CoverLocations;
+	return Copy;
 }
 
-EAIZoneState AAIZone::GetCurrentState()
+EAIZoneState AAIZone::GetCurrentState() const
 {
 	return CurrentState;
 }
+#pragma endregion 
 
 void AAIZone::AcceptStateTreeNotification_Implementation(const UStateTree* StateTreeNotifier, const UDataTable* DataTable, const FStateTreeTransitionResult& Transition)
 {
@@ -72,6 +76,8 @@ void AAIZone::AcceptStateTreeNotification_Implementation(const UStateTree* State
 		
 	case EAIZoneState::Combat:
 		Player = nullptr;
+		PlayerIsForgotten();
+		OnPlayerIsForgottenDelegate.Broadcast();
 		break;
 		
 	case EAIZoneState::Alerted:
@@ -115,28 +121,18 @@ void AAIZone::AcceptStateTreeNotification_Implementation(const UStateTree* State
 	OnAIZoneManagerStateChangedDelegate.Broadcast(SourceStateData->StateEnum, CurrentStateData->StateEnum);
 }
 
+#pragma region FUNCTIONS_LISTENERS
 // Something entered the BoxTrigger
 void AAIZone::NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (Cast<ABasicEnemy>(OtherActor))
-	{
-		ABasicEnemy* Enemy = Cast<ABasicEnemy>(OtherActor);
-		Enemies.Add(Enemy);
-
-		const TObjectPtr<ABasicEnemyController> EnemyController = Cast<ABasicEnemyController>(Enemy->GetController());
-		
-		EnemyController->OnPlayerEnteredInSightConeDelegate.AddDynamic(this, &AAIZone::NotifyPlayerEnteredInSightCone);
-		EnemyController->OnPlayerExitedFromSightConeDelegate.AddDynamic(this, &AAIZone::NotifyPlayerExitedInSightCone);
-		EnemyController->OnPlayerSeenDelegate.AddDynamic(this, &AAIZone::NotifyPlayerWasSeen);
-	}
-	else if (Cast<ALocation>(OtherActor))
+	if (Cast<ALocation>(OtherActor))
 	{
 		CoverLocations.Add(Cast<ALocation>(OtherActor));
 	}
 }
 
 // Player entered a sight cone
-void AAIZone::NotifyPlayerEnteredInSightCone()
+void AAIZone::NotifyPlayerEnteredInSightCone(const ABasicEnemyController* Controller)
 {
 	NumberOfSightConesThePlayerIsIn++;
 
@@ -150,7 +146,7 @@ void AAIZone::NotifyPlayerEnteredInSightCone()
 }
 
 // Player exited from a sight cone
-void AAIZone::NotifyPlayerExitedInSightCone()
+void AAIZone::NotifyPlayerExitedInSightCone(const ABasicEnemyController* Controller)
 {
 	NumberOfSightConesThePlayerIsIn--;
 
@@ -176,7 +172,7 @@ void AAIZone::NotifyPlayerExitedInSightCone()
 }
 
 // Player was seen by a BasicEnemy
-void AAIZone::NotifyPlayerWasSeen()
+void AAIZone::NotifyPlayerWasSeen(const ABasicEnemyController* Controller)
 {
 	if (CurrentState == EAIZoneState::Unaware || CurrentState == EAIZoneState::Alerted)
 	{
@@ -185,10 +181,14 @@ void AAIZone::NotifyPlayerWasSeen()
 			GetWorld()->GetTimerManager().ClearTimer(AlertedTimer);
 		}
 		Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+		PlayerIsSensed();
+		OnPlayerIsSensedDelegate.Broadcast(Controller);
 		StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.PlayerWasSeen")));
 	}
 }
+#pragma endregion 
 
+#pragma region FUNCTIONS_OVERRIDES
 // Called every frame
 void AAIZone::Tick(float DeltaTime)
 {
@@ -200,3 +200,4 @@ void AAIZone::BeginPlay()
 {
 	Super::BeginPlay();
 }
+#pragma endregion 
