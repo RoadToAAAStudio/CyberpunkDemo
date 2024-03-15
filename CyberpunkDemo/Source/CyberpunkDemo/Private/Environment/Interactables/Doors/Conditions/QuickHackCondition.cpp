@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Interactables/Doors/Conditions/QuickHackCondition.h"
+#include "Environment/Interactables/Doors/Conditions/QuickHackCondition.h"
 
 
 // Sets default values

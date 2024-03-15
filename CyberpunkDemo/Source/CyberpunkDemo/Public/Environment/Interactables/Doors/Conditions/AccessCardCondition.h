@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Interactables/Doors/UnlockCondition.h"
+#include "Environment/Interactables/Doors/UnlockCondition.h"
 #include "UObject/Object.h"
 #include "AccessCardCondition.generated.h"
 

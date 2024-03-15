@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Interactables/Doors/UnlockCondition.h"
+#include "Environment/Interactables/Doors/UnlockCondition.h"
 
 
 // Sets default values

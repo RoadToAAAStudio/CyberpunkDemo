@@ -6,7 +6,7 @@
 #include "GameplayTagContainer.h"
 #include "UnlockCondition.h"
 #include "GameFramework/Actor.h"
-#include "Interactables/IInspectable.h"
+#include "Environment/Interactables/IInspectable.h"
 #include "Door.generated.h"
 
 UCLASS()

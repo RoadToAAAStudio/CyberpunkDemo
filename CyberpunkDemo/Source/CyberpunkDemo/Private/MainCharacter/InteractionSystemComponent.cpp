@@ -2,7 +2,7 @@
 
 
 #include "MainCharacter/InteractionSystemComponent.h"
-#include "Interactables/IInspectable.h"
+#include "Environment/Interactables/IInspectable.h"
 #include "Kismet/GameplayStatics.h"
 
 

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Interactables/Doors/Conditions/HighStrengthCondition.h"
+#include "Environment/Interactables/Doors/Conditions/HighStrengthCondition.h"
 
 
 // Sets default values

@@ -3,18 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Interactables/Doors/UnlockCondition.h"
+#include "Environment/Interactables/Doors/UnlockCondition.h"
 #include "UObject/Object.h"
-#include "QuickHackCondition.generated.h"
+#include "HighStrengthCondition.generated.h"
 
 UCLASS()
-class CYBERPUNKDEMO_API UQuickHackCondition : public UUnlockCondition
+class CYBERPUNKDEMO_API UHighStrengthCondition : public UUnlockCondition
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	UQuickHackCondition();
+	UHighStrengthCondition();
 
 	bool Check() override;
 };
