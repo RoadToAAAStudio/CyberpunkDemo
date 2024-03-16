@@ -20,10 +20,30 @@ const AAIZone* ABasicEnemy::GetSharedKnowledge() const
 	return SharedKnowledge;
 }
 
+FVector ABasicEnemy::GetSpawnLocation() const
+{
+	return SpawnLocation;
+}
+
 #pragma region KNOWLEDGE_GETTERS
 FGameplayTagContainer ABasicEnemy::GetGameplayTagContainer() const
 {
 	return GameplayTagContainer;
+}
+
+bool ABasicEnemy::HasPatrolGoal() const
+{
+	return bPatrolGoal;
+}
+
+bool ABasicEnemy::HasInvestigationGoal() const
+{
+	return bInvestigationGoal;
+}
+
+bool ABasicEnemy::HasCombatGoal() const
+{
+	return bCombatGoal;
 }
 
 EBasicEnemyState ABasicEnemy::GetCurrentState() const
@@ -49,26 +69,6 @@ void ABasicEnemy::AcceptStateTreeNotification_Implementation(const UStateTree* S
 	if(!CurrentStateData || !SourceStateData) return;
 	
 	CurrentState = CurrentStateData->StateEnum;
-
-	switch (CurrentState)
-	{
-	case EBasicEnemyState::Unaware:
-		BasicEnemyController->BrainComponent->StopLogic(FString(""));
-		BasicEnemyController->RunBehaviorTree(BTUnaware);
-		break;
-	case EBasicEnemyState::Combat:
-		BasicEnemyController->BrainComponent->StopLogic(FString(""));
-		BasicEnemyController->RunBehaviorTree(BTCombat);
-		break;
-	case EBasicEnemyState::Alerted:
-		BasicEnemyController->BrainComponent->StopLogic(FString(""));
-		BasicEnemyController->RunBehaviorTree(BTAlerted);
-		break;
-	case EBasicEnemyState::Max:
-		break;
-	default:
-		break;
-	}
 	
 	StateChanged(SourceStateData->StateEnum, CurrentStateData->StateEnum);
 	OnBasicEnemyStateChangedDelegate.Broadcast(SourceStateData->StateEnum, CurrentStateData->StateEnum);
@@ -142,12 +142,6 @@ void ABasicEnemy::BeginPlay()
 	Super::BeginPlay();
 	
 	BasicEnemyController = Cast<ABasicEnemyController>(GetController());
-	BasicEnemyController->RunBehaviorTree(BTUnaware);
 	BasicEnemyController->OnPlayerSeenDelegate.AddDynamic(this, &ABasicEnemy::NotifyPlayerWasSeen);
-
-	if (PatrolSpline)
-	{
-		BasicEnemyController->GetBlackboardComponent()->SetValueAsObject("PatrolSpline", PatrolSpline);
-	}
 }
 #pragma endregion 

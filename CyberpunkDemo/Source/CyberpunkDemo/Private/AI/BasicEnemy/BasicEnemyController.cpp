@@ -111,6 +111,7 @@ void ABasicEnemyController::NotifyReceiveStimulus(AActor* Actor, const FAIStimul
 			else
 			{
 				GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone")));
+				GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsSeen")));
 				PlayerExitedFromSightCone();
 				OnPlayerExitedFromSightConeDelegate.Broadcast(this);
 			}
@@ -124,6 +125,11 @@ void ABasicEnemyController::NotifyReceiveStimulus(AActor* Actor, const FAIStimul
 			//TODO It depends on the Stimulus
 			CurrentHeardStimulus = Stimulus;
 			HearingBar->AddAmount(1.0f);
+
+		}
+		else
+		{
+			//TODO Stimulus is forgotten
 		}
 		
 		break;
@@ -134,6 +140,7 @@ void ABasicEnemyController::NotifyReceiveStimulus(AActor* Actor, const FAIStimul
 
 void ABasicEnemyController::NotifySightBarFull()
 {
+	GameplayTagsContainer.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsSeen")));
 	PlayerSeen();
 	OnPlayerSeenDelegate.Broadcast(this);
 }

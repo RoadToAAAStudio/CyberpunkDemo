@@ -35,6 +35,7 @@ UCLASS()
 class CYBERPUNKDEMO_API ABasicEnemy : public ACharacter, public IStateTreeNotificationsAcceptor
 {
 	GENERATED_BODY()
+	friend struct FStateTreeBasicEnemyEvaluator;
 	
 public:
 	
@@ -47,7 +48,20 @@ protected:
 
 #pragma region PERSONAL_KNOWLEDGE
 	UPROPERTY()
+	FVector SpawnLocation;
+	
+	UPROPERTY()
 	FGameplayTagContainer GameplayTagContainer;
+
+	
+	UPROPERTY()
+    uint32 bInvestigationGoal : 1;
+
+	UPROPERTY()
+	uint32 bPatrolGoal : 1;
+	
+	UPROPERTY()
+	uint32 bCombatGoal : 1;
 
 	/*
 	 * This reflects BasicEnemy State Tree current state
@@ -78,15 +92,7 @@ protected:
 #pragma region PERSONAL_COMPONENTS	
 	UPROPERTY(EditAnywhere, Instanced, Category = "DecisionMaking")
 	TObjectPtr<UStateTreeComponent> StateTree;
-	
-	UPROPERTY(EditAnywhere, Category = "Actuation")
-	TObjectPtr<UBehaviorTree> BTUnaware;
-	
-	UPROPERTY(EditAnywhere, Category = "Actuation")
-	TObjectPtr<UBehaviorTree> BTCombat;
-	
-	UPROPERTY(EditAnywhere, Category = "Actuation")
-	TObjectPtr<UBehaviorTree> BTAlerted;
+
 #pragma endregion 
 
 public:
@@ -96,10 +102,22 @@ public:
 #pragma region KNOWLEDGE_GETTERS
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
 	const AAIZone* GetSharedKnowledge() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal |Knowldge ")
+	FVector GetSpawnLocation() const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
 	FGameplayTagContainer GetGameplayTagContainer() const;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
+	bool HasPatrolGoal() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
+	bool HasInvestigationGoal() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
+	bool HasCombatGoal() const;
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
 	EBasicEnemyState GetCurrentState() const;
 
