@@ -15,6 +15,7 @@ UENUM(BlueprintType)
 enum class EBasicEnemyGoal : uint8
 {
 	None,
+	Idle,
 	Investigation,
 	Patrol,
 	Combat,
@@ -30,6 +31,16 @@ enum class EBasicEnemyState : uint8
 	Max UMETA(Hidden)
 };
 
+UENUM(BlueprintType)
+enum class EBasicEnemyBehaviour : uint8
+{
+	None,
+	Investigation,
+	Patrol,
+	Combat,
+	Max UMETA(Hidden)
+};
+
 USTRUCT(BlueprintType)
 struct FBasicEnemyStateMapping : public FTableRowBase
 {
@@ -39,6 +50,15 @@ struct FBasicEnemyStateMapping : public FTableRowBase
 	EBasicEnemyState StateEnum = EBasicEnemyState::Unaware;
 };
 
+USTRUCT(BlueprintType)
+struct FBasicEnemySupportedBehaviourMapping : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	EBasicEnemyBehaviour BehaviourEnum = EBasicEnemyBehaviour::None;
+};
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBasicEnemyStateChangedSignature, EBasicEnemyState, SourceState, EBasicEnemyState, NewState);
 
 UCLASS()
@@ -46,7 +66,7 @@ class CYBERPUNKDEMO_API ABasicEnemy : public ACharacter, public IStateTreeNotifi
 {
 	GENERATED_BODY()
 	friend struct FStateTreeBasicEnemyEvaluator;
-	friend struct FStateTreeSelectGoalTask;
+	friend struct FStateTreeSelectBehaviourTask;
 	
 public:
 	
@@ -63,13 +83,7 @@ protected:
 	
 	UPROPERTY()
 	FGameplayTagContainer GameplayTagContainer;
-
-	UPROPERTY()
-	EBasicEnemyGoal CurrentSelectedGoal = EBasicEnemyGoal::None;
-
-	UPROPERTY()
-	TArray<EBasicEnemyGoal> CurrentPossibleGoals;
-
+	
 	/*
 	 * This reflects BasicEnemy State Tree current state
 	 * Transitions:
@@ -84,6 +98,15 @@ protected:
 	UPROPERTY()
 	EBasicEnemyState CurrentState = EBasicEnemyState::Unaware;
 
+	UPROPERTY()
+	TSet<EBasicEnemyGoal> CurrentGeneratedGoals;
+
+	UPROPERTY()
+	TSet<EBasicEnemyBehaviour> SupportedBehaviours;
+
+	UPROPERTY()
+	EBasicEnemyBehaviour CurrentChosenBehaviour;
+	
 	UPROPERTY()
 	TObjectPtr<ABasicEnemyController> BasicEnemyController;
 
@@ -100,6 +123,8 @@ protected:
 	UPROPERTY(EditAnywhere, Instanced, Category = "DecisionMaking")
 	TObjectPtr<UStateTreeComponent> StateTree;
 
+	UPROPERTY(EditAnywhere, Category = "DecisionMaking")
+	TObjectPtr<UDataTable> SupportedBehavioursDataTable;
 #pragma endregion 
 
 public:
@@ -114,22 +139,22 @@ public:
 	FVector GetSpawnLocation() const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
+	const ASplineContainer* GetPatrolSpline() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
 	FGameplayTagContainer GetGameplayTagContainer() const;
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
-	EBasicEnemyGoal GetCurrentSelectedGoal() const;
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
-	TArray<EBasicEnemyGoal> GetCurrentPossibleGoals() const;
-	
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
-	bool HasGoal(EBasicEnemyGoal Goal) const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
 	EBasicEnemyState GetCurrentState() const;
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge | Goal")
+	TSet<EBasicEnemyGoal> GetCurrentGeneratedGoals() const;
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
-	const ASplineContainer* GetPatrolSpline() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge | Behaviour")
+	TSet<EBasicEnemyBehaviour> GetSupportedBehaviours() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge | Behaviour")
+	EBasicEnemyBehaviour GetCurrentChosenBehaviour() const;
 #pragma endregion
 	
 	// StateTree notifications acceptor

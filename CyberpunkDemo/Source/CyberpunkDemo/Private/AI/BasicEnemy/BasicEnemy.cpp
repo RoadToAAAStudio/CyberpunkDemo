@@ -15,6 +15,7 @@ ABasicEnemy::ABasicEnemy()
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABasicEnemy::NotifySomethingEnteredInTheTrigger);
 }
 
+#pragma region KNOWLEDGE_GETTERS
 const AAIZone* ABasicEnemy::GetSharedKnowledge() const
 {
 	return SharedKnowledge;
@@ -25,25 +26,14 @@ FVector ABasicEnemy::GetSpawnLocation() const
 	return SpawnLocation;
 }
 
-#pragma region KNOWLEDGE_GETTERS
+const ASplineContainer* ABasicEnemy::GetPatrolSpline() const
+{
+	return PatrolSpline;
+}
+
 FGameplayTagContainer ABasicEnemy::GetGameplayTagContainer() const
 {
 	return GameplayTagContainer;
-}
-
-EBasicEnemyGoal ABasicEnemy::GetCurrentSelectedGoal() const
-{
-	return CurrentSelectedGoal;
-}
-
-TArray<EBasicEnemyGoal> ABasicEnemy::GetCurrentPossibleGoals() const
-{
-	return CurrentPossibleGoals;
-}
-
-bool ABasicEnemy::HasGoal(EBasicEnemyGoal Goal) const
-{
-	return CurrentPossibleGoals.Contains(Goal);
 }
 
 EBasicEnemyState ABasicEnemy::GetCurrentState() const
@@ -51,10 +41,21 @@ EBasicEnemyState ABasicEnemy::GetCurrentState() const
 	return CurrentState;
 }
 
-const ASplineContainer* ABasicEnemy::GetPatrolSpline() const
+TSet<EBasicEnemyGoal> ABasicEnemy::GetCurrentGeneratedGoals() const
 {
-	return PatrolSpline;
+	return CurrentGeneratedGoals;
 }
+
+TSet<EBasicEnemyBehaviour> ABasicEnemy::GetSupportedBehaviours() const
+{
+	return SupportedBehaviours;
+}
+
+EBasicEnemyBehaviour ABasicEnemy::GetCurrentChosenBehaviour() const
+{
+	return CurrentChosenBehaviour;
+}
+
 #pragma endregion 
 
 // Called when the State Tree notifies a change of state
@@ -140,6 +141,17 @@ void ABasicEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 void ABasicEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Get Supported behaviour from DataTable
+	if (SupportedBehavioursDataTable)
+	{
+		for (auto& RowName : SupportedBehavioursDataTable->GetRowNames())
+		{
+			const FBasicEnemySupportedBehaviourMapping* SupportedBehaviour = SupportedBehavioursDataTable->FindRow<FBasicEnemySupportedBehaviourMapping>(RowName, "");
+			if (!SupportedBehaviour) continue;
+			SupportedBehaviours.Add(SupportedBehaviour->BehaviourEnum);
+		}
+	}
 	
 	BasicEnemyController = Cast<ABasicEnemyController>(GetController());
 	BasicEnemyController->OnPlayerSeenDelegate.AddDynamic(this, &ABasicEnemy::NotifyPlayerWasSeen);

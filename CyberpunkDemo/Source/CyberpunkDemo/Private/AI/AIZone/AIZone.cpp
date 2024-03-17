@@ -19,7 +19,7 @@ AAIZone::AAIZone()
 }
 
 #pragma region SHARED_KNOWLEDGE_GETTERS
-const AActor* AAIZone::GetPlayer() const
+AActor* AAIZone::GetPlayer() const
 {
 	return Player;
 }

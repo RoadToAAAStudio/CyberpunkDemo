@@ -7,14 +7,19 @@
 
 void FStateTreeBasicEnemyEvaluator::AddNewGoal(ABasicEnemy* BasicEnemy, FInstanceDataType& InstanceData, EBasicEnemyGoal Goal)
 {
-	BasicEnemy->CurrentPossibleGoals.Add(Goal);
-	InstanceData.PossibleGoals.Add(Goal);
+	BasicEnemy->CurrentGeneratedGoals.Add(Goal);
+	InstanceData.GeneratedGoals.Add(Goal);
 }
 
 void FStateTreeBasicEnemyEvaluator::RemoveGoal(ABasicEnemy* BasicEnemy, FInstanceDataType& InstanceData, EBasicEnemyGoal Goal)
 {
-	BasicEnemy->CurrentPossibleGoals.Remove(Goal);
-	InstanceData.PossibleGoals.Remove(Goal);
+	BasicEnemy->CurrentGeneratedGoals.Remove(Goal);
+	InstanceData.GeneratedGoals.Remove(Goal);
+}
+
+void FStateTreeBasicEnemyEvaluator::TreeStart(FStateTreeExecutionContext& Context) const
+{
+	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 }
 
 void FStateTreeBasicEnemyEvaluator::Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const
@@ -23,10 +28,14 @@ void FStateTreeBasicEnemyEvaluator::Tick(FStateTreeExecutionContext& Context, co
 	ABasicEnemy* BasicEnemy = InstanceData.BasicEnemy;
 	if (!BasicEnemy) return;
 
+	// Idle Goal
+	AddNewGoal(BasicEnemy, InstanceData, EBasicEnemyGoal::Idle);
+	
 	// Patrol Goal
 	if (BasicEnemy->PatrolSpline)
 	{
 		AddNewGoal(BasicEnemy, InstanceData, EBasicEnemyGoal::Patrol);
+		InstanceData.PatrolSpline = BasicEnemy->PatrolSpline;
 	}
 	else
 	{
@@ -37,6 +46,7 @@ void FStateTreeBasicEnemyEvaluator::Tick(FStateTreeExecutionContext& Context, co
 	if (BasicEnemy->GetSharedKnowledge()->GetPlayer())
 	{
 		AddNewGoal(BasicEnemy, InstanceData, EBasicEnemyGoal::Combat);
+		InstanceData.Player = BasicEnemy->GetSharedKnowledge()->GetPlayer();
 	}
 	else
 	{

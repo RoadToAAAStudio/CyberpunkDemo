@@ -16,12 +16,19 @@ struct CYBERPUNKDEMO_API FStateTreeBasicEnemyEvaluatorInstanceData
 	TObjectPtr<ABasicEnemy> BasicEnemy;
 
 	UPROPERTY(VisibleAnywhere, Category="Output")
-	TArray<EBasicEnemyGoal> PossibleGoals;
+	TSet<EBasicEnemyGoal> GeneratedGoals;
 
+	UPROPERTY(VisibleAnywhere, Category="Output")
+	TObjectPtr<ASplineContainer> PatrolSpline;
+	
+	UPROPERTY(VisibleAnywhere, Category="Output")
+	TObjectPtr<AActor> Player;
 };
 
 /**
- * Evaluator that generates goals for the Basic Enemy agent
+ * Evaluator that generates data for both the Basic Enemy and the State Tree (Data on the Basic Enemy is duplicated to be debugged)
+ * Generates Goals from Knowledge and provide all data for every goal generated
+ * Output data has to be check only if the corresponding goal is possible
  */
 USTRUCT(meta = (DisplayName = "Basic Enemy Goal Generator"))
 struct CYBERPUNKDEMO_API FStateTreeBasicEnemyEvaluator : public FStateTreeEvaluatorCommonBase
@@ -34,5 +41,6 @@ struct CYBERPUNKDEMO_API FStateTreeBasicEnemyEvaluator : public FStateTreeEvalua
 	static void RemoveGoal(ABasicEnemy* BasicEnemy, FInstanceDataType& InstanceData, EBasicEnemyGoal Goal);
 	
 	virtual const UStruct* GetInstanceDataType() const override { return FInstanceDataType::StaticStruct(); }
+	virtual void TreeStart(FStateTreeExecutionContext& Context) const override;
 	virtual void Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const override;
 };

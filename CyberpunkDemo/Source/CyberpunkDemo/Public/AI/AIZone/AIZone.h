@@ -144,7 +144,7 @@ public:
 	
 #pragma region SHARED_KNOWLEDGE_GETTERS
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
-	const AActor* GetPlayer() const;
+	AActor* GetPlayer() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
 	FTimerHandle GetCombatTimerHandle() const;
