@@ -5,6 +5,18 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(StateTreeBasicEnemyEvaluator)
 
+void FStateTreeBasicEnemyEvaluator::AddNewGoal(ABasicEnemy* BasicEnemy, FInstanceDataType& InstanceData, EBasicEnemyGoal Goal)
+{
+	BasicEnemy->CurrentPossibleGoals.Add(Goal);
+	InstanceData.PossibleGoals.Add(Goal);
+}
+
+void FStateTreeBasicEnemyEvaluator::RemoveGoal(ABasicEnemy* BasicEnemy, FInstanceDataType& InstanceData, EBasicEnemyGoal Goal)
+{
+	BasicEnemy->CurrentPossibleGoals.Remove(Goal);
+	InstanceData.PossibleGoals.Remove(Goal);
+}
+
 void FStateTreeBasicEnemyEvaluator::Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const
 {
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
@@ -14,24 +26,20 @@ void FStateTreeBasicEnemyEvaluator::Tick(FStateTreeExecutionContext& Context, co
 	// Patrol Goal
 	if (BasicEnemy->PatrolSpline)
 	{
-		BasicEnemy->bPatrolGoal = true;
-		InstanceData.bPatrolGoal = true;
+		AddNewGoal(BasicEnemy, InstanceData, EBasicEnemyGoal::Patrol);
 	}
 	else
 	{
-		BasicEnemy->bPatrolGoal = false;
-		InstanceData.bPatrolGoal = false;
+		RemoveGoal(BasicEnemy, InstanceData, EBasicEnemyGoal::Patrol);
 	}
 	
 	// Combat Goal
 	if (BasicEnemy->GetSharedKnowledge()->GetPlayer())
 	{
-		BasicEnemy->bCombatGoal = true;
-		InstanceData.bCombatGoal = true;
+		AddNewGoal(BasicEnemy, InstanceData, EBasicEnemyGoal::Combat);
 	}
 	else
 	{
-		BasicEnemy->bCombatGoal = false;
-		InstanceData.bCombatGoal = false;
+		RemoveGoal(BasicEnemy, InstanceData, EBasicEnemyGoal::Combat);
 	}
 }

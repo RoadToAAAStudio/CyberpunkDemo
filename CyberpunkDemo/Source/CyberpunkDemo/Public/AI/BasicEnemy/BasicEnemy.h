@@ -12,6 +12,16 @@
 #include "BasicEnemy.generated.h"
 
 UENUM(BlueprintType)
+enum class EBasicEnemyGoal : uint8
+{
+	None,
+	Investigation,
+	Patrol,
+	Combat,
+	Max UMETA(Hidden)
+};
+
+UENUM(BlueprintType)
 enum class EBasicEnemyState : uint8
 {
 	Unaware,
@@ -36,6 +46,7 @@ class CYBERPUNKDEMO_API ABasicEnemy : public ACharacter, public IStateTreeNotifi
 {
 	GENERATED_BODY()
 	friend struct FStateTreeBasicEnemyEvaluator;
+	friend struct FStateTreeSelectGoalTask;
 	
 public:
 	
@@ -53,15 +64,11 @@ protected:
 	UPROPERTY()
 	FGameplayTagContainer GameplayTagContainer;
 
-	
 	UPROPERTY()
-    uint32 bInvestigationGoal : 1;
+	EBasicEnemyGoal CurrentSelectedGoal = EBasicEnemyGoal::None;
 
 	UPROPERTY()
-	uint32 bPatrolGoal : 1;
-	
-	UPROPERTY()
-	uint32 bCombatGoal : 1;
+	TArray<EBasicEnemyGoal> CurrentPossibleGoals;
 
 	/*
 	 * This reflects BasicEnemy State Tree current state
@@ -110,13 +117,13 @@ public:
 	FGameplayTagContainer GetGameplayTagContainer() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
-	bool HasPatrolGoal() const;
+	EBasicEnemyGoal GetCurrentSelectedGoal() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
-	bool HasInvestigationGoal() const;
-
+	TArray<EBasicEnemyGoal> GetCurrentPossibleGoals() const;
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
-	bool HasCombatGoal() const;
+	bool HasGoal(EBasicEnemyGoal Goal) const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
 	EBasicEnemyState GetCurrentState() const;

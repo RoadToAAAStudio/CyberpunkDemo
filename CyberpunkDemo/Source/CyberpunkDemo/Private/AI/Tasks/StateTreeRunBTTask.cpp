@@ -2,7 +2,6 @@
 
 
 #include "AI/Tasks/StateTreeRunBTTask.h"
-
 #include "AIController.h"
 #include "BrainComponent.h"
 #include "StateTreeExecutionContext.h"
@@ -20,7 +19,8 @@ EStateTreeRunStatus FStateTreeRunBTTask::EnterState(FStateTreeExecutionContext& 
 	if (Brain)
 	{
 		Brain->StopLogic(FString(""));
-	}	
+	}
+	
 	bool Success = Controller->RunBehaviorTree(InstanceData.BehaviourTree);
 	if (!Success) return EStateTreeRunStatus::Failed;
 

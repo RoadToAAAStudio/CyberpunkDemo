@@ -31,19 +31,19 @@ FGameplayTagContainer ABasicEnemy::GetGameplayTagContainer() const
 	return GameplayTagContainer;
 }
 
-bool ABasicEnemy::HasPatrolGoal() const
+EBasicEnemyGoal ABasicEnemy::GetCurrentSelectedGoal() const
 {
-	return bPatrolGoal;
+	return CurrentSelectedGoal;
 }
 
-bool ABasicEnemy::HasInvestigationGoal() const
+TArray<EBasicEnemyGoal> ABasicEnemy::GetCurrentPossibleGoals() const
 {
-	return bInvestigationGoal;
+	return CurrentPossibleGoals;
 }
 
-bool ABasicEnemy::HasCombatGoal() const
+bool ABasicEnemy::HasGoal(EBasicEnemyGoal Goal) const
 {
-	return bCombatGoal;
+	return CurrentPossibleGoals.Contains(Goal);
 }
 
 EBasicEnemyState ABasicEnemy::GetCurrentState() const

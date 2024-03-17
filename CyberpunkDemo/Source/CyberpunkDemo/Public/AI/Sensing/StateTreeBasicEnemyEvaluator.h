@@ -16,13 +16,8 @@ struct CYBERPUNKDEMO_API FStateTreeBasicEnemyEvaluatorInstanceData
 	TObjectPtr<ABasicEnemy> BasicEnemy;
 
 	UPROPERTY(VisibleAnywhere, Category="Output")
-	bool bInvestigationGoal = false;
-	
-	UPROPERTY(VisibleAnywhere, Category="Output")
-	bool bPatrolGoal = false;
-	
-	UPROPERTY(VisibleAnywhere, Category="Output")
-	bool bCombatGoal = false;
+	TArray<EBasicEnemyGoal> PossibleGoals;
+
 };
 
 /**
@@ -35,6 +30,9 @@ struct CYBERPUNKDEMO_API FStateTreeBasicEnemyEvaluator : public FStateTreeEvalua
 
 	using FInstanceDataType = FStateTreeBasicEnemyEvaluatorInstanceData;
 
+	static void AddNewGoal(ABasicEnemy* BasicEnemy, FInstanceDataType& InstanceData, EBasicEnemyGoal Goal);
+	static void RemoveGoal(ABasicEnemy* BasicEnemy, FInstanceDataType& InstanceData, EBasicEnemyGoal Goal);
+	
 	virtual const UStruct* GetInstanceDataType() const override { return FInstanceDataType::StaticStruct(); }
 	virtual void Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const override;
 };
