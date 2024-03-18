@@ -47,13 +47,20 @@ void UQuickhackSystemComponent::Inspect()
 	}
 }
 
+// TODO: Fix method is called on tick
+
 void UQuickhackSystemComponent::CreateHacks(const UHackableComponent* HackTarget)
 {
 	TSet<TSubclassOf<UGameplayAbility>> PossibleHacks = HackTarget->GetPossibleHacks();
 	if (PossibleHacks.Num() <= 0) return;
 	for (auto Hack : PossibleHacks)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Orange, FString(Hack->GetName()));
+		//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Orange, FString(Hack->GetName()));
+		UQuickhackWidget* QuickhackWidget = Cast<UQuickhackWidget>(CreateWidget(GetWorld()->GetFirstPlayerController(), QuickhackWidgetClass));
+		AnalysisWidget->QuickhacksVerticalBox->AddChildToVerticalBox(QuickhackWidget);
+		FQuickHackData* QuickhackData = QuickhackDataTable->FindRow<FQuickHackData>(Hack->GetFName(), "");
+		QuickhackWidget->Init(QuickhackData->HackName, QuickhackData->HackCost, *QuickhackData->HackImage);
+		QuickhackWidget->AddToViewport();
 	}
 }
 

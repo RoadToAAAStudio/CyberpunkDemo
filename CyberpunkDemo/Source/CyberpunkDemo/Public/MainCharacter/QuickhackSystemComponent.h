@@ -4,10 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Environment//Interfaces/Hackerable.h"
 #include "Environment/HackableObjects/HackableComponent.h"
 #include "Widgets/AnalysisWidget.h"
+#include "Widgets/QuickhackWidget.h"
 #include "QuickhackSystemComponent.generated.h"
+
+USTRUCT(BlueprintType)
+struct FQuickHackData : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	UTexture2D* HackImage;
+
+	UPROPERTY(EditAnywhere)
+	FString HackName;
+
+	UPROPERTY(EditAnywhere)
+	FString HackCost;
+};
+
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CYBERPUNKDEMO_API UQuickhackSystemComponent : public UActorComponent
@@ -18,6 +34,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quickhack Widget")
 	TSubclassOf<UAnalysisWidget> AnalysisWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quickhack Widget")
+	TSubclassOf<UQuickhackWidget> QuickhackWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Quickhack Data")
+	UDataTable* QuickhackDataTable;
 	
 private:
 	// Parameters to ignore when doing the raycast (set by the component owner)
