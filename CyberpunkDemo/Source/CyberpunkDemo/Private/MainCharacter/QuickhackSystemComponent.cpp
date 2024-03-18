@@ -4,6 +4,7 @@
 #include "MainCharacter/QuickhackSystemComponent.h"
 
 #include "Blueprint/UserWidget.h"
+#include "Environment/HackableObjects/HackableComponent.h"
 
 
 // Sets default values for this component's properties
@@ -21,23 +22,32 @@ void UQuickhackSystemComponent::Inspect()
 	FVector LineStart = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetCameraLocation();
 	FVector LineEnd = LineStart + GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetActorForwardVector() * QuickHackDistance;
 	FHitResult HitResult;
-	IHackerable* HackerableTarget = nullptr;
 	if (GetWorld()->LineTraceSingleByProfile(HitResult, LineStart, LineEnd, "BlockAll", Params))
 	{
-		if (Cast<IHackerable>(HitResult.GetActor()))
+		if (HitResult.GetActor()->GetComponentByClass(UHackableComponent::StaticClass()))
 		{
-			CreateHacks(Cast<IHackerable>(HitResult.GetActor()));
 			DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor::Green, false, 2);
+			HackableComponentTarget = Cast<UHackableComponent>(HitResult.GetActor()->GetComponentByClass(UHackableComponent::StaticClass()));
+			if (!HackableComponentTarget->GetHasBeenInspected() && !HackableComponentTarget->GetIsUnderInspection())
+			{
+				HackableComponentTarget->StartInspectionTimer();
+				GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Emerald, FString("INSPECTING"));
+			}
+			else if (HackableComponentTarget->GetHasBeenInspected())
+			{
+				CreateHacks(Cast<UHackableComponent>(HitResult.GetActor()->GetComponentByClass(UHackableComponent::StaticClass())));
+			}
 		}
 		else
 		{
+			ResetHackTarget();
 			DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor::Red, false, 2);
 			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString("NO VALID HIT"));
 		}
 	}
 }
 
-void UQuickhackSystemComponent::CreateHacks(const IHackerable* HackTarget)
+void UQuickhackSystemComponent::CreateHacks(const UHackableComponent* HackTarget)
 {
 	TSet<TSubclassOf<UGameplayAbility>> PossibleHacks = HackTarget->GetPossibleHacks();
 	if (PossibleHacks.Num() <= 0) return;
@@ -51,24 +61,23 @@ void UQuickhackSystemComponent::HandleAnalysisWidget()
 {
 	if (!AnalysisWidget)
 	{
-		AnalysisWidget = Cast<UAnalysisWidget>(CreateWidget(GetWorld()->GetFirstPlayerController(), UAnalysisWidget::StaticClass()));
-		AnalysisWidget->AddToViewport();
+		AnalysisWidget = Cast<UAnalysisWidget>(CreateWidget(GetWorld()->GetFirstPlayerController(), AnalysisWidgetClass));
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Green, FString("CREATING WIDGET"));
+	}
+
+	if (AnalysisWidget->IsInViewport())
+	{
+		AnalysisWidget->RemoveFromParent();
+		ResetHackTarget();
+		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->SetFOV(100);
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString("REMOVING WIDGET"));
 	}
 	else
 	{
-		if (AnalysisWidget->IsInViewport())
-		{
-			AnalysisWidget->RemoveFromParent();
-			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString("REMOVING WIDGET"));
-		}
-		else
-		{
-			AnalysisWidget->AddToViewport();
-			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Green, FString("ADDING WIDGET"));
-		}
+		AnalysisWidget->AddToViewport();
+		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->SetFOV(70);
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Green, FString("ADDING WIDGET"));
 	}
-
 }
 
 
@@ -81,6 +90,15 @@ void UQuickhackSystemComponent::BeginPlay()
 	
 }
 
+void UQuickhackSystemComponent::ResetHackTarget()
+{
+	if (HackableComponentTarget)
+	{
+		HackableComponentTarget->StopInspectionTimer();
+		HackableComponentTarget = nullptr;
+	}
+}
+
 
 // Called every frame
 void UQuickhackSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -88,7 +106,13 @@ void UQuickhackSystemComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	if (AnalysisWidget)
+	{
+		if (AnalysisWidget->IsInViewport())
+		{
+			Inspect();
+		}
+	}
 }
 
 void UQuickhackSystemComponent::SetIgnoredParams(const FCollisionQueryParams ParamsToIgnore)

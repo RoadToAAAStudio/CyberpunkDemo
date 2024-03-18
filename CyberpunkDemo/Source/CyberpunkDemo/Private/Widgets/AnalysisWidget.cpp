@@ -2,3 +2,8 @@
 
 
 #include "Widgets/AnalysisWidget.h"
+
+void UAnalysisWidget::NativePreConstruct()
+{
+	Super::NativePreConstruct();
+}

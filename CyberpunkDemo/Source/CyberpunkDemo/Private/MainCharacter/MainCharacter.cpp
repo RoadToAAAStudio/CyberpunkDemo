@@ -155,7 +155,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 		// Analysis
 		EnhancedInputComponent->BindAction(AnalysisAction, ETriggerEvent::Started, QuickhackSystemComponent, &UQuickhackSystemComponent::HandleAnalysisWidget);
-		EnhancedInputComponent->BindAction(AnalysisAction, ETriggerEvent::Ongoing, QuickhackSystemComponent, &UQuickhackSystemComponent::Inspect);
+		//EnhancedInputComponent->BindAction(AnalysisAction, ETriggerEvent::Ongoing, QuickhackSystemComponent, &UQuickhackSystemComponent::Inspect);
 		EnhancedInputComponent->BindAction(AnalysisAction, ETriggerEvent::Completed, QuickhackSystemComponent, &UQuickhackSystemComponent::HandleAnalysisWidget);
 	}
 }
