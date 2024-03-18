@@ -8,6 +8,6 @@ public class CyberpunkDemo : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayStateTreeModule", "GameplayTags", "StateTreeModule", "GameplayAbilities", "GameplayTags", "GameplayTasks", "UMG"});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayStateTreeModule", "GameplayTags", "StateTreeModule", "GameplayAbilities", "GameplayTags", "GameplayTasks", "UMG", "StructUtils"});
 	}
 }

@@ -13,12 +13,6 @@ struct CYBERPUNKDEMO_API FStateTreeNotifierTaskInstanceData
 
 	UPROPERTY(EditAnywhere, Category = "Context")
 	TObjectPtr<AActor> Actor;
-
-	UPROPERTY(EditAnywhere, Category = "Parameter")
-	TObjectPtr<UStateTree> StateTreeNotifier;
-	
-	UPROPERTY(EditAnywhere, Category = "Parameter")
-	TObjectPtr<UDataTable> DataTable;
 };
 
 /**

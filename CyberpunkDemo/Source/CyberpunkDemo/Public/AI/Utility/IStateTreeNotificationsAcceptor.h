@@ -23,5 +23,5 @@ class CYBERPUNKDEMO_API IStateTreeNotificationsAcceptor
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "State Tree")
-	void AcceptStateTreeNotification(const UStateTree* StateTree, const UDataTable* DataTable, const FStateTreeTransitionResult& Transition);
+	void AcceptStateTreeNotification(const FName& SourceStateName, const FName& CurrentStateName);
 };

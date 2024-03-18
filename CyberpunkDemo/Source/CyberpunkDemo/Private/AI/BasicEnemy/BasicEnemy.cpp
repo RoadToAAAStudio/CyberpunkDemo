@@ -1,8 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AI/BasicEnemy/BasicEnemy.h"
-#include "AI/Utility/AIUtility.h"
-#include "BehaviorTree/BlackboardComponent.h"
 #include "Components/CapsuleComponent.h"
 
 // Sets default values
@@ -59,20 +57,23 @@ EBasicEnemyBehaviour ABasicEnemy::GetCurrentChosenBehaviour() const
 #pragma endregion 
 
 // Called when the State Tree notifies a change of state
-void ABasicEnemy::AcceptStateTreeNotification_Implementation(const UStateTree* StateTreeNotifier, const UDataTable* DataTable, const FStateTreeTransitionResult& Transition)
+void ABasicEnemy::AcceptStateTreeNotification_Implementation(const FName& SourceStateName, const FName& CurrentStateName)
 {
-	IStateTreeNotificationsAcceptor::AcceptStateTreeNotification_Implementation(StateTreeNotifier, DataTable, Transition);
-	const FName CurrentStateName = UAIUtility::GetCurrentState(StateTreeNotifier, Transition);
-	const FName SourceStateName = UAIUtility::GetSourceState(StateTreeNotifier, Transition);
-	const FBasicEnemyStateMapping* CurrentStateData = DataTable->FindRow<FBasicEnemyStateMapping>(CurrentStateName, "");
-	const FBasicEnemyStateMapping* SourceStateData = DataTable->FindRow<FBasicEnemyStateMapping>(SourceStateName, "");
+	IStateTreeNotificationsAcceptor::AcceptStateTreeNotification_Implementation(SourceStateName, CurrentStateName);
 
-	if(!CurrentStateData || !SourceStateData) return;
+	const UEnum* GoalEnum = FindFirstObjectSafe<UEnum>(TEXT("EBasicEnemyState"));
+	if (!GoalEnum) return;
+
+	int32 Index = GoalEnum->GetIndexByName(SourceStateName);
+	EBasicEnemyState SourceState = static_cast<EBasicEnemyState>(Index);
 	
-	CurrentState = CurrentStateData->StateEnum;
+	Index = GoalEnum->GetIndexByName(CurrentStateName);
+	EBasicEnemyState NewState = static_cast<EBasicEnemyState>(Index);
+
+	CurrentState = NewState;
 	
-	StateChanged(SourceStateData->StateEnum, CurrentStateData->StateEnum);
-	OnBasicEnemyStateChangedDelegate.Broadcast(SourceStateData->StateEnum, CurrentStateData->StateEnum);
+	StateChanged(SourceState, NewState);
+	OnBasicEnemyStateChangedDelegate.Broadcast(SourceState, NewState);
 }
 
 #pragma region FUNCTIONS_LISTENERS
@@ -149,7 +150,7 @@ void ABasicEnemy::BeginPlay()
 		{
 			const FBasicEnemySupportedBehaviourMapping* SupportedBehaviour = SupportedBehavioursDataTable->FindRow<FBasicEnemySupportedBehaviourMapping>(RowName, "");
 			if (!SupportedBehaviour) continue;
-			SupportedBehaviours.Add(SupportedBehaviour->BehaviourEnum);
+			SupportedBehaviours.Append(SupportedBehaviour->BehavioursEnum);
 		}
 	}
 	

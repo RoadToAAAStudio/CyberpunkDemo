@@ -166,7 +166,7 @@ public:
 #pragma endregion
 	
 	// StateTree notifications acceptor
-	void AcceptStateTreeNotification_Implementation(const UStateTree* StateTreeNotifier, const UDataTable* DataTable, const FStateTreeTransitionResult& Transition) override;
+	void AcceptStateTreeNotification_Implementation(const FName& SourceStateName, const FName& CurrentStateName) override;
 	
 protected:
 

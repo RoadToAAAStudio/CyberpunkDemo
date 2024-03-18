@@ -28,7 +28,7 @@ struct CYBERPUNKDEMO_API FStateTreeBasicEnemyEvaluatorInstanceData
 /**
  * Evaluator that generates data for both the Basic Enemy and the State Tree (Data on the Basic Enemy is duplicated to be debugged)
  * Generates Goals from Knowledge and provide all data for every goal generated
- * Output data has to be check only if the corresponding goal is possible
+ * Output data has to be checked only if the corresponding goal is possible
  */
 USTRUCT(meta = (DisplayName = "Basic Enemy Goal Generator"))
 struct CYBERPUNKDEMO_API FStateTreeBasicEnemyEvaluator : public FStateTreeEvaluatorCommonBase

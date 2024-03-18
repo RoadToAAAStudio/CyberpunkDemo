@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AI/AIZone/AIZone.h"
-#include "AI/Utility/AIUtility.h"
 #include "AI/WorldInterfacing/Location.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -57,19 +56,22 @@ EAIZoneState AAIZone::GetCurrentState() const
 }
 #pragma endregion 
 
-void AAIZone::AcceptStateTreeNotification_Implementation(const UStateTree* StateTreeNotifier, const UDataTable* DataTable, const FStateTreeTransitionResult& Transition)
+void AAIZone::AcceptStateTreeNotification_Implementation(const FName& SourceStateName, const FName& CurrentStateName)
 {
-	IStateTreeNotificationsAcceptor::AcceptStateTreeNotification_Implementation(StateTreeNotifier, DataTable, Transition);
-	const FName CurrentStateName = UAIUtility::GetCurrentState(StateTreeNotifier, Transition);
-	const FName SourceStateName = UAIUtility::GetSourceState(StateTreeNotifier, Transition);
-	const FAIZoneMapping* CurrentStateData = DataTable->FindRow<FAIZoneMapping>(CurrentStateName, "");
-	const FAIZoneMapping* SourceStateData = DataTable->FindRow<FAIZoneMapping>(SourceStateName, "");
+	IStateTreeNotificationsAcceptor::AcceptStateTreeNotification_Implementation(SourceStateName, CurrentStateName);
 
-	if(!CurrentStateData || !SourceStateData) return;
+	const UEnum* GoalEnum = FindFirstObjectSafe<UEnum>(TEXT("EAIZoneState"));
+	if (!GoalEnum) return;
+
+	int32 Index = GoalEnum->GetIndexByName(SourceStateName);
+	EAIZoneState SourceState = static_cast<EAIZoneState>(Index);
 	
-	CurrentState = CurrentStateData->StateEnum;
+	Index = GoalEnum->GetIndexByName(CurrentStateName);
+	EAIZoneState NewState = static_cast<EAIZoneState>(Index);
 	
-	switch (SourceStateData->StateEnum)
+	CurrentState = NewState;
+	
+	switch (SourceState)
 	{
 	case EAIZoneState::Unaware:
 		break;
@@ -88,7 +90,7 @@ void AAIZone::AcceptStateTreeNotification_Implementation(const UStateTree* State
 		
 	}
 	
-	switch (CurrentState)
+	switch (NewState)
 	{
 	case EAIZoneState::Unaware:
 		break;
@@ -117,8 +119,8 @@ void AAIZone::AcceptStateTreeNotification_Implementation(const UStateTree* State
 		
 	}
 	
-	StateChanged(SourceStateData->StateEnum, CurrentStateData->StateEnum);
-	OnAIZoneManagerStateChangedDelegate.Broadcast(SourceStateData->StateEnum, CurrentStateData->StateEnum);
+	StateChanged(SourceState, NewState);
+	OnAIZoneManagerStateChangedDelegate.Broadcast(SourceState, NewState);
 }
 
 #pragma region FUNCTIONS_LISTENERS

@@ -23,21 +23,21 @@ enum class EBasicEnemyGoal : uint8
 };
 
 UENUM(BlueprintType)
-enum class EBasicEnemyState : uint8
-{
-	Unaware,
-	Combat,
-	Alerted,
-	Max UMETA(Hidden)
-};
-
-UENUM(BlueprintType)
 enum class EBasicEnemyBehaviour : uint8
 {
 	None,
 	Investigation,
 	Patrol,
 	Combat,
+	Max UMETA(Hidden)
+};
+
+UENUM(BlueprintType)
+enum class EBasicEnemyState : uint8
+{
+	Unaware,
+	Combat,
+	Alerted,
 	Max UMETA(Hidden)
 };
 
@@ -56,7 +56,25 @@ struct FBasicEnemySupportedBehaviourMapping : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	EBasicEnemyBehaviour BehaviourEnum = EBasicEnemyBehaviour::None;
+	TSet<EBasicEnemyBehaviour> BehavioursEnum;
+};
+
+USTRUCT(BlueprintType)
+struct FSetBasicEnemyBehaviourWrapper
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSet<EBasicEnemyBehaviour> BehavioursEnum;
+};
+
+USTRUCT(BlueprintType)
+struct FBasicEnemyBehavioursPerGoalMapping : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TMap<EBasicEnemyGoal, FSetBasicEnemyBehaviourWrapper> BehaviourEnum;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBasicEnemyStateChangedSignature, EBasicEnemyState, SourceState, EBasicEnemyState, NewState);
@@ -158,7 +176,7 @@ public:
 #pragma endregion
 	
 	// StateTree notifications acceptor
-	void AcceptStateTreeNotification_Implementation(const UStateTree* StateTreeNotifier, const UDataTable* DataTable, const FStateTreeTransitionResult& Transition) override;
+	void AcceptStateTreeNotification_Implementation(const FName& SourceStateName, const FName& CurrentStateName) override;
 	
 protected:
 	

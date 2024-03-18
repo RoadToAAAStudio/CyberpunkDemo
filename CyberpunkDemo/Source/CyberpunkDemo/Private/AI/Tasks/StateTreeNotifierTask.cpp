@@ -8,9 +8,12 @@ EStateTreeRunStatus FStateTreeNotifierTask::EnterState(FStateTreeExecutionContex
 {
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 	AActor* Actor = InstanceData.Actor;
+	
 	if (Cast<IStateTreeNotificationsAcceptor>(Actor))
 	{
-		Cast<IStateTreeNotificationsAcceptor>(Actor)->Execute_AcceptStateTreeNotification(Actor, InstanceData.StateTreeNotifier, InstanceData.DataTable, Transition);
+		FName SourceStateName = Context.GetStateTree()->GetStates()[Transition.SourceState.Index].Name;
+		FName CurrentStateName = Context.GetStateTree()->GetStates()[Transition.CurrentState.Index].Name;
+		Cast<IStateTreeNotificationsAcceptor>(Actor)->Execute_AcceptStateTreeNotification(Actor, SourceStateName, CurrentStateName);
 	}
 	return EStateTreeRunStatus::Running;
 }
