@@ -35,32 +35,20 @@ void UQuickhackSystemComponent::Inspect()
 			}
 			else if (HackableComponentTarget->GetHasBeenInspected())
 			{
-				CreateHacks(Cast<UHackableComponent>(HitResult.GetActor()->GetComponentByClass(UHackableComponent::StaticClass())));
+				//CreateHacks(Cast<UHackableComponent>(HitResult.GetActor()->GetComponentByClass(UHackableComponent::StaticClass())));
+				if (!bIsQuickhackCreated)
+				{
+					bIsQuickhackCreated = true;
+					AnalysisWidget->CreateHacks(Cast<UHackableComponent>(HitResult.GetActor()->GetComponentByClass(UHackableComponent::StaticClass())));
+				}
 			}
 		}
 		else
 		{
 			ResetHackTarget();
 			DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor::Red, false, 2);
-			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString("NO VALID HIT"));
+			//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString("NO VALID HIT"));
 		}
-	}
-}
-
-// TODO: Fix method is called on tick
-
-void UQuickhackSystemComponent::CreateHacks(const UHackableComponent* HackTarget)
-{
-	TSet<TSubclassOf<UGameplayAbility>> PossibleHacks = HackTarget->GetPossibleHacks();
-	if (PossibleHacks.Num() <= 0) return;
-	for (auto Hack : PossibleHacks)
-	{
-		//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Orange, FString(Hack->GetName()));
-		UQuickhackWidget* QuickhackWidget = Cast<UQuickhackWidget>(CreateWidget(GetWorld()->GetFirstPlayerController(), QuickhackWidgetClass));
-		AnalysisWidget->QuickhacksVerticalBox->AddChildToVerticalBox(QuickhackWidget);
-		FQuickHackData* QuickhackData = QuickhackDataTable->FindRow<FQuickHackData>(Hack->GetFName(), "");
-		QuickhackWidget->Init(QuickhackData->HackName, QuickhackData->HackCost, *QuickhackData->HackImage);
-		QuickhackWidget->AddToViewport();
 	}
 }
 
@@ -69,7 +57,8 @@ void UQuickhackSystemComponent::HandleAnalysisWidget()
 	if (!AnalysisWidget)
 	{
 		AnalysisWidget = Cast<UAnalysisWidget>(CreateWidget(GetWorld()->GetFirstPlayerController(), AnalysisWidgetClass));
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Green, FString("CREATING WIDGET"));
+		AnalysisWidget->Init(QuickhackDataTable, QuickhackWidgetClass);
+		//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Green, FString("CREATING WIDGET"));
 	}
 
 	if (AnalysisWidget->IsInViewport())
@@ -77,13 +66,13 @@ void UQuickhackSystemComponent::HandleAnalysisWidget()
 		AnalysisWidget->RemoveFromParent();
 		ResetHackTarget();
 		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->SetFOV(100);
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString("REMOVING WIDGET"));
+		//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString("REMOVING WIDGET"));
 	}
 	else
 	{
 		AnalysisWidget->AddToViewport();
 		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->SetFOV(70);
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Green, FString("ADDING WIDGET"));
+		//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Green, FString("ADDING WIDGET"));
 	}
 }
 
@@ -101,10 +90,13 @@ void UQuickhackSystemComponent::ResetHackTarget()
 {
 	if (HackableComponentTarget)
 	{
-		HackableComponentTarget->StopInspectionTimer();
+		if (HackableComponentTarget->GetIsUnderInspection()) HackableComponentTarget->StopInspectionTimer();
 		HackableComponentTarget = nullptr;
 	}
-}
+	// TODO: Remove quickhack list from widget
+	bIsQuickhackCreated = false;
+	AnalysisWidget->RemoveHacks();
+}							
 
 
 // Called every frame

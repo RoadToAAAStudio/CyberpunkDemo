@@ -9,22 +9,6 @@
 #include "Widgets/QuickhackWidget.h"
 #include "QuickhackSystemComponent.generated.h"
 
-USTRUCT(BlueprintType)
-struct FQuickHackData : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere)
-	UTexture2D* HackImage;
-
-	UPROPERTY(EditAnywhere)
-	FString HackName;
-
-	UPROPERTY(EditAnywhere)
-	FString HackCost;
-};
-
-
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CYBERPUNKDEMO_API UQuickhackSystemComponent : public UActorComponent
 {
@@ -53,6 +37,8 @@ private:
 
 	UPROPERTY()
 	UHackableComponent* HackableComponentTarget;
+
+	bool bIsQuickhackCreated = false;
 
 public:
 	// Sets default values for this component's properties

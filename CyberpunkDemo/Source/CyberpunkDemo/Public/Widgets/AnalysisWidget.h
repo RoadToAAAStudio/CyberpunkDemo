@@ -5,8 +5,12 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/VerticalBox.h"
+#include "Widgets/QuickhackWidget.h"
+#include "Environment/HackableObjects/HackableComponent.h"
+#include "Utility/DataStructures/FQuickhackDataStructure.h"
 #include "AnalysisWidget.generated.h"
 
+//class UQuickhackSystemComponent;
 /**
  * 
  */
@@ -23,7 +27,18 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UVerticalBox* InformationVerticalBox;
 
-protected:
+private:
+	
+	TSubclassOf<UQuickhackWidget> QuickhackWidgetClass;
 
-	virtual void NativePreConstruct() override;
+	UPROPERTY()
+	UDataTable* QuickhackDataTable;
+
+public:
+
+	void Init(UDataTable* _QuickhackDataTable, TSubclassOf<UQuickhackWidget> _QuickhackWidgetClass);
+
+	void CreateHacks(const UHackableComponent* HackTarget);
+
+	void RemoveHacks();
 };

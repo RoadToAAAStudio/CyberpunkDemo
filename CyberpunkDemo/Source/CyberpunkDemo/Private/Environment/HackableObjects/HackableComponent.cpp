@@ -70,6 +70,7 @@ void UHackableComponent::BeginPlay()
 void UHackableComponent::SetHasBeenInspected()
 {
 	bHasBeenInspected = true;
+	bIsUnderInspection = false;
 }
 
 // Called every frame
