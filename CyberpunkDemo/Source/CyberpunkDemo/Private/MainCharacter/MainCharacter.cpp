@@ -69,7 +69,23 @@ void AMainCharacter::BeginPlay()
 
 	JumpMaxCount = 2;
 
+	// Gameplay Ability System
 	ShootSpec = AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(UGA_Shoot::StaticClass()));
+}
+
+TSet<TSubclassOf<UGameplayAbility>> AMainCharacter::GetPlayerHacks()
+{
+	TSet<TSubclassOf<UGameplayAbility>> PlayerHacks;
+	// if (AbilitySystemComponent)
+	// {
+	// 	for (auto AbilitySpecs : AbilitySystemComponent->GetActivatableAbilities())
+	// 	{
+	// 		PlayerHacks.Add(AbilitySpecs.Ability->GetClass());
+	// 	}
+	// 	return PlayerHacks;
+	// }
+	PlayerHacks.Add(UGA_Shoot::StaticClass());
+	return PlayerHacks;
 }
 
 // Called every frame
@@ -77,6 +93,7 @@ void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//GEngine->AddOnScreenDebugMessage(-1,0,FColor::Black, FString(FString::FromInt(AbilitySystemComponent->IsActive())));
 }
 
 void AMainCharacter::Jump()
@@ -123,7 +140,7 @@ void AMainCharacter::DisableMappingContext(bool Enable)
 	}
 }
 
-// Called to bind functionality to input [!]
+// Called to bind functionality to input
 void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Set up action bindings

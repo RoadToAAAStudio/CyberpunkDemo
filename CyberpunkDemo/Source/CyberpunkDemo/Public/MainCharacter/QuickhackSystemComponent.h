@@ -9,6 +9,9 @@
 #include "Widgets/QuickhackWidget.h"
 #include "QuickhackSystemComponent.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCompletedTargetAnalysisSignature, UHackableComponent*);
+DECLARE_MULTICAST_DELEGATE(FOnFinishedTargetAnalysisSignature);
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CYBERPUNKDEMO_API UQuickhackSystemComponent : public UActorComponent
 {
@@ -24,6 +27,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Quickhack Data")
 	UDataTable* QuickhackDataTable;
+
+	FOnCompletedTargetAnalysisSignature OnCompletedTargetAnalysis;
+	FOnFinishedTargetAnalysisSignature OnFinishedTargetAnalysis;
 	
 private:
 	// Parameters to ignore when doing the raycast (set by the component owner)
@@ -38,6 +44,9 @@ private:
 	UPROPERTY()
 	UHackableComponent* HackableComponentTarget;
 
+	UPROPERTY()
+	UHackableComponent* PreviousHackableComponentTarget;
+
 	bool bIsQuickhackCreated = false;
 
 public:
@@ -45,8 +54,6 @@ public:
 	UQuickhackSystemComponent();
 
 	void Inspect();
-
-	void CreateHacks(const UHackableComponent* HackTarget);
 
 	void HandleAnalysisWidget();
 

@@ -111,7 +111,6 @@ public:
 	// Getter for the ASC
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
-
 	// Sets default values for this character's properties
 	AMainCharacter(const FObjectInitializer& ObjectInitializer);
 
@@ -140,6 +139,8 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void PerformShoot();
+
+	TSet<TSubclassOf<UGameplayAbility>> GetPlayerHacks();
 
 protected:
 	

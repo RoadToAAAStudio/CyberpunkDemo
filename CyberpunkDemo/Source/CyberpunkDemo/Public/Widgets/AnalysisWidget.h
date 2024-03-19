@@ -10,6 +10,7 @@
 #include "Utility/DataStructures/FQuickhackDataStructure.h"
 #include "AnalysisWidget.generated.h"
 
+
 //class UQuickhackSystemComponent;
 /**
  * 
@@ -34,11 +35,16 @@ private:
 	UPROPERTY()
 	UDataTable* QuickhackDataTable;
 
+	UPROPERTY()
+	class UQuickhackSystemComponent* Owner;
+
+	TSet<TSubclassOf<UGameplayAbility>> PlayerHacks;
+
 public:
 
-	void Init(UDataTable* _QuickhackDataTable, TSubclassOf<UQuickhackWidget> _QuickhackWidgetClass);
+	void Init(UQuickhackSystemComponent* _Owner, UDataTable* _QuickhackDataTable, TSubclassOf<UQuickhackWidget> _QuickhackWidgetClass);
 
-	void CreateHacks(const UHackableComponent* HackTarget);
+	void CreateHacks(UHackableComponent* HackTarget);
 
 	void RemoveHacks();
 };

@@ -28,18 +28,30 @@ void UQuickhackSystemComponent::Inspect()
 		{
 			DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor::Green, false, 2);
 			HackableComponentTarget = Cast<UHackableComponent>(HitResult.GetActor()->GetComponentByClass(UHackableComponent::StaticClass()));
+
+			// Initialize the variable used to check if the player is going straight from a hackable component to another
+			if (!PreviousHackableComponentTarget) PreviousHackableComponentTarget = Cast<UHackableComponent>(HitResult.GetActor()->GetComponentByClass(UHackableComponent::StaticClass()));
+
+			// Check if the player already knows the target
 			if (!HackableComponentTarget->GetHasBeenInspected() && !HackableComponentTarget->GetIsUnderInspection())
 			{
 				HackableComponentTarget->StartInspectionTimer();
-				GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Emerald, FString("INSPECTING"));
 			}
 			else if (HackableComponentTarget->GetHasBeenInspected())
 			{
-				//CreateHacks(Cast<UHackableComponent>(HitResult.GetActor()->GetComponentByClass(UHackableComponent::StaticClass())));
+				// Construct the quickhack list only once
 				if (!bIsQuickhackCreated)
 				{
 					bIsQuickhackCreated = true;
-					AnalysisWidget->CreateHacks(Cast<UHackableComponent>(HitResult.GetActor()->GetComponentByClass(UHackableComponent::StaticClass())));
+					OnCompletedTargetAnalysis.Broadcast(Cast<UHackableComponent>(HitResult.GetActor()->GetComponentByClass(UHackableComponent::StaticClass())));
+				}
+			}
+			
+			if (HackableComponentTarget && PreviousHackableComponentTarget)
+			{
+				if (HackableComponentTarget != PreviousHackableComponentTarget)
+				{
+					ResetHackTarget();
 				}
 			}
 		}
@@ -47,7 +59,6 @@ void UQuickhackSystemComponent::Inspect()
 		{
 			ResetHackTarget();
 			DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor::Red, false, 2);
-			//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString("NO VALID HIT"));
 		}
 	}
 }
@@ -57,8 +68,7 @@ void UQuickhackSystemComponent::HandleAnalysisWidget()
 	if (!AnalysisWidget)
 	{
 		AnalysisWidget = Cast<UAnalysisWidget>(CreateWidget(GetWorld()->GetFirstPlayerController(), AnalysisWidgetClass));
-		AnalysisWidget->Init(QuickhackDataTable, QuickhackWidgetClass);
-		//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Green, FString("CREATING WIDGET"));
+		AnalysisWidget->Init(this, QuickhackDataTable, QuickhackWidgetClass);
 	}
 
 	if (AnalysisWidget->IsInViewport())
@@ -66,13 +76,11 @@ void UQuickhackSystemComponent::HandleAnalysisWidget()
 		AnalysisWidget->RemoveFromParent();
 		ResetHackTarget();
 		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->SetFOV(100);
-		//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString("REMOVING WIDGET"));
 	}
 	else
 	{
 		AnalysisWidget->AddToViewport();
 		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->SetFOV(70);
-		//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Green, FString("ADDING WIDGET"));
 	}
 }
 
@@ -91,11 +99,11 @@ void UQuickhackSystemComponent::ResetHackTarget()
 	if (HackableComponentTarget)
 	{
 		if (HackableComponentTarget->GetIsUnderInspection()) HackableComponentTarget->StopInspectionTimer();
+		PreviousHackableComponentTarget = HackableComponentTarget;
 		HackableComponentTarget = nullptr;
 	}
-	// TODO: Remove quickhack list from widget
 	bIsQuickhackCreated = false;
-	AnalysisWidget->RemoveHacks();
+	OnFinishedTargetAnalysis.Broadcast();
 }							
 
 
