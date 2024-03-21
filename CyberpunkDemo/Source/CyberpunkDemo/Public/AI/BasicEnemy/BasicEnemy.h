@@ -3,38 +3,36 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BasicEnemyController.h"
-#include "AI/AIZone/AIZone.h"
 #include "AI/Utility/IStateTreeNotificationsAcceptor.h"
 #include "AI/Utility/SplineContainer.h"
 #include "Components/StateTreeComponent.h"
 #include "GameFramework/Character.h"
 #include "BasicEnemy.generated.h"
 
-UENUM(BlueprintType)
-enum class EBasicEnemyGoal : uint8
-{
-	None,
-	Idle,
-	Investigation,
-	Patrol,
-	Combat,
-	Max UMETA(Hidden)
-};
+class ABasicEnemyController;
 
 UENUM(BlueprintType)
 enum class EBasicEnemyBehaviour : uint8
 {
 	None,
-	Investigation,
+	Idle,
+	ReturnToSpawnPoint,
 	Patrol,
-	Combat,
+	Investigation,
+	BlindInvestigation,
+	Shoot,
+	QuickMeleeAttack,
+	ThrowGrenade,
+	MoveToCover,
+	ShootFromCover,
+	ThrowGrenadeFromCover,
 	Max UMETA(Hidden)
 };
 
 UENUM(BlueprintType)
 enum class EBasicEnemyState : uint8
 {
+	None,
 	Unaware,
 	Combat,
 	Alerted,
@@ -59,24 +57,6 @@ struct FBasicEnemySupportedBehaviourMapping : public FTableRowBase
 	TSet<EBasicEnemyBehaviour> BehavioursEnum;
 };
 
-USTRUCT(BlueprintType)
-struct FSetBasicEnemyBehaviourWrapper
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSet<EBasicEnemyBehaviour> BehavioursEnum;
-};
-
-USTRUCT(BlueprintType)
-struct FBasicEnemyBehavioursPerGoalMapping : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TMap<EBasicEnemyGoal, FSetBasicEnemyBehaviourWrapper> BehaviourEnum;
-};
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBasicEnemyStateChangedSignature, EBasicEnemyState, SourceState, EBasicEnemyState, NewState);
 
 UCLASS()
@@ -93,31 +73,25 @@ public:
 	FOnBasicEnemyStateChangedSignature OnBasicEnemyStateChangedDelegate;
 #pragma endregion
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<ASplineContainer> PatrolSpline;
+	
 protected:
 
-#pragma region PERSONAL_KNOWLEDGE
-	UPROPERTY()
-	FVector SpawnLocation;
-	
-	UPROPERTY()
-	FGameplayTagContainer GameplayTagContainer;
-	
+#pragma region DECISIONMAKING
 	/*
-	 * This reflects BasicEnemy State Tree current state
-	 * Transitions:
-	 *		Unaware:
-	 *			To Combat: if the BasicEnemy sees the player or is Sensed by someone else
-	 *		Combat:
-	 *			To Alerted: if the combat timer expires
-	 *		Alerted:
-	 *			To Combat: if the BasicEnemy sees the player or is Sensed by someone else
-	 *			To Unaware: if the alerted timer expires
-	 */
+	* This reflects BasicEnemy State Tree current state
+	* Transitions:
+	*		Unaware:
+	*			To Combat: if the BasicEnemy sees the player or is Sensed by someone else
+	*		Combat:
+	*			To Alerted: if the combat timer expires
+	*		Alerted:
+	*			To Combat: if the BasicEnemy sees the player or is Sensed by someone else
+	*			To Unaware: if the alerted timer expires
+	*/
 	UPROPERTY()
 	EBasicEnemyState CurrentState = EBasicEnemyState::Unaware;
-
-	UPROPERTY()
-	TSet<EBasicEnemyGoal> CurrentGeneratedGoals;
 
 	UPROPERTY()
 	TSet<EBasicEnemyBehaviour> SupportedBehaviours;
@@ -127,15 +101,7 @@ protected:
 	
 	UPROPERTY()
 	TObjectPtr<ABasicEnemyController> BasicEnemyController;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<ASplineContainer> PatrolSpline;
 #pragma endregion
-
-#pragma region SHARED_KNOWLEDGE
-	UPROPERTY()
-	TObjectPtr<AAIZone> SharedKnowledge;
-#pragma endregion 
 
 #pragma region PERSONAL_COMPONENTS	
 	UPROPERTY(EditAnywhere, Instanced, Category = "DecisionMaking")
@@ -148,31 +114,16 @@ protected:
 public:
 	// Sets default values for this character's properties
 	ABasicEnemy();
-	
-#pragma region KNOWLEDGE_GETTERS
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
-	const AAIZone* GetSharedKnowledge() const;
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal |Knowldge ")
-	FVector GetSpawnLocation() const;
-	
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
-	const ASplineContainer* GetPatrolSpline() const;
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
-	FGameplayTagContainer GetGameplayTagContainer() const;
-	
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
+#pragma region DECISIONMAKING_GETTERS
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | DecisionMaking | Behaviour")
 	EBasicEnemyState GetCurrentState() const;
 	
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge | Goal")
-	TSet<EBasicEnemyGoal> GetCurrentGeneratedGoals() const;
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge | Behaviour")
-	TSet<EBasicEnemyBehaviour> GetSupportedBehaviours() const;
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge | Behaviour")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | DecisionMaking | Behaviour")
 	EBasicEnemyBehaviour GetCurrentChosenBehaviour() const;
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | DecisionMaking | Behaviour")
+	TSet<EBasicEnemyBehaviour> GetSupportedBehaviours() const;
 #pragma endregion
 	
 	// StateTree notifications acceptor

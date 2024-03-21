@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AI/BasicEnemy/BasicEnemyController.h"
+
+#include "AI/AIZone/AIZone.h"
 #include "AI/BasicEnemy/BasicEnemy.h"
 #include "Kismet/GameplayStatics.h"
 #include "Perception/AIPerceptionComponent.h"
@@ -12,16 +14,34 @@ ABasicEnemyController::ABasicEnemyController(const FObjectInitializer& ObjectIni
 	SetupPerceptionSystem();
 }
 
-FGameplayTagContainer ABasicEnemyController::GetGameplayTagContainer() const
+#pragma region KNOWELEDGE_GETTERS
+FVector ABasicEnemyController::GetSpawnLocation() const
 {
-	return GameplayTagsContainer;
+	return PersonalKnowledge.SpawnLocation;
 }
 
+const ASplineContainer* ABasicEnemyController::GetPatrolSpline() const
+{
+	return PersonalKnowledge.PatrolSpline;
+}
+
+FGameplayTagContainer ABasicEnemyController::GetTags() const
+{
+	return PersonalKnowledge.Tags;
+}
+
+TSet<EBasicEnemyGoal> ABasicEnemyController::GetCurrentGeneratedGoals() const
+{
+	return PersonalKnowledge.CurrentGeneratedGoals;
+}
+#pragma endregion 
+
+#pragma region SENSORS_CONTROL
 void ABasicEnemyController::EnableSightSense(bool Enable)
 {
 	if (Enable)
 	{
-		GameplayTagsContainer.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
+		PersonalKnowledge.Tags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
 		SightBar->OnBarFilledDelegate.AddDynamic(this, &ABasicEnemyController::NotifySightBarFull);
 		SightBar->Reset();
 
@@ -31,9 +51,9 @@ void ABasicEnemyController::EnableSightSense(bool Enable)
 	}
 	else
 	{
-		GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
-		GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone")));
-		GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsSeen")));
+		PersonalKnowledge.Tags.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
+		PersonalKnowledge.Tags.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone")));
+		PersonalKnowledge.Tags.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsSeen")));
 		SightBar->OnBarFilledDelegate.RemoveDynamic(this, &ABasicEnemyController::NotifySightBarFull);
 		SightBar->Reset();
 		
@@ -45,7 +65,7 @@ void ABasicEnemyController::EnableHearingSense(bool Enable)
 {
 	if (Enable)
 	{
-		GameplayTagsContainer.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Hearing")));
+		PersonalKnowledge.Tags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Hearing")));
 		HearingBar->OnBarFilledDelegate.AddDynamic(this, &ABasicEnemyController::NotifyHearingBarFull);
 		HearingBar->Reset();
 
@@ -53,7 +73,7 @@ void ABasicEnemyController::EnableHearingSense(bool Enable)
 	}
 	else
 	{
-		GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Hearing")));
+		PersonalKnowledge.Tags.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Hearing")));
 		HearingBar->OnBarFilledDelegate.RemoveDynamic(this, &ABasicEnemyController::NotifyHearingBarFull);
 		HearingBar->Reset();
 		
@@ -63,13 +83,14 @@ void ABasicEnemyController::EnableHearingSense(bool Enable)
 
 bool ABasicEnemyController::IsSightEnabled()
 {
-	return GameplayTagsContainer.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
+	return PersonalKnowledge.Tags.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight")));
 }
 
 bool ABasicEnemyController::IsHearingEnabled()
 {
-	return GameplayTagsContainer.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Hearing")));
+	return PersonalKnowledge.Tags.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Hearing")));
 }
+#pragma endregion
 
 void ABasicEnemyController::SetupPerceptionSystem()
 {
@@ -92,78 +113,15 @@ void ABasicEnemyController::SetupPerceptionSystem()
 	HearingBar = CreateDefaultSubobject<UAttributeBar>(TEXT("HearingBar"));
 }
 
-#pragma region FUNCTIONS_LISTENERS
-void ABasicEnemyController::NotifyReceiveStimulus(AActor* Actor, const FAIStimulus Stimulus)
+void ABasicEnemyController::SensorsUpdate(float DeltaTime)
 {
-	switch (Stimulus.Type)
-	{
-	case 0:
-		if (!IsSightEnabled()) break;
-
-		if (Actor == UGameplayStatics::GetPlayerPawn(GetWorld(), 0))
-		{
-			if (Stimulus.WasSuccessfullySensed())
-			{
-				GameplayTagsContainer.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone")));
-				PlayerEnteredInSightCone();
-				OnPlayerEnteredInSightConeDelegate.Broadcast(this);
-			}
-			else
-			{
-				GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone")));
-				GameplayTagsContainer.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsSeen")));
-				PlayerExitedFromSightCone();
-				OnPlayerExitedFromSightConeDelegate.Broadcast(this);
-			}
-		}
-		break;
-	case 1:
-		if (!IsHearingEnabled()) break;
-
-		if (Stimulus.WasSuccessfullySensed())
-		{
-			//TODO It depends on the Stimulus
-			CurrentHeardStimulus = Stimulus;
-			HearingBar->AddAmount(1.0f);
-
-		}
-		else
-		{
-			//TODO Stimulus is forgotten
-		}
-		
-		break;
-	default:
-		break;
-	}
-}
-
-void ABasicEnemyController::NotifySightBarFull()
-{
-	GameplayTagsContainer.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsSeen")));
-	PlayerSeen();
-	OnPlayerSeenDelegate.Broadcast(this);
-}
-
-void ABasicEnemyController::NotifyHearingBarFull()
-{
-	SomethingWasHeard(CurrentHeardStimulus);
-	OnSomethingWasHeardDelegate.Broadcast(CurrentHeardStimulus);
-}
-#pragma endregion 
-
-#pragma region FUNCTIONS_OVERRIDES
-void ABasicEnemyController::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 	// TODO Handle locking of sight
 	
 	// Sight is Active
 	if (IsSightEnabled())
 	{
 		// TODO Depends on the crouching and distance
-		if (GameplayTagsContainer.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone"))))
+		if (PersonalKnowledge.Tags.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone"))))
 		{
 			SightBar->AddAmount(SightIncreaseRate * DeltaTime);
 		}
@@ -183,6 +141,107 @@ void ABasicEnemyController::Tick(float DeltaTime)
 	}
 }
 
+void ABasicEnemyController::GoalGeneration()
+{
+	TSet<EBasicEnemyGoal>* CurrentGeneratedGoals = &PersonalKnowledge.CurrentGeneratedGoals; 
+	// Patrol Goal
+	if (PersonalKnowledge.PatrolSpline)
+	{
+		CurrentGeneratedGoals->Add(EBasicEnemyGoal::Patrol);
+	}
+	else 
+	{
+		CurrentGeneratedGoals->Remove(EBasicEnemyGoal::Patrol);
+	}
+
+	// Search Goal
+	//if (PersonalKnowledge.CurrentHeardStimulus)
+
+	// Combat Goal
+	if (SharedKnowledge->GetPlayer())
+	{
+		CurrentGeneratedGoals->Add(EBasicEnemyGoal::Combat);
+	}
+	else
+	{
+		CurrentGeneratedGoals->Remove(EBasicEnemyGoal::Combat);
+	}
+}
+
+#pragma region FUNCTIONS_LISTENERS
+void ABasicEnemyController::NotifyReceiveStimulus(AActor* Actor, const FAIStimulus Stimulus)
+{
+	switch (Stimulus.Type)
+	{
+	case 0:
+		if (!IsSightEnabled()) break;
+
+		if (Actor == UGameplayStatics::GetPlayerPawn(GetWorld(), 0))
+		{
+			if (Stimulus.WasSuccessfullySensed())
+			{
+				PersonalKnowledge.Tags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone")));
+				PlayerEnteredInSightCone();
+				OnPlayerEnteredInSightConeDelegate.Broadcast(this);
+			}
+			else
+			{
+				PersonalKnowledge.Tags.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone")));
+				PersonalKnowledge.Tags.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsSeen")));
+				PlayerExitedFromSightCone();
+				OnPlayerExitedFromSightConeDelegate.Broadcast(this);
+			}
+		}
+		break;
+	case 1:
+		if (!IsHearingEnabled()) break;
+
+		if (Stimulus.WasSuccessfullySensed())
+		{
+			//TODO Amount depends on the Stimulus
+			PersonalKnowledge.CurrentHeardStimulus = Stimulus;
+			HearingBar->AddAmount(1.0f);
+
+		}
+		else
+		{
+			//TODO Stimulus is forgotten
+			if (PersonalKnowledge.CurrentHeardStimulus.StimulusLocation == Stimulus.StimulusLocation)
+			{
+				PersonalKnowledge.Tags.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Hearing.SomethingWasHeard")));
+			}
+		}
+		
+		break;
+	default:
+		break;
+	}
+}
+
+void ABasicEnemyController::NotifySightBarFull()
+{
+	PersonalKnowledge.Tags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsSeen")));
+	PlayerSeen();
+	OnPlayerSeenDelegate.Broadcast(this);
+}
+
+void ABasicEnemyController::NotifyHearingBarFull()
+{
+	PersonalKnowledge.Tags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Hearing.SomethingWasHeard")));
+	SomethingWasHeard(PersonalKnowledge.CurrentHeardStimulus);
+	OnSomethingWasHeardDelegate.Broadcast(PersonalKnowledge.CurrentHeardStimulus);
+}
+#pragma endregion 
+
+#pragma region FUNCTIONS_OVERRIDES
+void ABasicEnemyController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	SensorsUpdate(DeltaTime);
+	GoalGeneration();
+}
+
 void ABasicEnemyController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -195,5 +254,10 @@ void ABasicEnemyController::BeginPlay()
 void ABasicEnemyController::OnPossess(APawn* PossessedPawn)
 {
 	Super::OnPossess(PossessedPawn);
+
+	if (Cast<ABasicEnemy>(PossessedPawn))
+	{
+		PersonalKnowledge.PatrolSpline = Cast<ABasicEnemy>(PossessedPawn)->PatrolSpline;
+	}
 }
 #pragma endregion 

@@ -5,7 +5,10 @@
 #include "CoreMinimal.h"
 #include "StateTreeEvaluatorBase.h"
 #include "AI/BasicEnemy/BasicEnemy.h"
-#include "StateTreeBasicEnemyEvaluator.generated.h"
+#include "StateTreeBasicEnemyGoalGenerator.generated.h"
+
+struct FAIStimulus;
+enum class EBasicEnemyGoal : uint8;
 
 USTRUCT()
 struct CYBERPUNKDEMO_API FStateTreeBasicEnemyEvaluatorInstanceData
@@ -36,11 +39,14 @@ struct CYBERPUNKDEMO_API FStateTreeBasicEnemyEvaluator : public FStateTreeEvalua
 	GENERATED_BODY()
 
 	using FInstanceDataType = FStateTreeBasicEnemyEvaluatorInstanceData;
-
-	static void AddNewGoal(ABasicEnemy* BasicEnemy, FInstanceDataType& InstanceData, EBasicEnemyGoal Goal);
-	static void RemoveGoal(ABasicEnemy* BasicEnemy, FInstanceDataType& InstanceData, EBasicEnemyGoal Goal);
 	
 	virtual const UStruct* GetInstanceDataType() const override { return FInstanceDataType::StaticStruct(); }
 	virtual void TreeStart(FStateTreeExecutionContext& Context) const override;
+	virtual void TreeStop(FStateTreeExecutionContext& Context) const override;
 	virtual void Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const override;
+
+#pragma region FUNCTIONS_LISTENERS
+
+	void NotifySomethingWasHeard(const FAIStimulus Stimulus);
+#pragma endregion 
 };

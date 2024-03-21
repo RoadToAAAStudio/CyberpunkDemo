@@ -1,7 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AI/BasicEnemy/BasicEnemy.h"
+
+#include "AI/AIZone/AIZone.h"
+#include "AI/BasicEnemy/BasicEnemyController.h"
 #include "Components/CapsuleComponent.h"
+
+class AAIZone;
 
 // Sets default values
 ABasicEnemy::ABasicEnemy()
@@ -13,35 +18,9 @@ ABasicEnemy::ABasicEnemy()
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABasicEnemy::NotifySomethingEnteredInTheTrigger);
 }
 
-#pragma region KNOWLEDGE_GETTERS
-const AAIZone* ABasicEnemy::GetSharedKnowledge() const
-{
-	return SharedKnowledge;
-}
-
-FVector ABasicEnemy::GetSpawnLocation() const
-{
-	return SpawnLocation;
-}
-
-const ASplineContainer* ABasicEnemy::GetPatrolSpline() const
-{
-	return PatrolSpline;
-}
-
-FGameplayTagContainer ABasicEnemy::GetGameplayTagContainer() const
-{
-	return GameplayTagContainer;
-}
-
 EBasicEnemyState ABasicEnemy::GetCurrentState() const
 {
 	return CurrentState;
-}
-
-TSet<EBasicEnemyGoal> ABasicEnemy::GetCurrentGeneratedGoals() const
-{
-	return CurrentGeneratedGoals;
 }
 
 TSet<EBasicEnemyBehaviour> ABasicEnemy::GetSupportedBehaviours() const
@@ -54,8 +33,6 @@ EBasicEnemyBehaviour ABasicEnemy::GetCurrentChosenBehaviour() const
 	return CurrentChosenBehaviour;
 }
 
-#pragma endregion 
-
 // Called when the State Tree notifies a change of state
 void ABasicEnemy::AcceptStateTreeNotification_Implementation(const FName& SourceStateName, const FName& CurrentStateName)
 {
@@ -65,10 +42,10 @@ void ABasicEnemy::AcceptStateTreeNotification_Implementation(const FName& Source
 	if (!GoalEnum) return;
 
 	int32 Index = GoalEnum->GetIndexByName(SourceStateName);
-	EBasicEnemyState SourceState = static_cast<EBasicEnemyState>(Index);
+	EBasicEnemyState SourceState = Index != INDEX_NONE? static_cast<EBasicEnemyState>(Index) : EBasicEnemyState::None;
 	
 	Index = GoalEnum->GetIndexByName(CurrentStateName);
-	EBasicEnemyState NewState = static_cast<EBasicEnemyState>(Index);
+	EBasicEnemyState NewState = Index != INDEX_NONE? static_cast<EBasicEnemyState>(Index) : EBasicEnemyState::None;
 
 	CurrentState = NewState;
 	
@@ -83,21 +60,15 @@ void ABasicEnemy::NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* Overla
 	{
 		AAIZone* AIZone = Cast<AAIZone>(OtherActor);
 
-		// Link BasicEnemy with what it needs
-		SharedKnowledge = AIZone;
-		SharedKnowledge->OnPlayerIsSensedDelegate.AddDynamic(this, &ABasicEnemy::NotifyPlayerWasSeen);
-		SharedKnowledge->OnCombatTimerFinishedDelegate.AddDynamic(this, &ABasicEnemy::NotifyCombatTimerFinished);
-		SharedKnowledge->OnAlertedTimerFinishedDelegate.AddDynamic(this, &ABasicEnemy::NotifyAlertedTimerFinished);
-
-
-		// Link AIZone with what it needs
-		SharedKnowledge->Enemies.Add(this);
-
-		const TObjectPtr<ABasicEnemyController> EnemyController = Cast<ABasicEnemyController>(GetController());
+		if (!BasicEnemyController)
+		{
+			BasicEnemyController = Cast<ABasicEnemyController>(GetController());
+		}
+		BasicEnemyController->SharedKnowledge = AIZone;
+		BasicEnemyController->SharedKnowledge->OnPlayerIsSensedDelegate.AddDynamic(this, &ABasicEnemy::NotifyPlayerWasSeen);
+		BasicEnemyController->SharedKnowledge->OnCombatTimerFinishedDelegate.AddDynamic(this, &ABasicEnemy::NotifyCombatTimerFinished);
+		BasicEnemyController->SharedKnowledge->OnAlertedTimerFinishedDelegate.AddDynamic(this, &ABasicEnemy::NotifyAlertedTimerFinished);
 		
-		EnemyController->OnPlayerEnteredInSightConeDelegate.AddDynamic(SharedKnowledge, &AAIZone::NotifyPlayerEnteredInSightCone);
-		EnemyController->OnPlayerExitedFromSightConeDelegate.AddDynamic(SharedKnowledge, &AAIZone::NotifyPlayerExitedInSightCone);
-		EnemyController->OnPlayerSeenDelegate.AddDynamic(SharedKnowledge, &AAIZone::NotifyPlayerWasSeen);
 	}
 }
 
@@ -109,8 +80,7 @@ void ABasicEnemy::NotifyPlayerWasSeen(const ABasicEnemyController* NotifierContr
 	 * So the message to the StateTree should be called only once
 	 */ 
 	
-	if (CurrentState == EBasicEnemyState::Combat) return;
-	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(TEXT("Character.Sensing.Sight.Events.PlayerWasSeen")));
+	StateTree->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.PlayerWasSeen")));
 }
 
 void ABasicEnemy::NotifyCombatTimerFinished()

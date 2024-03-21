@@ -61,7 +61,7 @@ EStateTreeRunStatus FStateTreeSelectBehaviourTask::EnterState(FStateTreeExecutio
 				break;
 			case EBasicEnemyBehaviour::Patrol:
 				break;
-			case EBasicEnemyBehaviour::Combat:
+			//case EBasicEnemyBehaviour::Combat:
 				break;
 			}
 		}

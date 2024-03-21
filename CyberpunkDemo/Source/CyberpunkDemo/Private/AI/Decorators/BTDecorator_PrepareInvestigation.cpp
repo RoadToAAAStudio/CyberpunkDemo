@@ -26,7 +26,7 @@ void UBTDecorator_PrepareInvestigation::OnNodeActivation(FBehaviorTreeSearchData
 	ABasicEnemy* Enemy = Cast<ABasicEnemy>(Actor);
 	if (!Enemy) return;
 
-	ABasicEnemyController* Controller = Cast<ABasicEnemyController>(Enemy->GetController());
+	//ABasicEnemyController* Controller = Cast<ABasicEnemyController>(Enemy->GetController());
 
 	// TODO Check if there is something to investigate
 }

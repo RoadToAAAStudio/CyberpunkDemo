@@ -9,16 +9,55 @@
 #include "GameplayTagContainer.h"
 #include "BasicEnemyController.generated.h"
 
+class ABasicEnemyController;
+class AAIZone;
+
+UENUM(BlueprintType)
+enum class EBasicEnemyGoal : uint8
+{
+	None,
+	Patrol,
+	Search,
+	Reaction,
+	Combat,
+	Cover,
+	Max UMETA(Hidden)
+};
+
+USTRUCT(BlueprintType)
+struct FBasicEnemyPersonalKnowledge
+{
+	GENERATED_BODY()
+	
+	UPROPERTY()
+	FVector SpawnLocation;
+	
+	UPROPERTY()
+	TObjectPtr<ASplineContainer> PatrolSpline;
+
+	UPROPERTY()
+	FAIStimulus CurrentHeardStimulus; 
+	
+	UPROPERTY()
+	FGameplayTagContainer Tags;
+
+	UPROPERTY()
+	TSet<EBasicEnemyGoal> CurrentGeneratedGoals;
+	
+};
+
+
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerEnteredInSightCone, const ABasicEnemyController*, Controller);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerExitedFromSightCone, const ABasicEnemyController*, Controller);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerSeenSignature, const ABasicEnemyController*, Controller);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSomethingWasHeardSignature, const FAIStimulus, Stimulus);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSightSenseToogleSignature, const bool, Enabled);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHearingSenseToogleSignature, const bool, Enabled);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSomethingWasHeardSignature, const FAIStimulus, Stimulus);
 
 /**
  * Basic Enemy Controller
- * It encapsulate data and delegates for AI sensors
+ * It encapsulates data and delegates for AI sensors, knowledge and goals
  */
 UCLASS()
 class CYBERPUNKDEMO_API ABasicEnemyController : public AAIController
@@ -26,16 +65,12 @@ class CYBERPUNKDEMO_API ABasicEnemyController : public AAIController
 	GENERATED_BODY()
 public:
 	
-#pragma region COMPONENTS
+#pragma region SENSORS_COMPONENTS
 	// Dependencies with Configs and Components
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UAttributeBar> SightBar;
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UAttributeBar> HearingBar;
-	UPROPERTY()
-	TObjectPtr<class UAISenseConfig_Sight> SightConfig;
-	UPROPERTY()
-	TObjectPtr<class UAISenseConfig_Hearing> HearingConfig;
 #pragma endregion
 	
 #pragma region DELEGATES
@@ -53,8 +88,14 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnHearingSenseToogleSignature OnHearingSenseToggledDelegate;
 #pragma endregion
-	
+
+#pragma region SENSORS_CONFIGS	
 	// Config variables
+	UPROPERTY()
+	TObjectPtr<class UAISenseConfig_Sight> SightConfig;
+	UPROPERTY()
+	TObjectPtr<class UAISenseConfig_Hearing> HearingConfig;
+	
 	// Rate for filling the sight bar
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SightIncreaseRate = 0.25f;
@@ -66,21 +107,40 @@ public:
 	// Rate for emptying the hearing bar
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float HearingDecreaseRate = 0.25f;
+#pragma endregion
 
+#pragma region KNOWLEDGE_GETTERS
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal |Knowldge ")
+	FVector GetSpawnLocation() const;
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
+	const ASplineContainer* GetPatrolSpline() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
+	FGameplayTagContainer GetTags() const;
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge | Goal")
+	TSet<EBasicEnemyGoal> GetCurrentGeneratedGoals() const;
+
+#pragma region SHARED_KNOWLEDGE
+	UPROPERTY(BlueprintReadOnly, Category = "Shared | Knowledge")
+	TObjectPtr<AAIZone> SharedKnowledge;
+#pragma endregion
+
+#pragma endregion
+
+	
 protected:
-	// Info to be polled
+
+#pragma region PERSONAL_KNOWLEDGE
 	UPROPERTY()
-	FGameplayTagContainer GameplayTagsContainer;
-	
-private:
-	FAIStimulus CurrentHeardStimulus; 
-	
+	FBasicEnemyPersonalKnowledge PersonalKnowledge;
+#pragma endregion
+
 public:
 	explicit ABasicEnemyController(const FObjectInitializer& ObjectInitializer);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FGameplayTagContainer GetGameplayTagContainer() const;
-	
+#pragma region SENSORS_CONTROL
 	UFUNCTION(BlueprintCallable)
 	void EnableSightSense(bool Enable);
 
@@ -92,7 +152,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsHearingEnabled();
-
+#pragma endregion
+	
 protected:
 
 #pragma region BLUEPRINT_EVENTS
@@ -113,6 +174,10 @@ protected:
 	
 private:
 	void SetupPerceptionSystem();
+
+	void SensorsUpdate(float DeltaTime);
+
+	void GoalGeneration();
 
 #pragma region FUNCTIONS_LISTENERS
 	UFUNCTION()

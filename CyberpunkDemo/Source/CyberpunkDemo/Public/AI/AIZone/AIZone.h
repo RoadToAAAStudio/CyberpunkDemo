@@ -15,6 +15,7 @@ class ABasicEnemy;
 UENUM(BlueprintType)
 enum class EAIZoneState : uint8
 {
+	None,
 	Unaware,
 	Combat,
 	Alerted,

@@ -1,6 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AI/AIZone/AIZone.h"
+
+#include "AI/BasicEnemy/BasicEnemy.h"
+#include "AI/BasicEnemy/BasicEnemyController.h"
 #include "AI/WorldInterfacing/Location.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -64,41 +67,42 @@ void AAIZone::AcceptStateTreeNotification_Implementation(const FName& SourceStat
 	if (!GoalEnum) return;
 
 	int32 Index = GoalEnum->GetIndexByName(SourceStateName);
-	EAIZoneState SourceState = static_cast<EAIZoneState>(Index);
+	EAIZoneState SourceState = Index != INDEX_NONE? static_cast<EAIZoneState>(Index) : EAIZoneState::None;
 	
 	Index = GoalEnum->GetIndexByName(CurrentStateName);
-	EAIZoneState NewState = static_cast<EAIZoneState>(Index);
+	EAIZoneState NewState = Index != INDEX_NONE? static_cast<EAIZoneState>(Index) : EAIZoneState::None;
 	
 	CurrentState = NewState;
 	
 	switch (SourceState)
 	{
-	case EAIZoneState::Unaware:
+		case EAIZoneState::Unaware:
+			break;
+			
+		case EAIZoneState::Combat:
+		{
+			Player = nullptr;
+			PlayerIsForgotten();
+			OnPlayerIsForgottenDelegate.Broadcast();
+		}
 		break;
-		
-	case EAIZoneState::Combat:
-		Player = nullptr;
-		PlayerIsForgotten();
-		OnPlayerIsForgottenDelegate.Broadcast();
-		break;
-		
-	case EAIZoneState::Alerted:
-		break;
-		
-	case EAIZoneState::Max:
-		break;
-		
+			
+		case EAIZoneState::Alerted:
+			break;
+			
+		case EAIZoneState::Max:
+			break;
 	}
 	
 	switch (NewState)
 	{
-	case EAIZoneState::Unaware:
-		break;
-		
-	case EAIZoneState::Combat:
-		break;
-		
-	case EAIZoneState::Alerted:
+		case EAIZoneState::Unaware:
+			break;
+			
+		case EAIZoneState::Combat:
+			break;
+			
+		case EAIZoneState::Alerted:
 		{
 			// Start Alerted Timer
 			FTimerDelegate TimerCallback = FTimerDelegate::CreateLambda([this]()
@@ -113,10 +117,9 @@ void AAIZone::AcceptStateTreeNotification_Implementation(const FName& SourceStat
 			OnAlertedTimerStartedDelegate.Broadcast();
 		}
 		break;
-		
-	case EAIZoneState::Max:
-		break;
-		
+			
+		case EAIZoneState::Max:
+			break;
 	}
 	
 	StateChanged(SourceState, NewState);
@@ -129,7 +132,19 @@ void AAIZone::NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* Overlapped
 {
 	if (Cast<ALocation>(OtherActor))
 	{
-		CoverLocations.Add(Cast<ALocation>(OtherActor));
+		ALocation* Location = Cast<ALocation>(OtherActor);
+		CoverLocations.Add(Location);
+	}
+	else if (Cast<ABasicEnemy>(OtherActor))
+	{
+		ABasicEnemy* Enemy = Cast<ABasicEnemy>(OtherActor);
+		Enemies.Add(Enemy);
+		
+		ABasicEnemyController* EnemyController = Cast<ABasicEnemyController>(Enemy->GetController());
+		
+		EnemyController->OnPlayerEnteredInSightConeDelegate.AddDynamic(this, &AAIZone::NotifyPlayerEnteredInSightCone);
+		EnemyController->OnPlayerExitedFromSightConeDelegate.AddDynamic(this, &AAIZone::NotifyPlayerExitedInSightCone);
+		EnemyController->OnPlayerSeenDelegate.AddDynamic(this, &AAIZone::NotifyPlayerWasSeen);
 	}
 }
 
