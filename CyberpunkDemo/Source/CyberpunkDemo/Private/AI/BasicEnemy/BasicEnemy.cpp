@@ -112,7 +112,7 @@ void ABasicEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 void ABasicEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	// Get Supported behaviour from DataTable
 	if (SupportedBehavioursDataTable)
 	{

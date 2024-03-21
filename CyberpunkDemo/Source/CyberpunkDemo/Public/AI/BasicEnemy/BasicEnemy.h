@@ -90,7 +90,7 @@ protected:
 	*			To Combat: if the BasicEnemy sees the player or is Sensed by someone else
 	*			To Unaware: if the alerted timer expires
 	*/
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	EBasicEnemyState CurrentState = EBasicEnemyState::Unaware;
 
 	UPROPERTY()
