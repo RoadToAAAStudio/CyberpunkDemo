@@ -79,7 +79,7 @@ void UHackableComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (InspectionTimerHandle.IsValid())
-	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Cyan, FString(FString::SanitizeFloat(GetWorld()->GetTimerManager().GetTimerRemaining(InspectionTimerHandle))));
+	// if (InspectionTimerHandle.IsValid())
+	// GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Cyan, FString(FString::SanitizeFloat(GetWorld()->GetTimerManager().GetTimerRemaining(InspectionTimerHandle))));
 }
 

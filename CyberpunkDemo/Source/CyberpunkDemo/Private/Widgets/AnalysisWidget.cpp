@@ -30,8 +30,8 @@ void UAnalysisWidget::CreateHacks(UHackableComponent* HackTarget)
 			GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString("Ability not found!"));
 			return;
 		}
-		QuickhacksVerticalBox->AddChildToVerticalBox(QuickhackWidget);
-		QuickhackWidget->Init(QuickhackData->HackName, QuickhackData->HackCost, *QuickhackData->HackImage);
+		QuickhacksVerticalBox->AddChild(QuickhackWidget);
+		QuickhackWidget->Init(QuickhackData->HackName, QuickhackData->HackCost, *QuickhackData->HackImage, Hack);
 		QuickhackWidget->AddToViewport();
 	}
 }

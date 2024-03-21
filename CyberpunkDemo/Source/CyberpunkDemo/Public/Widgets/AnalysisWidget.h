@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/ScrollBox.h"
 #include "Components/VerticalBox.h"
 #include "Widgets/QuickhackWidget.h"
 #include "Environment/HackableObjects/HackableComponent.h"
@@ -23,7 +24,7 @@ class CYBERPUNKDEMO_API UAnalysisWidget : public UUserWidget
 public:
 	
 	UPROPERTY(meta = (BindWidget)) 
-	UVerticalBox* QuickhacksVerticalBox;
+	UScrollBox* QuickhacksVerticalBox;
 
 	UPROPERTY(meta = (BindWidget))
 	UVerticalBox* InformationVerticalBox;

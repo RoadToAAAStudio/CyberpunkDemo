@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Abilities/GameplayAbility.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/Button.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "QuickhackWidget.generated.h"
@@ -18,6 +20,10 @@ class CYBERPUNKDEMO_API UQuickhackWidget : public UUserWidget
 
 public:
 
+	// Widget elements 
+	UPROPERTY(meta = (BindWidget))
+	UButton* HackButton;
+	
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* HackText;
 
@@ -27,5 +33,17 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UImage* HackImage;
 
-	void Init(FString& _HackText, FString& _HackCost, UTexture2D& _HackImage);
+private:
+
+	// Hack this specific button is bound to
+	TSubclassOf<UGameplayAbility> AssignedHack;
+	
+public:
+	
+	void Init(FString& _HackText, FString& _HackCost, UTexture2D& _HackImage, TSubclassOf<UGameplayAbility>& _AssignedHack);
+
+private:
+
+	UFUNCTION()
+	void DoHack();
 };

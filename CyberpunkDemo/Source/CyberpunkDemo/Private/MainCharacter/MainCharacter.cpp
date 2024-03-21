@@ -9,6 +9,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
+#include "Abilities/GameplayAbility_CharacterJump.h"
 #include "CyberpunkDemo/CyberpunkDemoCharacter.h"
 #include "Engine/LocalPlayer.h"
 #include "GameplayAbilitySystem/Abilities/GA_Shoot.h"
@@ -85,6 +86,7 @@ TSet<TSubclassOf<UGameplayAbility>> AMainCharacter::GetPlayerHacks()
 	// 	return PlayerHacks;
 	// }
 	PlayerHacks.Add(UGA_Shoot::StaticClass());
+	PlayerHacks.Add(UGameplayAbility_CharacterJump::StaticClass());
 	return PlayerHacks;
 }
 
