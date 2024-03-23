@@ -9,6 +9,7 @@
 #include "GameplayTagContainer.h"
 #include "BasicEnemyController.generated.h"
 
+class AMainCharacter;
 class ABasicEnemyController;
 class AAIZone;
 
@@ -35,6 +36,9 @@ struct FBasicEnemyPersonalKnowledge
 	UPROPERTY()
 	TObjectPtr<ASplineContainer> PatrolSpline;
 
+	UPROPERTY()
+	TObjectPtr<ACharacter> PlayerInSightCone;
+	
 	UPROPERTY()
 	FAIStimulus CurrentHeardStimulus; 
 	
@@ -98,15 +102,27 @@ public:
 	
 	// Rate for filling the sight bar
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float SightIncreaseRate = 0.25f;
+	float SightIncreaseRate = 1.0f;
 
 	// Rate for emptying the sight bar
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float SightDecreaseRate = 0.25f;
+	float SightDecreaseRate = 1.0f;
 
+	// Min Rate multiplier based on distance for sight bar
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SightMinMultiplier = 1.0f;
+	
+	// Max Rate multiplier based on distance for sight bar
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SightMaxMultiplier = 1.0f;
+
+	// Crouch multiplier for sight bar
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SightCrouchMultiplier = 1.0f;
+	
 	// Rate for emptying the hearing bar
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float HearingDecreaseRate = 0.25f;
+	float HearingDecreaseRate = 1.0f;
 #pragma endregion
 
 #pragma region KNOWLEDGE_GETTERS

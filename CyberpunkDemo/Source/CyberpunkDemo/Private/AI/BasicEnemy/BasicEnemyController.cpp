@@ -5,6 +5,7 @@
 #include "AI/AIZone/AIZone.h"
 #include "AI/BasicEnemy/BasicEnemy.h"
 #include "Kismet/GameplayStatics.h"
+#include "MainCharacter/MainCharacter.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Sight.h"
@@ -120,10 +121,22 @@ void ABasicEnemyController::SensorsUpdate(float DeltaTime)
 	// Sight is Active
 	if (IsSightEnabled())
 	{
-		// TODO Depends on the crouching and distance
 		if (PersonalKnowledge.Tags.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone"))))
 		{
-			SightBar->AddAmount(SightIncreaseRate * DeltaTime);
+			float CurrentDistanceMultiplier = 1.0f;
+			CurrentDistanceMultiplier = FMath::GetMappedRangeValueClamped(UE::Math::TVector2<float>(0.0f, 2500.0f), UE::Math::TVector2<float>(SightMaxMultiplier, SightMinMultiplier), FVector::Distance(GetPawn()->GetActorLocation(), PersonalKnowledge.PlayerInSightCone->GetActorLocation()));
+			float CurrentCrouchingMultiplier = 1.0f;
+			if (Cast<AMainCharacter>(PersonalKnowledge.PlayerInSightCone))
+			{
+				AMainCharacter* Player = Cast<AMainCharacter>(PersonalKnowledge.PlayerInSightCone);
+				if (Player->GetCustomCharacterComponent()->GetCurrentMovementState() == ECustomMovementState::Crouching)
+				{
+					CurrentCrouchingMultiplier = SightCrouchMultiplier;
+				}
+			}
+
+			SightBar->AddAmount(SightIncreaseRate * CurrentDistanceMultiplier * CurrentCrouchingMultiplier * DeltaTime);
+
 		}
 		else
 		{
@@ -180,12 +193,14 @@ void ABasicEnemyController::NotifyReceiveStimulus(AActor* Actor, const FAIStimul
 		{
 			if (Stimulus.WasSuccessfullySensed())
 			{
+				PersonalKnowledge.PlayerInSightCone = Cast<ACharacter>(Actor);
 				PersonalKnowledge.Tags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone")));
 				PlayerEnteredInSightCone();
 				OnPlayerEnteredInSightConeDelegate.Broadcast(this);
 			}
 			else
 			{
+				PersonalKnowledge.PlayerInSightCone = nullptr;
 				PersonalKnowledge.Tags.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone")));
 				PersonalKnowledge.Tags.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsSeen")));
 				PlayerExitedFromSightCone();
