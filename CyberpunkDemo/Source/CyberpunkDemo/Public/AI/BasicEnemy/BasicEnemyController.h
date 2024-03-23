@@ -9,6 +9,7 @@
 #include "GameplayTagContainer.h"
 #include "BasicEnemyController.generated.h"
 
+class ASplineContainer;
 class AMainCharacter;
 class ABasicEnemyController;
 class AAIZone;
@@ -40,7 +41,16 @@ struct FBasicEnemyPersonalKnowledge
 	TObjectPtr<ACharacter> PlayerInSightCone;
 	
 	UPROPERTY()
-	FAIStimulus CurrentHeardStimulus; 
+	FAIStimulus CurrentHeardStimulus;
+
+	UPROPERTY()
+	bool bIsHeardStimulusSet;
+
+	UPROPERTY()
+	FVector CurrentCoverLocation;
+
+	UPROPERTY()
+	bool bIsCoverLocationSet;
 	
 	UPROPERTY()
 	FGameplayTagContainer Tags;
@@ -48,6 +58,37 @@ struct FBasicEnemyPersonalKnowledge
 	UPROPERTY()
 	TSet<EBasicEnemyGoal> CurrentGeneratedGoals;
 	
+	void SetHeardStimulus(FAIStimulus Stimulus)
+	{
+		CurrentHeardStimulus = Stimulus;
+		bIsHeardStimulusSet = true;
+	}
+
+	void UnsetHeardStimulus()
+	{
+		bIsHeardStimulusSet = false;
+	}
+
+	bool HeartStimulusIsSet() const
+	{
+		return bIsHeardStimulusSet;
+	}
+
+	void SetCoverLocation(FVector CoverLocation)
+	{
+		CurrentCoverLocation = CoverLocation;
+		bIsCoverLocationSet = true;
+	}
+
+	void UnsetCoverLocations()
+	{
+		bIsCoverLocationSet = false;
+	}
+
+	bool CoverLocationIsSet() const
+	{
+		return bIsCoverLocationSet;
+	}
 };
 
 
@@ -133,6 +174,18 @@ public:
 	const ASplineContainer* GetPatrolSpline() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
+	FVector GetSensedLocation() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
+	bool IsSensedLocationSet() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
+	FVector GetCoverLocation() const;
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
+	bool IsCoverLocationSet() const;
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
 	FGameplayTagContainer GetTags() const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge | Goal")
@@ -153,6 +206,10 @@ protected:
 	FBasicEnemyPersonalKnowledge PersonalKnowledge;
 #pragma endregion
 
+private:
+	// Temp variable for a hearing stimulus
+	FAIStimulus CurrentHeardStimulus;
+	
 public:
 	explicit ABasicEnemyController(const FObjectInitializer& ObjectInitializer);
 

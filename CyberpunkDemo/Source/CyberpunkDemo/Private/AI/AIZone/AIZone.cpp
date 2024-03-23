@@ -112,7 +112,7 @@ void AAIZone::AcceptStateTreeNotification_Implementation(const FName& SourceStat
 				OnAlertedTimerFinishedDelegate.Broadcast();
 			});
 
-			GetWorld()->GetTimerManager().SetTimer(AlertedTimer, TimerCallback, 4.0f, false);
+			GetWorld()->GetTimerManager().SetTimer(AlertedTimer, TimerCallback, AlertedTimerDuration, false);
 			AlertedTimerStarted();
 			OnAlertedTimerStartedDelegate.Broadcast();
 		}
@@ -179,7 +179,7 @@ void AAIZone::NotifyPlayerExitedInSightCone(const ABasicEnemyController* Control
 				OnCombatTimerFinishedDelegate.Broadcast();
 			});
 
-			GetWorld()->GetTimerManager().SetTimer(CombatTimer, TimerCallback,4.0f, false);
+			GetWorld()->GetTimerManager().SetTimer(CombatTimer, TimerCallback,CombatTimerDuration, false);
 			CombatTimerStarted();
 			OnCombatTimerStartedDelegate.Broadcast();
 		}

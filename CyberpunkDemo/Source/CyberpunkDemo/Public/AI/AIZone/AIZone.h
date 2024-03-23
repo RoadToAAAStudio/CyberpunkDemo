@@ -91,6 +91,9 @@ protected:
 	UPROPERTY()
 	FTimerHandle CombatTimer;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CombatTimerDuration = 4.0f;
+
 	/*
 	 * The Alerted Timer is Set when Alerted is entered
 	 * this is cleared if the Current State is Alerted and the Player is seen
@@ -98,6 +101,9 @@ protected:
 	UPROPERTY()
 	FTimerHandle AlertedTimer;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AlertedTimerDuration = 4.0f;
+	
 	/*
 	 * Increased/Decreased when the player enters/exits a sight cone
 	 */

@@ -68,7 +68,6 @@ void ABasicEnemy::NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* Overla
 		BasicEnemyController->SharedKnowledge->OnPlayerIsSensedDelegate.AddDynamic(this, &ABasicEnemy::NotifyPlayerWasSeen);
 		BasicEnemyController->SharedKnowledge->OnCombatTimerFinishedDelegate.AddDynamic(this, &ABasicEnemy::NotifyCombatTimerFinished);
 		BasicEnemyController->SharedKnowledge->OnAlertedTimerFinishedDelegate.AddDynamic(this, &ABasicEnemy::NotifyAlertedTimerFinished);
-		
 	}
 }
 

@@ -26,6 +26,26 @@ const ASplineContainer* ABasicEnemyController::GetPatrolSpline() const
 	return PersonalKnowledge.PatrolSpline;
 }
 
+FVector ABasicEnemyController::GetSensedLocation() const
+{
+	return PersonalKnowledge.CurrentHeardStimulus.StimulusLocation;
+}
+
+bool ABasicEnemyController::IsSensedLocationSet() const
+{
+	return PersonalKnowledge.HeartStimulusIsSet();
+}
+
+bool ABasicEnemyController::IsCoverLocationSet() const
+{
+	return PersonalKnowledge.CoverLocationIsSet();
+}
+
+FVector ABasicEnemyController::GetCoverLocation() const
+{
+	return PersonalKnowledge.CurrentCoverLocation;
+}
+
 FGameplayTagContainer ABasicEnemyController::GetTags() const
 {
 	return PersonalKnowledge.Tags;
@@ -123,20 +143,11 @@ void ABasicEnemyController::SensorsUpdate(float DeltaTime)
 	{
 		if (PersonalKnowledge.Tags.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone"))))
 		{
-			float CurrentDistanceMultiplier = 1.0f;
-			CurrentDistanceMultiplier = FMath::GetMappedRangeValueClamped(UE::Math::TVector2<float>(0.0f, 2500.0f), UE::Math::TVector2<float>(SightMaxMultiplier, SightMinMultiplier), FVector::Distance(GetPawn()->GetActorLocation(), PersonalKnowledge.PlayerInSightCone->GetActorLocation()));
-			float CurrentCrouchingMultiplier = 1.0f;
-			if (Cast<AMainCharacter>(PersonalKnowledge.PlayerInSightCone))
-			{
-				AMainCharacter* Player = Cast<AMainCharacter>(PersonalKnowledge.PlayerInSightCone);
-				if (Player->GetCustomCharacterComponent()->GetCurrentMovementState() == ECustomMovementState::Crouching)
-				{
-					CurrentCrouchingMultiplier = SightCrouchMultiplier;
-				}
-			}
+			AMainCharacter* Player = Cast<AMainCharacter>(PersonalKnowledge.PlayerInSightCone);
+			float CrouchMultiplier = Player->GetCustomCharacterComponent()->GetCurrentMovementState() == ECustomMovementState::Crouching? SightCrouchMultiplier : 1.0f;
+			float DistanceMultiplier = FMath::GetMappedRangeValueClamped(UE::Math::TVector2<float>(0.0f, 2500.0f), UE::Math::TVector2<float>(SightMaxMultiplier, SightMinMultiplier), FVector::Distance(GetPawn()->GetActorLocation(), PersonalKnowledge.PlayerInSightCone->GetActorLocation()));
 
-			SightBar->AddAmount(SightIncreaseRate * CurrentDistanceMultiplier * CurrentCrouchingMultiplier * DeltaTime);
-
+			SightBar->AddAmount(SightIncreaseRate * DistanceMultiplier * CrouchMultiplier * DeltaTime);
 		}
 		else
 		{
@@ -156,7 +167,8 @@ void ABasicEnemyController::SensorsUpdate(float DeltaTime)
 
 void ABasicEnemyController::GoalGeneration()
 {
-	TSet<EBasicEnemyGoal>* CurrentGeneratedGoals = &PersonalKnowledge.CurrentGeneratedGoals; 
+	TSet<EBasicEnemyGoal>* CurrentGeneratedGoals = &PersonalKnowledge.CurrentGeneratedGoals;
+	
 	// Patrol Goal
 	if (PersonalKnowledge.PatrolSpline)
 	{
@@ -168,7 +180,14 @@ void ABasicEnemyController::GoalGeneration()
 	}
 
 	// Search Goal
-	//if (PersonalKnowledge.CurrentHeardStimulus)
+	if (PersonalKnowledge.bIsHeardStimulusSet || Cast<ABasicEnemy>(GetPawn())->GetCurrentState() == EBasicEnemyState::Alerted)
+	{
+		CurrentGeneratedGoals->Add(EBasicEnemyGoal::Search);
+	}
+	else
+	{
+		CurrentGeneratedGoals->Remove(EBasicEnemyGoal::Search);
+	}
 
 	// Combat Goal
 	if (SharedKnowledge->GetPlayer())
@@ -178,6 +197,16 @@ void ABasicEnemyController::GoalGeneration()
 	else
 	{
 		CurrentGeneratedGoals->Remove(EBasicEnemyGoal::Combat);
+	}
+
+	// Cover Goal
+	if (PersonalKnowledge.bIsCoverLocationSet)
+	{
+		CurrentGeneratedGoals->Add(EBasicEnemyGoal::Cover);
+	}
+	else
+	{
+		CurrentGeneratedGoals->Remove(EBasicEnemyGoal::Cover);
 	}
 }
 
@@ -214,16 +243,14 @@ void ABasicEnemyController::NotifyReceiveStimulus(AActor* Actor, const FAIStimul
 		if (Stimulus.WasSuccessfullySensed())
 		{
 			//TODO Amount depends on the Stimulus
-			PersonalKnowledge.CurrentHeardStimulus = Stimulus;
+			CurrentHeardStimulus = Stimulus;
 			HearingBar->AddAmount(1.0f);
-
 		}
 		else
 		{
-			//TODO Stimulus is forgotten
 			if (PersonalKnowledge.CurrentHeardStimulus.StimulusLocation == Stimulus.StimulusLocation)
 			{
-				PersonalKnowledge.Tags.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Hearing.SomethingWasHeard")));
+				PersonalKnowledge.UnsetHeardStimulus();
 			}
 		}
 		
@@ -242,7 +269,7 @@ void ABasicEnemyController::NotifySightBarFull()
 
 void ABasicEnemyController::NotifyHearingBarFull()
 {
-	PersonalKnowledge.Tags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Hearing.SomethingWasHeard")));
+	PersonalKnowledge.SetHeardStimulus(CurrentHeardStimulus);
 	SomethingWasHeard(PersonalKnowledge.CurrentHeardStimulus);
 	OnSomethingWasHeardDelegate.Broadcast(PersonalKnowledge.CurrentHeardStimulus);
 }
@@ -262,6 +289,7 @@ void ABasicEnemyController::BeginPlay()
 	Super::BeginPlay();
 
 	GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &ABasicEnemyController::NotifyReceiveStimulus);
+
 	EnableSightSense(true);
 	EnableHearingSense(true);
 }
