@@ -16,5 +16,6 @@ public:
 	// Sets default values for this actor's properties
 	UHighTechCondition();
 
+	void AddUnlockInput(TArray<EInspectInput>& ArrayInputs) override;
 	bool Check() override;
 };

@@ -9,6 +9,11 @@ UQuickHackCondition::UQuickHackCondition()
 {
 }
 
+void UQuickHackCondition::AddUnlockInput(TArray<EInspectInput>& ArrayInputs)
+{
+	Super::AddUnlockInput(ArrayInputs);
+}
+
 bool UQuickHackCondition::Check()
 {
 	//check if the player have the quick hack to unlock doors

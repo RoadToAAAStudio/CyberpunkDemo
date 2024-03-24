@@ -6,6 +6,8 @@
 #include "UObject/Object.h"
 #include "UnlockCondition.generated.h"
 
+enum class EInspectInput:uint8;
+
 UCLASS(Abstract)
 class CYBERPUNKDEMO_API UUnlockCondition : public UObject
 {
@@ -14,6 +16,8 @@ class CYBERPUNKDEMO_API UUnlockCondition : public UObject
 public:
 	// Sets default values for this actor's properties
 	UUnlockCondition();
+
+	virtual void AddUnlockInput(TArray<EInspectInput>& ArrayInputs);
 	
 	virtual bool Check();
 };

@@ -2,6 +2,9 @@
 
 
 #include "Environment/Interactables/Doors/Door.h"
+#include "Environment/Interactables/Doors/Conditions/AccessCardCondition.h"
+#include "Environment/Interactables/Doors/Conditions/HighStrengthCondition.h"
+#include "Environment/Interactables/Doors/Conditions/HighTechCondition.h"
 
 
 // Sets default values
@@ -15,7 +18,17 @@ ADoor::ADoor()
 void ADoor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	if (Conditions.IsEmpty())
+	{
+		InspectInputs.Add(EInspectInput::Nothing);
+	}
+	else
+	{
+		for (int i = 0; i < Conditions.Num(); i++)
+		{
+			Conditions[i]->AddUnlockInput(InspectInputs);
+		}
+	}
 }
 
 // Called every frame

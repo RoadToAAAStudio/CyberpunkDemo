@@ -3,10 +3,16 @@
 
 #include "Environment/Interactables/Doors/Conditions/HighTechCondition.h"
 
+enum class EInspectInput:uint8 {KeepRPressed};
 
 // Sets default values
 UHighTechCondition::UHighTechCondition()
 {
+}
+
+void UHighTechCondition::AddUnlockInput(TArray<EInspectInput>& ArrayInputs)
+{
+	ArrayInputs.Add(EInspectInput::KeepRPressed);
 }
 
 bool UHighTechCondition::Check()

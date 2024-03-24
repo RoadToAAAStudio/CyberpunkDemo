@@ -9,6 +9,10 @@ UUnlockCondition::UUnlockCondition()
 {
 }
 
+void UUnlockCondition::AddUnlockInput(TArray<EInspectInput>& ArrayInputs)
+{
+}
+
 bool UUnlockCondition::Check()
 {
 	return false;

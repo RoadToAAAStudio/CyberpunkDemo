@@ -3,10 +3,23 @@
 
 #include "Environment/Interactables/Doors/Conditions/HighStrengthCondition.h"
 
+enum class EInspectInput:uint8 {PressF, KeepFPressed};
 
 // Sets default values
 UHighStrengthCondition::UHighStrengthCondition()
 {
+}
+
+void UHighStrengthCondition::AddUnlockInput(TArray<EInspectInput>& ArrayInputs)
+{
+	if (ArrayInputs.Contains(EInspectInput::PressF))
+	{
+		ArrayInputs.Add(EInspectInput::KeepFPressed);
+	}
+	else
+	{
+		ArrayInputs.Add(EInspectInput::PressF);
+	}
 }
 
 bool UHighStrengthCondition::Check()

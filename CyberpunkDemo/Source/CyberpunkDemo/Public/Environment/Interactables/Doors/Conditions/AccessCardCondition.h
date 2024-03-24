@@ -15,6 +15,8 @@ class CYBERPUNKDEMO_API UAccessCardCondition : public UUnlockCondition
 public:
 	// Sets default values for this actor's properties
 	UAccessCardCondition();
+
+	void AddUnlockInput(TArray<EInspectInput>& ArrayInputs) override;
 	
 	bool Check() override;
 };

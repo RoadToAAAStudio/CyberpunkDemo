@@ -6,6 +6,17 @@
 #include "UObject/Interface.h"
 #include "IInspectable.generated.h"
 
+UENUM(BlueprintType)
+	enum class EInspectInput : uint8
+{
+	Nothing,
+	PressF,
+	KeepFPressed,
+	PressR,
+	KeepRPressed,
+	MAX UMETA(Hidden)
+};
+
 // This class does not need to be modified.
 UINTERFACE()
 class UInspectable : public UInterface
@@ -21,6 +32,11 @@ class CYBERPUNKDEMO_API IInspectable
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
+
+public:
+	TArray<EInspectInput> InspectInputs;
+
+	
 public:
 	virtual void Inspect();
 };

@@ -3,12 +3,17 @@
 
 #include "Environment/Interactables/Doors/Conditions/AccessCardCondition.h"
 
+enum class EInspectInput:uint8 {PressF};
 
 // Sets default values
 UAccessCardCondition::UAccessCardCondition()
 {
 }
 
+void UAccessCardCondition::AddUnlockInput(TArray<EInspectInput>& ArrayInputs)
+{
+	ArrayInputs.Add(EInspectInput::PressF);
+}
 
 
 bool UAccessCardCondition::Check()
