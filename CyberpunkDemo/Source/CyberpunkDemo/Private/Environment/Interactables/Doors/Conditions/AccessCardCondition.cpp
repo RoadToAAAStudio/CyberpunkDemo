@@ -3,8 +3,6 @@
 
 #include "Environment/Interactables/Doors/Conditions/AccessCardCondition.h"
 
-enum class EInspectInput:uint8 {PressF};
-
 // Sets default values
 UAccessCardCondition::UAccessCardCondition()
 {

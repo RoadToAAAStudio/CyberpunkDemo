@@ -6,16 +6,7 @@
 #include "UObject/Interface.h"
 #include "IInspectable.generated.h"
 
-UENUM(BlueprintType)
-	enum class EInspectInput : uint8
-{
-	Nothing,
-	PressF,
-	KeepFPressed,
-	PressR,
-	KeepRPressed,
-	MAX UMETA(Hidden)
-};
+enum class EInspectInput:uint8;
 
 // This class does not need to be modified.
 UINTERFACE()

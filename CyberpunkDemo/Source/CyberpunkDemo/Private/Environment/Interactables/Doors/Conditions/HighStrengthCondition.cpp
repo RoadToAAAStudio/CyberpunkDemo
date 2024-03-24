@@ -3,8 +3,6 @@
 
 #include "Environment/Interactables/Doors/Conditions/HighStrengthCondition.h"
 
-enum class EInspectInput:uint8 {PressF, KeepFPressed};
-
 // Sets default values
 UHighStrengthCondition::UHighStrengthCondition()
 {

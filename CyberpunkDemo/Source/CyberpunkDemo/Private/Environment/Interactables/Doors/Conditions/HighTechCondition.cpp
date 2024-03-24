@@ -3,8 +3,6 @@
 
 #include "Environment/Interactables/Doors/Conditions/HighTechCondition.h"
 
-enum class EInspectInput:uint8 {KeepRPressed};
-
 // Sets default values
 UHighTechCondition::UHighTechCondition()
 {

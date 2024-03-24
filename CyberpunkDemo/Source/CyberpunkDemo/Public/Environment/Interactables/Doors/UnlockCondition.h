@@ -6,7 +6,15 @@
 #include "UObject/Object.h"
 #include "UnlockCondition.generated.h"
 
-enum class EInspectInput:uint8;
+enum class EInspectInput:uint8
+{
+	Nothing,
+	PressF,
+	KeepFPressed,
+	PressR,
+	KeepRPressed,
+	MAX UMETA(Hidden)
+};
 
 UCLASS(Abstract)
 class CYBERPUNKDEMO_API UUnlockCondition : public UObject
