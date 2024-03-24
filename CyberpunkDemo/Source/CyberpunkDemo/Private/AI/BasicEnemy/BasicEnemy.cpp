@@ -18,6 +18,11 @@ ABasicEnemy::ABasicEnemy()
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABasicEnemy::NotifySomethingEnteredInTheTrigger);
 }
 
+ABasicEnemyController* ABasicEnemy::GetBasicEnemyController() const
+{
+	return BasicEnemyController;
+}
+
 EBasicEnemyState ABasicEnemy::GetCurrentState() const
 {
 	return CurrentState;

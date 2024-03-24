@@ -32,31 +32,31 @@ struct FBasicEnemyPersonalKnowledge
 	GENERATED_BODY()
 	
 	UPROPERTY()
-	FVector SpawnLocation;
+	FVector SpawnLocation = FVector(0, 0, 0);
 	
 	UPROPERTY()
-	TObjectPtr<ASplineContainer> PatrolSpline;
+	TObjectPtr<ASplineContainer> PatrolSpline = nullptr;
 
 	UPROPERTY()
-	TObjectPtr<ACharacter> PlayerInSightCone;
+	TObjectPtr<ACharacter> PlayerInSightCone = nullptr;
 	
 	UPROPERTY()
-	FAIStimulus CurrentHeardStimulus;
+	FAIStimulus CurrentHeardStimulus = FAIStimulus();
 
 	UPROPERTY()
-	bool bIsHeardStimulusSet;
+	bool bIsHeardStimulusSet = false;
 
 	UPROPERTY()
-	FVector CurrentCoverLocation;
+	FVector CurrentCoverLocation = FVector(0, 0, 0);
 
 	UPROPERTY()
-	bool bIsCoverLocationSet;
+	bool bIsCoverLocationSet = false;
 	
 	UPROPERTY()
-	FGameplayTagContainer Tags;
+	FGameplayTagContainer Tags = FGameplayTagContainer();
 
 	UPROPERTY()
-	TSet<EBasicEnemyGoal> CurrentGeneratedGoals;
+	TSet<EBasicEnemyGoal> CurrentGeneratedGoals = TSet<EBasicEnemyGoal>();
 	
 	void SetHeardStimulus(FAIStimulus Stimulus)
 	{
@@ -173,6 +173,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
 	const ASplineContainer* GetPatrolSpline() const;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
+	const ACharacter* GetPlayerInSightCone() const;
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
 	FVector GetSensedLocation() const;
 

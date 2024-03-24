@@ -116,6 +116,9 @@ public:
 	ABasicEnemy();
 
 #pragma region DECISIONMAKING_GETTERS
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
+	ABasicEnemyController* GetBasicEnemyController() const;
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | DecisionMaking | Behaviour")
 	EBasicEnemyState GetCurrentState() const;
 	

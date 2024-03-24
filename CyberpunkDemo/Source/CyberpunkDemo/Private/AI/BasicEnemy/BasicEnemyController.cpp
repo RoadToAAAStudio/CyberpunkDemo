@@ -26,6 +26,11 @@ const ASplineContainer* ABasicEnemyController::GetPatrolSpline() const
 	return PersonalKnowledge.PatrolSpline;
 }
 
+const ACharacter* ABasicEnemyController::GetPlayerInSightCone() const
+{
+	return PersonalKnowledge.PlayerInSightCone;
+}
+
 FVector ABasicEnemyController::GetSensedLocation() const
 {
 	return PersonalKnowledge.CurrentHeardStimulus.StimulusLocation;
