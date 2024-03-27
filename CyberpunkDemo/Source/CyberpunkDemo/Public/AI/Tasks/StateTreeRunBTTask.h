@@ -14,10 +14,13 @@ struct CYBERPUNKDEMO_API FStateTreeRunBTTaskInstanceData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, Category = "Context")
-	TObjectPtr<ACharacter> Actor;
+	TObjectPtr<AActor> Actor;
 	
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 	TObjectPtr<UBehaviorTree> BehaviourTree;
+	
+	UPROPERTY(EditAnywhere, Category = "Parameter")
+	bool Suceed;
 };
 
 /**

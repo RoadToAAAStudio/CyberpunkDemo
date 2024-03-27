@@ -12,17 +12,26 @@
 EStateTreeRunStatus FStateTreeRunBTTask::EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const
 {
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
-	AAIController* Controller = Cast<AAIController>(InstanceData.Actor->GetController());
-	if (!Controller) return EStateTreeRunStatus::Failed;
+	// AAIController* Controller = Cast<AAIController>(InstanceData.Actor->GetController());
+	// if (!Controller) return EStateTreeRunStatus::Failed;
+	//
+	// UBrainComponent* Brain = Controller->GetBrainComponent();
+	// if (Brain)
+	// {
+	// 	Brain->StopLogic(FString(""));
+	// }
+	//
+	// bool Success = Controller->RunBehaviorTree(InstanceData.BehaviourTree);
+	// if (!Success) return EStateTreeRunStatus::Failed;
+	//
+	// return EStateTreeRunStatus::Running;
 
-	UBrainComponent* Brain = Controller->GetBrainComponent();
-	if (Brain)
+	if (InstanceData.Suceed)
 	{
-		Brain->StopLogic(FString(""));
+		return EStateTreeRunStatus::Succeeded;
 	}
-	
-	bool Success = Controller->RunBehaviorTree(InstanceData.BehaviourTree);
-	if (!Success) return EStateTreeRunStatus::Failed;
-
-	return EStateTreeRunStatus::Running;
+	else
+	{
+		return EStateTreeRunStatus::Failed;
+	}
 }

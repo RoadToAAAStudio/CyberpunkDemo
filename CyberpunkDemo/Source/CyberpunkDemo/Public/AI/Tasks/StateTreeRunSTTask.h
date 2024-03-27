@@ -6,6 +6,7 @@
 #include "Blueprint/StateTreeTaskBlueprintBase.h"
 #include "StateTreeRunSTTask.generated.h"
 
+enum class EBasicEnemyBehaviour : uint8;
 /**
  * FSubtreeStateTreeTask instance data
  * @see FSubtreeStateTreeTask
@@ -15,8 +16,15 @@ struct CYBERPUNKDEMO_API FStateTreeRunSTTaskInstanceData
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere, Category = "Parameter", meta=(Schema="/Script/GameplayStateTreeModule.StateTreeComponentSchema"))
-    FStateTreeReference StateTreeRef;
+    UPROPERTY(EditAnywhere, Category = "Input")
+	EBasicEnemyBehaviour ChosenBehaviour;
+	
+	UPROPERTY(EditAnywhere, Category = "Parameter")
+	TMap<EBasicEnemyBehaviour, FStateTreeReference> Behaviours;
+
+	FStateTreeReference StateTreeRef;
+    // UPROPERTY(EditAnywhere, Category = "Parameter", meta=(Schema="/Script/GameplayStateTreeModule.StateTreeComponentSchema"))
+    // FStateTreeReference StateTreeRef;
 
     UPROPERTY(Transient)
     FStateTreeInstanceData InstanceData;
@@ -25,7 +33,7 @@ struct CYBERPUNKDEMO_API FStateTreeRunSTTaskInstanceData
 /*
  * Runs a sub state tree asset whose schema class should at least be a super class of the parent's schema
  */
-USTRUCT(meta = (DisplayName = "Run Subtree Asset Task"))
+USTRUCT(meta = (DisplayName = "Run Chosen Behaviour"))
 struct CYBERPUNKDEMO_API FStateTreeRunSTTask : public FStateTreeTaskCommonBase
 {
     GENERATED_BODY()

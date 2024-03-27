@@ -11,7 +11,6 @@ EStateTreeRunStatus FStateTreeSelectBehaviourTask::EnterState(FStateTreeExecutio
 {
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 	ABasicEnemy* BasicEnemy = InstanceData.BasicEnemy;
-	if(!BasicEnemy) return EStateTreeRunStatus::Running;
 	
 	TSet<EBasicEnemyBehaviour> SupportedBehaviour = BasicEnemy->SupportedBehaviours;
 
@@ -35,7 +34,7 @@ EStateTreeRunStatus FStateTreeSelectBehaviourTask::EnterState(FStateTreeExecutio
 	if (SupportedBehaviour.Num() == 0)
 	{
 		// Default behaviour if nothing is possible
-		InstanceData.ChosenBehaviour = EBasicEnemyBehaviour::None;
+		InstanceData.ChosenBehaviour = EBasicEnemyBehaviour::Idle;
 	}
 	else if (SupportedBehaviour.Num() == 1)
 	{
@@ -49,7 +48,7 @@ EStateTreeRunStatus FStateTreeSelectBehaviourTask::EnterState(FStateTreeExecutio
 	else
 	{
 		// Assign to each one a score
-		EBasicEnemyBehaviour BestBehaviour = EBasicEnemyBehaviour::None;
+		EBasicEnemyBehaviour BestBehaviour = EBasicEnemyBehaviour::Idle;
 		int BestScore = -1;
 
 		for (auto& Behaviour : SupportedBehaviour)
@@ -57,18 +56,40 @@ EStateTreeRunStatus FStateTreeSelectBehaviourTask::EnterState(FStateTreeExecutio
 			int BehaviourScore = -1;
 			switch (Behaviour)
 			{
-			case EBasicEnemyBehaviour::Investigation:
+			case EBasicEnemyBehaviour::Idle:
+				break;
+			case EBasicEnemyBehaviour::ReturnToSpawnPoint:
 				break;
 			case EBasicEnemyBehaviour::Patrol:
 				break;
-			//case EBasicEnemyBehaviour::Combat:
+			case EBasicEnemyBehaviour::Investigation:
 				break;
+			case EBasicEnemyBehaviour::BlindInvestigation:
+				break;
+			case EBasicEnemyBehaviour::Shoot:
+				break;
+			case EBasicEnemyBehaviour::QuickMeleeAttack:
+				break;
+			case EBasicEnemyBehaviour::ThrowGrenade:
+				break;
+			case EBasicEnemyBehaviour::MoveToCover:
+				break;
+			case EBasicEnemyBehaviour::ShootFromCover:
+				break;
+			case EBasicEnemyBehaviour::ThrowGrenadeFromCover:
+				break;
+			}
+
+			if (BehaviourScore > BestScore)
+			{
+				BestBehaviour = Behaviour;
+				BestScore = BehaviourScore;
 			}
 		}
 
-		InstanceData.ChosenBehaviour = BestBehaviour != InstanceData.ChosenBehaviour? BestBehaviour : InstanceData.ChosenBehaviour;
+		InstanceData.ChosenBehaviour = BestBehaviour;
 
 	}
 	
-	return EStateTreeRunStatus::Succeeded;
+	return EStateTreeRunStatus::Running;
 }

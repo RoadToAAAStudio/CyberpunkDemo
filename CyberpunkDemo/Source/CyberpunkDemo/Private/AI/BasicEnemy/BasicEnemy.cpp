@@ -51,7 +51,7 @@ void ABasicEnemy::AcceptStateTreeNotification_Implementation(const FName& Source
 	
 	Index = GoalEnum->GetIndexByName(CurrentStateName);
 	EBasicEnemyState NewState = Index != INDEX_NONE? static_cast<EBasicEnemyState>(Index) : EBasicEnemyState::None;
-
+	//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow, FString::Printf(TEXT("%d"), (int)NewState));
 	CurrentState = NewState;
 	
 	StateChanged(SourceState, NewState);

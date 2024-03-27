@@ -1,6 +1,7 @@
 #include "AI/Tasks/StateTreeRunSTTask.h"
 #include "VisualLogger/VisualLogger.h"
 #include "StateTreeExecutionContext.h"
+#include "AI/BasicEnemy/BasicEnemy.h"
 
 #define STATETREE_LOG(Verbosity, Format, ...) UE_VLOG(Context.GetOwner(), LogStateTree, Verbosity, Format, ##__VA_ARGS__)
 #define STATETREE_CLOG(Condition, Verbosity, Format, ...) UE_CVLOG((Condition), Context.GetOwner(), LogStateTree, Verbosity, Format, ##__VA_ARGS__)
@@ -8,6 +9,8 @@
 EStateTreeRunStatus FStateTreeRunSTTask::EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const
 {
     FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
+
+    InstanceData.StateTreeRef = *InstanceData.Behaviours.Find(InstanceData.ChosenBehaviour);
 
     if (!InstanceData.StateTreeRef.IsValid())
     {
