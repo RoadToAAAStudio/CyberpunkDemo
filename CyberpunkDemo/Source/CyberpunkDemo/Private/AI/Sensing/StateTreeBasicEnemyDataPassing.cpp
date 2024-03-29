@@ -2,6 +2,7 @@
 
 #include "AI/Sensing/StateTreeBasicEnemyDataPassing.h"
 #include "StateTreeExecutionContext.h"
+#include "AI/AIZone/AIZone.h"
 #include "AI/BasicEnemy/BasicEnemyController.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(StateTreeBasicEnemyDataPassing)
@@ -20,4 +21,11 @@ void FStateTreeBasicEnemyDataPassing::Tick(FStateTreeExecutionContext& Context, 
 	InstanceData.CoverLocation = BasicEnemy->GetBasicEnemyController()->GetCoverLocation();
 	InstanceData.Tags = BasicEnemy->GetBasicEnemyController()->GetTags();
 	InstanceData.GeneratedGoals = BasicEnemy->GetBasicEnemyController()->GetCurrentGeneratedGoals();
+
+	// Generate other Data
+	AActor* Player = BasicEnemy->GetBasicEnemyController()->SharedKnowledge->GetPlayer();
+	if (Player)
+	{
+		InstanceData.PlayerDistance = FVector::Distance(BasicEnemy->GetActorLocation(), Player->GetActorLocation());
+	}
 }

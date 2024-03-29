@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "StateTreeEvaluatorBase.h"
 #include "AI/BasicEnemy/BasicEnemy.h"
-#include "Perception/AIPerceptionTypes.h"
 #include "StateTreeBasicEnemyDataPassing.generated.h"
 
 struct FAIStimulus;
@@ -46,12 +45,15 @@ struct CYBERPUNKDEMO_API FStateTreeBasicEnemyDataPassingInstanceData
 
 	UPROPERTY(VisibleAnywhere, Category="Output")
 	TSet<EBasicEnemyGoal> GeneratedGoals = TSet<EBasicEnemyGoal>();
+
+	// Other generated data
+	UPROPERTY(VisibleAnywhere, Category="Output")
+	float PlayerDistance;
 };
 
 /**
- * Evaluator that generates data for both the Basic Enemy and the State Tree (Data on the Basic Enemy is duplicated to be debugged)
- * Generates Goals from Knowledge and provide all data for every goal generated
- * Output data has to be checked only if the corresponding goal is possible
+ * Evaluator that pass data from knowledge to the State Tree.
+ * It generates also some useful data for the decision making
  */
 USTRUCT(meta = (DisplayName = "Basic Enemy Data passing"))
 struct CYBERPUNKDEMO_API FStateTreeBasicEnemyDataPassing : public FStateTreeEvaluatorCommonBase

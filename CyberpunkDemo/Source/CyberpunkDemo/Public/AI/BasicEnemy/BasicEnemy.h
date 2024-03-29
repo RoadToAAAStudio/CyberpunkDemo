@@ -18,8 +18,8 @@ enum class EBasicEnemyBehaviour : uint8
 	Idle,
 	ReturnToSpawnPoint,
 	Patrol,
-	Investigation,
 	BlindInvestigation,
+	Investigation,
 	Shoot,
 	QuickMeleeAttack,
 	ThrowGrenade,
@@ -79,6 +79,14 @@ public:
 protected:
 
 #pragma region DECISIONMAKING
+	UPROPERTY(EditAnywhere, Category = "DecisionMaking")
+	float MinDistanceToShoot = 600.0f;
+
+	UPROPERTY(EditAnywhere, Category = "DecisionMaking")
+	float MaxDistanceToShoot = 1500.0f;
+
+	UPROPERTY(EditAnywhere, Category = "DecisionMaking")
+	float MaxDistanceToQuickMeleeAttack = 200.0f;
 	/*
 	* This reflects BasicEnemy State Tree current state
 	* Transitions:
@@ -97,12 +105,24 @@ protected:
 	TSet<EBasicEnemyBehaviour> SupportedBehaviours;
 
 	UPROPERTY()
+	TSet<EBasicEnemyBehaviour> CurrentFilteredBehaviours;
+
+	UPROPERTY()
 	EBasicEnemyBehaviour CurrentChosenBehaviour;
 	
 	UPROPERTY()
 	TObjectPtr<ABasicEnemyController> BasicEnemyController;
 #pragma endregion
 
+#pragma region ACTUATION
+	UPROPERTY(EditAnywhere, Category = "Actuation")
+	float WaitingTimeAtPatrolStart = 5.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Actuation")
+	float WaitingTimeAtPatrolEnd = 5.0f;
+
+#pragma endregion 
+	
 #pragma region PERSONAL_COMPONENTS	
 	UPROPERTY(EditAnywhere, Instanced, Category = "DecisionMaking")
 	TObjectPtr<UStateTreeComponent> StateTree;
@@ -123,10 +143,14 @@ public:
 	EBasicEnemyState GetCurrentState() const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | DecisionMaking | Behaviour")
-	EBasicEnemyBehaviour GetCurrentChosenBehaviour() const;
+	TSet<EBasicEnemyBehaviour> GetSupportedBehaviours() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | DecisionMaking | Behaviour")
+	TSet<EBasicEnemyBehaviour> GetCurrentFilteredBehaviours() const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | DecisionMaking | Behaviour")
-	TSet<EBasicEnemyBehaviour> GetSupportedBehaviours() const;
+	EBasicEnemyBehaviour GetCurrentChosenBehaviour() const;
+	
 #pragma endregion
 	
 	// StateTree notifications acceptor

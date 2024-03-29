@@ -33,6 +33,11 @@ TSet<EBasicEnemyBehaviour> ABasicEnemy::GetSupportedBehaviours() const
 	return SupportedBehaviours;
 }
 
+TSet<EBasicEnemyBehaviour> ABasicEnemy::GetCurrentFilteredBehaviours() const
+{
+	return CurrentFilteredBehaviours;
+}
+
 EBasicEnemyBehaviour ABasicEnemy::GetCurrentChosenBehaviour() const
 {
 	return CurrentChosenBehaviour;

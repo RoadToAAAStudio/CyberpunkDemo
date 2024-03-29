@@ -4,7 +4,7 @@
 #include "StateTreeReference.h"
 #include "StateTreeInstanceData.h"
 #include "Blueprint/StateTreeTaskBlueprintBase.h"
-#include "StateTreeRunSTTask.generated.h"
+#include "StateTreeRunChosenBehaviour.generated.h"
 
 enum class EBasicEnemyBehaviour : uint8;
 /**

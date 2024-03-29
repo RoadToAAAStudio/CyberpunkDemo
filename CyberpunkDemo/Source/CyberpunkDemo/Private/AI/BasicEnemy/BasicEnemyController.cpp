@@ -303,6 +303,8 @@ void ABasicEnemyController::OnPossess(APawn* PossessedPawn)
 {
 	Super::OnPossess(PossessedPawn);
 
+	PersonalKnowledge.SpawnLocation = PossessedPawn->GetActorLocation();
+	
 	if (Cast<ABasicEnemy>(PossessedPawn))
 	{
 		PersonalKnowledge.PatrolSpline = Cast<ABasicEnemy>(PossessedPawn)->PatrolSpline;
