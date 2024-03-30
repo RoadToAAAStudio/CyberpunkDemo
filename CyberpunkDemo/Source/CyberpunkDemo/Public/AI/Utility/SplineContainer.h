@@ -11,7 +11,7 @@
  * Class that holds a spline
  */
 
-UCLASS()
+UCLASS(BlueprintType)
 class CYBERPUNKDEMO_API ASplineContainer : public AActor
 {
 	GENERATED_BODY()

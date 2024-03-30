@@ -18,37 +18,37 @@ struct CYBERPUNKDEMO_API FStateTreeBasicEnemyDataPassingInstanceData
 	UPROPERTY(EditAnywhere, Category="Context")
 	TObjectPtr<ABasicEnemy> BasicEnemy;
 
-	// Data passing from Knowledge
-	UPROPERTY(VisibleAnywhere, Category="Output")
-	FVector SpawnLocation = FVector(0, 0, 0);
-	
-	UPROPERTY(VisibleAnywhere, Category="Output")
-	const ASplineContainer* PatrolSpline = nullptr;
-
-	UPROPERTY(VisibleAnywhere, Category="Output")
-	const ACharacter* PlayerInSightCone = nullptr;
-	
-	UPROPERTY(VisibleAnywhere, Category="Output")
-	FVector SensedLocation = FVector();
-
-	UPROPERTY(VisibleAnywhere, Category="Output")
-	bool bIsHeardStimulusSet = false;
-
-	UPROPERTY(VisibleAnywhere, Category="Output")
-	FVector CoverLocation = FVector(0, 0, 0);
-
-	UPROPERTY(VisibleAnywhere, Category="Output")
-	bool bIsCoverLocationSet = false;
-	
-	UPROPERTY(VisibleAnywhere, Category="Output")
-	FGameplayTagContainer Tags = FGameplayTagContainer();
-
-	UPROPERTY(VisibleAnywhere, Category="Output")
-	TSet<EBasicEnemyGoal> GeneratedGoals = TSet<EBasicEnemyGoal>();
-
-	// Other generated data
-	UPROPERTY(VisibleAnywhere, Category="Output")
-	float PlayerDistance;
+	// Data passing from Actor
+	// UPROPERTY(VisibleAnywhere, Category="Output")
+	// FVector SpawnLocation = FVector(0, 0, 0);
+	//
+	// UPROPERTY(VisibleAnywhere, Category="Output")
+	// const ASplineContainer* PatrolSpline = nullptr;
+	//
+	// UPROPERTY(VisibleAnywhere, Category="Output")
+	// const ACharacter* PlayerInSightCone = nullptr;
+	//
+	// UPROPERTY(VisibleAnywhere, Category="Output")
+	// FVector SensedLocation = FVector();
+	//
+	// UPROPERTY(VisibleAnywhere, Category="Output")
+	// bool bIsHeardStimulusSet = false;
+	//
+	// UPROPERTY(VisibleAnywhere, Category="Output")
+	// FVector CoverLocation = FVector(0, 0, 0);
+	//
+	// UPROPERTY(VisibleAnywhere, Category="Output")
+	// bool bIsCoverLocationSet = false;
+	//
+	// UPROPERTY(VisibleAnywhere, Category="Output")
+	// FGameplayTagContainer Tags = FGameplayTagContainer();
+	//
+	// UPROPERTY(VisibleAnywhere, Category="Output")
+	// TSet<EBasicEnemyGoal> GeneratedGoals = TSet<EBasicEnemyGoal>();
+	//
+	// // Other generated data
+	// UPROPERTY(VisibleAnywhere, Category="Output")
+	// float PlayerDistance;
 };
 
 /**

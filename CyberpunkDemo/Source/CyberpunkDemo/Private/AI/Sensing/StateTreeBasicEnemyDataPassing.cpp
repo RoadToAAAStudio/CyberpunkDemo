@@ -13,19 +13,19 @@ void FStateTreeBasicEnemyDataPassing::Tick(FStateTreeExecutionContext& Context, 
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 	ABasicEnemy* BasicEnemy = InstanceData.BasicEnemy;
 
-	InstanceData.SpawnLocation = BasicEnemy->GetBasicEnemyController()->GetSpawnLocation();
-	InstanceData.PatrolSpline = BasicEnemy->GetBasicEnemyController()->GetPatrolSpline();
-	InstanceData.PlayerInSightCone = BasicEnemy->GetBasicEnemyController()->GetPlayerInSightCone();
-	InstanceData.SensedLocation = BasicEnemy->GetBasicEnemyController()->GetSensedLocation();
-	InstanceData.bIsHeardStimulusSet = BasicEnemy->GetBasicEnemyController()->IsSensedLocationSet();
-	InstanceData.CoverLocation = BasicEnemy->GetBasicEnemyController()->GetCoverLocation();
-	InstanceData.Tags = BasicEnemy->GetBasicEnemyController()->GetTags();
-	InstanceData.GeneratedGoals = BasicEnemy->GetBasicEnemyController()->GetCurrentGeneratedGoals();
-
-	// Generate other Data
-	AActor* Player = BasicEnemy->GetBasicEnemyController()->SharedKnowledge->GetPlayer();
-	if (Player)
-	{
-		InstanceData.PlayerDistance = FVector::Distance(BasicEnemy->GetActorLocation(), Player->GetActorLocation());
-	}
+	// InstanceData.SpawnLocation = BasicEnemy->GetBasicEnemyController()->GetSpawnLocation();
+	// InstanceData.PatrolSpline = BasicEnemy->GetBasicEnemyController()->GetPatrolSpline();
+	// InstanceData.PlayerInSightCone = BasicEnemy->GetBasicEnemyController()->GetPlayerInSightCone();
+	// InstanceData.SensedLocation = BasicEnemy->GetBasicEnemyController()->GetSensedLocation();
+	// InstanceData.bIsHeardStimulusSet = BasicEnemy->GetBasicEnemyController()->IsSensedLocationSet();
+	// InstanceData.CoverLocation = BasicEnemy->GetBasicEnemyController()->GetCoverLocation();
+	// InstanceData.Tags = BasicEnemy->GetBasicEnemyController()->GetTags();
+	// InstanceData.GeneratedGoals = BasicEnemy->GetBasicEnemyController()->GetGeneratedGoals();
+	//
+	// // Generate other Data
+	// AActor* Player = BasicEnemy->GetBasicEnemyController()->SharedKnowledge->GetPlayer();
+	// if (Player)
+	// {
+	// 	InstanceData.PlayerDistance = FVector::Distance(BasicEnemy->GetActorLocation(), Player->GetActorLocation());
+	// }
 }

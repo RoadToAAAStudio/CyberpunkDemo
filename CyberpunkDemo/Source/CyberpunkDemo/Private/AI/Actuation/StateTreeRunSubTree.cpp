@@ -1,4 +1,4 @@
-#include "AI/Tasks/StateTreeRunChosenBehaviour.h"
+#include "AI/Actuation/StateTreeRunSubTree.h"
 #include "VisualLogger/VisualLogger.h"
 #include "StateTreeExecutionContext.h"
 #include "AI/BasicEnemy/BasicEnemy.h"
@@ -9,13 +9,6 @@
 EStateTreeRunStatus FStateTreeRunSTTask::EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const
 {
     FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
-
-    if (!InstanceData.Behaviours.Contains(InstanceData.ChosenBehaviour))
-    {
-        return EStateTreeRunStatus::Failed;
-    }
-    
-    InstanceData.StateTreeRef = *InstanceData.Behaviours.Find(InstanceData.ChosenBehaviour);
     
     if (!InstanceData.StateTreeRef.IsValid())
     {
@@ -49,11 +42,6 @@ EStateTreeRunStatus FStateTreeRunSTTask::Tick(FStateTreeExecutionContext& Contex
 void FStateTreeRunSTTask::ExitState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const
 {
     FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
-
-    if (!InstanceData.Behaviours.Contains(InstanceData.ChosenBehaviour))
-    {
-        return;
-    }
     
     FStateTreeExecutionContext ChildContext(*Context.GetOwner(), *InstanceData.StateTreeRef.GetStateTree(), InstanceData.InstanceData);
     if (SetContextRequirements(Context, ChildContext, true))

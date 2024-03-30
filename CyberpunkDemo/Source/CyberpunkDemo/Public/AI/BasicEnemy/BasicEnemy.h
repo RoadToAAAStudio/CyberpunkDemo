@@ -9,9 +9,10 @@
 #include "GameFramework/Character.h"
 #include "BasicEnemy.generated.h"
 
+class USettableStateTreeComponent;
 class ABasicEnemyController;
 
-UENUM(BlueprintType)
+UENUM(BlueprintType, Blueprintable)
 enum class EBasicEnemyBehaviour : uint8
 {
 	None,
@@ -54,7 +55,23 @@ struct FBasicEnemySupportedBehaviourMapping : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSet<EBasicEnemyBehaviour> BehavioursEnum;
+	EBasicEnemyBehaviour BehaviourEnum;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UStateTree> BehaviourAsset;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool IsInterruptible;
+};
+
+/*
+* Actuators expects to find their data here
+* */
+USTRUCT(BlueprintType)
+struct FBasicEnemyActuatorsData
+{
+	GENERATED_BODY()
+	
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBasicEnemyStateChangedSignature, EBasicEnemyState, SourceState, EBasicEnemyState, NewState);
@@ -63,8 +80,6 @@ UCLASS()
 class CYBERPUNKDEMO_API ABasicEnemy : public ACharacter, public IStateTreeNotificationsAcceptor
 {
 	GENERATED_BODY()
-	friend struct FStateTreeBasicEnemyEvaluator;
-	friend struct FStateTreeSelectBehaviourTask;
 	
 public:
 	
@@ -101,14 +116,14 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	EBasicEnemyState CurrentState = EBasicEnemyState::Unaware;
 
+	/*
+	 * All possible behaviour for this enemy
+	 */
 	UPROPERTY()
-	TSet<EBasicEnemyBehaviour> SupportedBehaviours;
+	TMap<EBasicEnemyBehaviour, UStateTree*> SupportedBehaviours;
 
 	UPROPERTY()
-	TSet<EBasicEnemyBehaviour> CurrentFilteredBehaviours;
-
-	UPROPERTY()
-	EBasicEnemyBehaviour CurrentChosenBehaviour;
+	EBasicEnemyBehaviour ChosenBehaviour;
 	
 	UPROPERTY()
 	TObjectPtr<ABasicEnemyController> BasicEnemyController;
@@ -120,15 +135,18 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Actuation")
 	float WaitingTimeAtPatrolEnd = 5.0f;
-
 #pragma endregion 
 	
 #pragma region PERSONAL_COMPONENTS	
 	UPROPERTY(EditAnywhere, Instanced, Category = "DecisionMaking")
-	TObjectPtr<UStateTreeComponent> StateTree;
-
+	TObjectPtr<UStateTreeComponent> StateMachine;
+	
 	UPROPERTY(EditAnywhere, Category = "DecisionMaking")
 	TObjectPtr<UDataTable> SupportedBehavioursDataTable;
+
+	UPROPERTY(VisibleAnywhere, Category = "Actuation")
+	TObjectPtr<USettableStateTreeComponent> CurrentBehaviour;
+
 #pragma endregion 
 
 public:
@@ -144,9 +162,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | DecisionMaking | Behaviour")
 	TSet<EBasicEnemyBehaviour> GetSupportedBehaviours() const;
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | DecisionMaking | Behaviour")
-	TSet<EBasicEnemyBehaviour> GetCurrentFilteredBehaviours() const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | DecisionMaking | Behaviour")
 	EBasicEnemyBehaviour GetCurrentChosenBehaviour() const;
@@ -165,7 +180,8 @@ protected:
 #pragma endregion 
 
 private:
-
+	void SelectBehaviour();
+	
 #pragma region FUNCTIONS_LISTENERS
 	// Function listeners
 	UFUNCTION()
@@ -179,6 +195,9 @@ private:
 
 	UFUNCTION()
 	void NotifyAlertedTimerFinished();
+
+	UFUNCTION()
+	void NotifyGoalGenerated(const TSet<EBasicEnemyGoal> NewGoals, const TSet<EBasicEnemyGoal> RemovedGoals);
 	
 #pragma endregion 
 

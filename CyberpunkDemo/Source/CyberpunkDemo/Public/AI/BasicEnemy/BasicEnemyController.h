@@ -9,6 +9,7 @@
 #include "GameplayTagContainer.h"
 #include "BasicEnemyController.generated.h"
 
+class ABasicEnemy;
 class ASplineContainer;
 class AMainCharacter;
 class ABasicEnemyController;
@@ -33,12 +34,18 @@ struct FBasicEnemyPersonalKnowledge
 	
 	UPROPERTY()
 	FVector SpawnLocation = FVector(0, 0, 0);
+
+	UPROPERTY()
+	float DistanceFromSpawn = INFINITY;
 	
 	UPROPERTY()
 	TObjectPtr<ASplineContainer> PatrolSpline = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<ACharacter> PlayerInSightCone = nullptr;
+
+	UPROPERTY()
+	float DistanceFromPlayer = INFINITY;
 	
 	UPROPERTY()
 	FAIStimulus CurrentHeardStimulus = FAIStimulus();
@@ -56,7 +63,7 @@ struct FBasicEnemyPersonalKnowledge
 	FGameplayTagContainer Tags = FGameplayTagContainer();
 
 	UPROPERTY()
-	TSet<EBasicEnemyGoal> CurrentGeneratedGoals = TSet<EBasicEnemyGoal>();
+	TSet<EBasicEnemyGoal> GeneratedGoals = TSet<EBasicEnemyGoal>();
 	
 	void SetHeardStimulus(FAIStimulus Stimulus)
 	{
@@ -99,6 +106,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerSeenSignature, const ABasic
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSomethingWasHeardSignature, const FAIStimulus, Stimulus);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSightSenseToogleSignature, const bool, Enabled);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHearingSenseToogleSignature, const bool, Enabled);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGoalsChanged, const TSet<EBasicEnemyGoal>, NewGoals, const TSet<EBasicEnemyGoal>, RemovedGoal);
 
 /**
  * Basic Enemy Controller
@@ -132,6 +140,8 @@ public:
     FOnSomethingWasHeardSignature OnSomethingWasHeardDelegate;
 	UPROPERTY(BlueprintAssignable)
 	FOnHearingSenseToogleSignature OnHearingSenseToggledDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnGoalsChanged OnGoalsChanged;
 #pragma endregion
 
 #pragma region SENSORS_CONFIGS	
@@ -169,12 +179,18 @@ public:
 #pragma region KNOWLEDGE_GETTERS
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal |Knowldge ")
 	FVector GetSpawnLocation() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
+	float GetDistanceFromSpawn() const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
 	const ASplineContainer* GetPatrolSpline() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
 	const ACharacter* GetPlayerInSightCone() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
+	float GetDistanceFromPlayer() const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
 	FVector GetSensedLocation() const;
@@ -192,7 +208,7 @@ public:
 	FGameplayTagContainer GetTags() const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge | Goal")
-	TSet<EBasicEnemyGoal> GetCurrentGeneratedGoals() const;
+	TSet<EBasicEnemyGoal> GetGeneratedGoals() const;
 
 #pragma region SHARED_KNOWLEDGE
 	UPROPERTY(BlueprintReadOnly, Category = "Shared | Knowledge")
@@ -209,6 +225,10 @@ protected:
 	FBasicEnemyPersonalKnowledge PersonalKnowledge;
 #pragma endregion
 
+	// Link to BasicEnemy
+	UPROPERTY()
+	TObjectPtr<ABasicEnemy> BasicEnemy;
+	
 private:
 	// Temp variable for a hearing stimulus
 	FAIStimulus CurrentHeardStimulus;
@@ -246,11 +266,17 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnSomethingWasHeard"))
 	void SomethingWasHeard(const FAIStimulus Stimulus);
+
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnGoalsChanged"))
+	void GoalsChanged(const TSet<EBasicEnemyGoal>& NewGoals, const TSet<EBasicEnemyGoal>& RemovedGoals);
+	
 #pragma endregion
 	
 private:
 	void SetupPerceptionSystem();
 
+	void UpdatePersonalKnowledge();
+	
 	void SensorsUpdate(float DeltaTime);
 
 	void GoalGeneration();

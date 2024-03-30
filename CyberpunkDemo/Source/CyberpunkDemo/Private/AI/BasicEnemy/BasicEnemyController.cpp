@@ -21,6 +21,11 @@ FVector ABasicEnemyController::GetSpawnLocation() const
 	return PersonalKnowledge.SpawnLocation;
 }
 
+float ABasicEnemyController::GetDistanceFromSpawn() const
+{
+	return PersonalKnowledge.DistanceFromSpawn;
+}
+
 const ASplineContainer* ABasicEnemyController::GetPatrolSpline() const
 {
 	return PersonalKnowledge.PatrolSpline;
@@ -29,6 +34,11 @@ const ASplineContainer* ABasicEnemyController::GetPatrolSpline() const
 const ACharacter* ABasicEnemyController::GetPlayerInSightCone() const
 {
 	return PersonalKnowledge.PlayerInSightCone;
+}
+
+float ABasicEnemyController::GetDistanceFromPlayer() const
+{
+	return PersonalKnowledge.DistanceFromPlayer;
 }
 
 FVector ABasicEnemyController::GetSensedLocation() const
@@ -56,9 +66,9 @@ FGameplayTagContainer ABasicEnemyController::GetTags() const
 	return PersonalKnowledge.Tags;
 }
 
-TSet<EBasicEnemyGoal> ABasicEnemyController::GetCurrentGeneratedGoals() const
+TSet<EBasicEnemyGoal> ABasicEnemyController::GetGeneratedGoals() const
 {
-	return PersonalKnowledge.CurrentGeneratedGoals;
+	return PersonalKnowledge.GeneratedGoals;
 }
 #pragma endregion 
 
@@ -139,6 +149,15 @@ void ABasicEnemyController::SetupPerceptionSystem()
 	HearingBar = CreateDefaultSubobject<UAttributeBar>(TEXT("HearingBar"));
 }
 
+void ABasicEnemyController::UpdatePersonalKnowledge()
+{
+	// PlayerDistance
+	if (SharedKnowledge->GetPlayer())
+	{
+		PersonalKnowledge.DistanceFromPlayer = FVector::Distance(BasicEnemy->GetActorLocation(), SharedKnowledge->GetPlayer()->GetActorLocation());
+	}
+}
+
 void ABasicEnemyController::SensorsUpdate(float DeltaTime)
 {
 	// TODO Handle locking of sight
@@ -172,46 +191,93 @@ void ABasicEnemyController::SensorsUpdate(float DeltaTime)
 
 void ABasicEnemyController::GoalGeneration()
 {
-	TSet<EBasicEnemyGoal>* CurrentGeneratedGoals = &PersonalKnowledge.CurrentGeneratedGoals;
+	TSet<EBasicEnemyGoal>* CurrentGeneratedGoals = &PersonalKnowledge.GeneratedGoals;
+	
+	TSet<EBasicEnemyGoal> GoalsToAdd;
+	TSet<EBasicEnemyGoal> GoalsToRemove;
 	
 	// Patrol Goal
-	if (PersonalKnowledge.PatrolSpline)
+	if (!CurrentGeneratedGoals->Contains(EBasicEnemyGoal::Patrol))
 	{
-		CurrentGeneratedGoals->Add(EBasicEnemyGoal::Patrol);
+		// Try Add
+		if (PersonalKnowledge.PatrolSpline)
+		{
+			GoalsToAdd.Add(EBasicEnemyGoal::Patrol);
+		}
 	}
-	else 
+	else
 	{
-		CurrentGeneratedGoals->Remove(EBasicEnemyGoal::Patrol);
+		// Try remove
+		if (!PersonalKnowledge.PatrolSpline)
+		{
+			GoalsToRemove.Remove(EBasicEnemyGoal::Patrol);
+		}
 	}
 
 	// Search Goal
-	if (PersonalKnowledge.bIsHeardStimulusSet || Cast<ABasicEnemy>(GetPawn())->GetCurrentState() == EBasicEnemyState::Alerted)
+	if (!CurrentGeneratedGoals->Contains(EBasicEnemyGoal::Search))
 	{
-		CurrentGeneratedGoals->Add(EBasicEnemyGoal::Search);
+		// Try Add
+		if (PersonalKnowledge.bIsHeardStimulusSet || Cast<ABasicEnemy>(GetPawn())->GetCurrentState() == EBasicEnemyState::Alerted)
+		{
+			GoalsToAdd.Add(EBasicEnemyGoal::Search);
+		}
 	}
 	else
 	{
-		CurrentGeneratedGoals->Remove(EBasicEnemyGoal::Search);
+		// Try remove
+		if (!PersonalKnowledge.bIsHeardStimulusSet && Cast<ABasicEnemy>(GetPawn())->GetCurrentState() != EBasicEnemyState::Alerted)
+		{
+			GoalsToRemove.Remove(EBasicEnemyGoal::Search);
+		}
 	}
 
 	// Combat Goal
-	if (SharedKnowledge->GetPlayer())
+	if (!CurrentGeneratedGoals->Contains(EBasicEnemyGoal::Combat))
 	{
-		CurrentGeneratedGoals->Add(EBasicEnemyGoal::Combat);
+		// Try Add
+		if (SharedKnowledge->GetPlayer())
+		{
+			GoalsToAdd.Add(EBasicEnemyGoal::Combat);
+		}
 	}
 	else
 	{
-		CurrentGeneratedGoals->Remove(EBasicEnemyGoal::Combat);
+		// Try remove
+		if (!SharedKnowledge->GetPlayer())
+		{
+			GoalsToRemove.Remove(EBasicEnemyGoal::Combat);
+		}
 	}
 
 	// Cover Goal
-	if (PersonalKnowledge.bIsCoverLocationSet)
+	if (!CurrentGeneratedGoals->Contains(EBasicEnemyGoal::Cover))
 	{
-		CurrentGeneratedGoals->Add(EBasicEnemyGoal::Cover);
+		// Try Add
+		if (PersonalKnowledge.bIsCoverLocationSet)
+		{
+			GoalsToAdd.Add(EBasicEnemyGoal::Cover);
+		}
 	}
 	else
 	{
-		CurrentGeneratedGoals->Remove(EBasicEnemyGoal::Cover);
+		// Try remove
+		if (!PersonalKnowledge.bIsCoverLocationSet)
+		{
+			GoalsToRemove.Remove(EBasicEnemyGoal::Cover);
+		}
+	}
+
+	CurrentGeneratedGoals->Append(GoalsToAdd);
+	for (const auto& Goal : GoalsToRemove)
+	{
+		CurrentGeneratedGoals->Remove(Goal);
+	}
+
+	if (GoalsToAdd.Num() > 0 || GoalsToRemove.Num() > 0)
+	{		
+		GoalsChanged(GoalsToAdd, GoalsToRemove);
+		OnGoalsChanged.Broadcast(GoalsToAdd, GoalsToRemove);
 	}
 }
 
@@ -286,6 +352,7 @@ void ABasicEnemyController::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	SensorsUpdate(DeltaTime);
+	UpdatePersonalKnowledge();
 	GoalGeneration();
 }
 
@@ -293,21 +360,19 @@ void ABasicEnemyController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &ABasicEnemyController::NotifyReceiveStimulus);
-
 	EnableSightSense(true);
 	EnableHearingSense(true);
+
+	GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &ABasicEnemyController::NotifyReceiveStimulus);
 }
 
 void ABasicEnemyController::OnPossess(APawn* PossessedPawn)
 {
 	Super::OnPossess(PossessedPawn);
 
+	BasicEnemy = Cast<ABasicEnemy>(PossessedPawn);
+
 	PersonalKnowledge.SpawnLocation = PossessedPawn->GetActorLocation();
-	
-	if (Cast<ABasicEnemy>(PossessedPawn))
-	{
-		PersonalKnowledge.PatrolSpline = Cast<ABasicEnemy>(PossessedPawn)->PatrolSpline;
-	}
+	PersonalKnowledge.PatrolSpline = Cast<ABasicEnemy>(PossessedPawn)->PatrolSpline;
 }
 #pragma endregion 
