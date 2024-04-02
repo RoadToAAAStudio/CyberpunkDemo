@@ -7,6 +7,29 @@
 #include "Components/ActorComponent.h"
 #include "HackableComponent.generated.h"
 
+USTRUCT(BlueprintType)
+struct FObjectTypeDataStructure : public FTableRowBase
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere)
+	TSet<TSubclassOf<UGameplayAbility>> PossibleHacks;
+
+	UPROPERTY(EditAnywhere)
+	FString ObjectName;
+
+	UPROPERTY(EditAnywhere)
+	FString ObjectInfo;
+};
+
+UENUM(BlueprintType)
+enum class EHackableObjects : uint8
+{
+	None,
+	Camera,
+	Toaster,
+	Max UMETA(Hidden),
+};
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CYBERPUNKDEMO_API UHackableComponent : public UActorComponent
@@ -15,6 +38,12 @@ class CYBERPUNKDEMO_API UHackableComponent : public UActorComponent
 
 	UPROPERTY(EditAnywhere, Category = "Hacks")
 	TSet<TSubclassOf<UGameplayAbility>> PossibleHacks;
+
+	UPROPERTY(EditAnywhere, Category = "Hacks")
+	EHackableObjects ObjectType;
+
+	UPROPERTY(EditAnywhere, Category = "Hacks")
+	UDataTable* ObjectData;
 
 	UPROPERTY(EditAnywhere, Category = "Inspection Settings")
 	float InspectionTime;

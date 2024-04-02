@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputMappingContext.h"
+#include "EnhancedInputComponent.h"
 #include "Components/ActorComponent.h"
 #include "Environment/HackableObjects/HackableComponent.h"
 #include "Widgets/AnalysisWidget.h"
@@ -27,6 +29,15 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Quickhack Data")
 	UDataTable* QuickhackDataTable;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputMappingContext* QuickhackMappingContext;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* ScrollHacksAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* DoHackAction;
 
 	FOnCompletedTargetAnalysisSignature OnCompletedTargetAnalysis;
 	FOnFinishedTargetAnalysisSignature OnFinishedTargetAnalysis;
@@ -57,16 +68,17 @@ public:
 
 	void HandleAnalysisWidget();
 
+	bool GetIsQuickhackCreated();
+
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
+							   FActorComponentTickFunction* ThisTickFunction) override;
+
+	void Init(const FCollisionQueryParams ParamsToIgnore);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 	void ResetHackTarget();
-	
-public:
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;
-
-	void SetIgnoredParams(const FCollisionQueryParams ParamsToIgnore);
 };

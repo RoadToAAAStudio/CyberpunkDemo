@@ -42,8 +42,7 @@ public:
 	
 	void Init(FString& _HackText, FString& _HackCost, UTexture2D& _HackImage, TSubclassOf<UGameplayAbility>& _AssignedHack);
 
-private:
+	void Highlight(bool isSelected);
 
-	UFUNCTION()
 	void DoHack();
 };

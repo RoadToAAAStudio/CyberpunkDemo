@@ -13,6 +13,18 @@ void UQuickhackWidget::Init(FString& _HackText, FString& _HackCost, UTexture2D& 
 	HackButton->OnReleased.AddDynamic(this, &UQuickhackWidget::DoHack);
 }
 
+void UQuickhackWidget::Highlight(bool isSelected)
+{
+	if (isSelected)
+	{
+		HackImage->SetOpacity(0);
+	}
+	else
+	{
+		HackImage->SetOpacity(1);
+	}
+}
+
 void UQuickhackWidget::DoHack()
 {
 	FString Print = "Performing hack: ";

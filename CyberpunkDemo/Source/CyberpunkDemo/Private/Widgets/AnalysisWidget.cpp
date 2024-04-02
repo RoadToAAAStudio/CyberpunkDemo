@@ -31,6 +31,7 @@ void UAnalysisWidget::CreateHacks(UHackableComponent* HackTarget)
 			return;
 		}
 		QuickhacksVerticalBox->AddChild(QuickhackWidget);
+		if (QuickhacksVerticalBox->GetChildrenCount() == 1) QuickhackWidget->Highlight(true);
 		QuickhackWidget->Init(QuickhackData->HackName, QuickhackData->HackCost, *QuickhackData->HackImage, Hack);
 		QuickhackWidget->AddToViewport();
 	}
@@ -39,4 +40,35 @@ void UAnalysisWidget::CreateHacks(UHackableComponent* HackTarget)
 void UAnalysisWidget::RemoveHacks()
 {
 	QuickhacksVerticalBox->ClearChildren();
+	SelectedHackIndex = 0;
+}
+
+void UAnalysisWidget::ScrollHacks(const FInputActionValue& Value)
+{
+	SelectedHackIndex++;
+
+	if (SelectedHackIndex > QuickhacksVerticalBox->GetChildrenCount() - 1)
+	{
+		SelectedHackIndex = 0;
+	}
+
+	for (auto Hack : QuickhacksVerticalBox->GetAllChildren())
+	{
+		if (!Owner->GetIsQuickhackCreated()) return;
+		UQuickhackWidget* QuickHack = Cast<UQuickhackWidget>(Hack);
+		if (Hack == QuickhacksVerticalBox->GetChildAt(SelectedHackIndex))
+		{
+			QuickHack->Highlight(true);
+		}
+		else
+		{
+			QuickHack->Highlight(false);
+		}
+	}
+}
+
+void UAnalysisWidget::DoHack(const FInputActionValue& Value)
+{
+	if (!Owner->GetIsQuickhackCreated()) return;
+	Cast<UQuickhackWidget>(QuickhacksVerticalBox->GetChildAt(SelectedHackIndex))->DoHack();
 }

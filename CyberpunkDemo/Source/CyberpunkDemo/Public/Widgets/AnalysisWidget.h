@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputActionValue.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/ScrollBox.h"
 #include "Components/VerticalBox.h"
@@ -41,6 +42,8 @@ private:
 
 	TSet<TSubclassOf<UGameplayAbility>> PlayerHacks;
 
+	int SelectedHackIndex = 0;
+
 public:
 
 	void Init(UQuickhackSystemComponent* _Owner, UDataTable* _QuickhackDataTable, TSubclassOf<UQuickhackWidget> _QuickhackWidgetClass);
@@ -48,4 +51,8 @@ public:
 	void CreateHacks(UHackableComponent* HackTarget);
 
 	void RemoveHacks();
+
+	void ScrollHacks(const FInputActionValue& Value);
+
+	void DoHack(const FInputActionValue& Value);
 };

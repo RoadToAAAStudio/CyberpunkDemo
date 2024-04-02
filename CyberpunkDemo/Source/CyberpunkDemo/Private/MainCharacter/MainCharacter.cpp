@@ -50,7 +50,6 @@ AMainCharacter::AMainCharacter(const FObjectInitializer& ObjectInitializer)
 
 	// Create Quickhack System Component
 	QuickhackSystemComponent = CreateDefaultSubobject<UQuickhackSystemComponent>(TEXT("QuickhackSystemComponent"));
-	QuickhackSystemComponent->SetIgnoredParams(GetIgnoreCharacterParams());
 }
 
 // Called when the game starts or when spawned
@@ -69,6 +68,8 @@ void AMainCharacter::BeginPlay()
 	}
 
 	JumpMaxCount = 2;
+
+	QuickhackSystemComponent->Init(GetIgnoreCharacterParams());
 
 	// Gameplay Ability System
 	ShootSpec = AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(UGA_Shoot::StaticClass()));

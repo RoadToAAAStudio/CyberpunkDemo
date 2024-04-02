@@ -3,8 +3,10 @@
 
 #include "MainCharacter/QuickhackSystemComponent.h"
 
+#include "EnhancedInputSubsystems.h"
 #include "Blueprint/UserWidget.h"
 #include "Environment/HackableObjects/HackableComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values for this component's properties
@@ -65,12 +67,6 @@ void UQuickhackSystemComponent::Inspect()
 
 void UQuickhackSystemComponent::HandleAnalysisWidget()
 {
-	if (!AnalysisWidget)
-	{
-		AnalysisWidget = Cast<UAnalysisWidget>(CreateWidget(GetWorld()->GetFirstPlayerController(), AnalysisWidgetClass));
-		AnalysisWidget->Init(this, QuickhackDataTable, QuickhackWidgetClass);
-	}
-
 	if (AnalysisWidget->IsInViewport())
 	{
 		AnalysisWidget->RemoveFromParent();
@@ -84,14 +80,22 @@ void UQuickhackSystemComponent::HandleAnalysisWidget()
 	}
 }
 
+bool UQuickhackSystemComponent::GetIsQuickhackCreated()
+{
+	return bIsQuickhackCreated;
+}
+
 
 // Called when the game starts
 void UQuickhackSystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
+	if (!AnalysisWidget)
+	{
+		AnalysisWidget = Cast<UAnalysisWidget>(CreateWidget(GetWorld()->GetFirstPlayerController(), AnalysisWidgetClass));
+		AnalysisWidget->Init(this, QuickhackDataTable, QuickhackWidgetClass);
+	}
 }
 
 void UQuickhackSystemComponent::ResetHackTarget()
@@ -122,8 +126,25 @@ void UQuickhackSystemComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 	}
 }
 
-void UQuickhackSystemComponent::SetIgnoredParams(const FCollisionQueryParams ParamsToIgnore)
+void UQuickhackSystemComponent::Init(const FCollisionQueryParams ParamsToIgnore)
 {
 	Params = ParamsToIgnore;
+
+	// Add the input mapping context
+	if (APlayerController* PlayerController = Cast<APlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(QuickhackMappingContext, 0);
+		}
+	}
+
+	// Bind the input actions
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->InputComponent))
+	{
+		EnhancedInputComponent->BindAction(ScrollHacksAction, ETriggerEvent::Triggered, AnalysisWidget, &UAnalysisWidget::ScrollHacks);
+
+		EnhancedInputComponent->BindAction(DoHackAction, ETriggerEvent::Completed, AnalysisWidget, &UAnalysisWidget::DoHack);
+	}
 }
 

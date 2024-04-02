@@ -7,18 +7,23 @@
 // Sets default values for this component's properties
 UHackableComponent::UHackableComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 TSet<TSubclassOf<UGameplayAbility>> UHackableComponent::GetPossibleHacks() const
 {
-	return PossibleHacks;
+	TSet<TSubclassOf<UGameplayAbility>> Hacks;
+	FObjectTypeDataStructure* ObjectTypeData = ObjectData->FindRow<FObjectTypeDataStructure>(FName(UEnum::GetValueAsString(ObjectType)), "");
+	if (!ObjectTypeData)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Object type data not found");
+		return Hacks;
+	}
+	Hacks = ObjectTypeData->PossibleHacks;
+	return ObjectTypeData->PossibleHacks;
 }
 
+#pragma region TIMER_HANDLE
 void UHackableComponent::StartInspectionTimer()
 {
 	if (GetWorld()->GetTimerManager().IsTimerPaused(InspectionTimerHandle))
@@ -48,29 +53,28 @@ bool UHackableComponent::GetIsUnderInspection()
 	return bIsUnderInspection;
 }
 
-// void UHackableComponent::SetIsUnderInspection(bool UnderInspection)
-// {
-// 	bIsUnderInspection = UnderInspection;
-// }
+void UHackableComponent::SetHasBeenInspected()
+{
+	bHasBeenInspected = true;
+	bIsUnderInspection = false;
+}
+
+#pragma endregion
 
 void UHackableComponent::Highlight() const
 {
 	
 }
 
-
 // Called when the game starts
 void UHackableComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-}
-
-void UHackableComponent::SetHasBeenInspected()
-{
-	bHasBeenInspected = true;
-	bIsUnderInspection = false;
+	if (static_cast<int>(ObjectType) == 0)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString(GetName() + "has not an OBJECT TYPE SPECIFIED!"));
+	}
 }
 
 // Called every frame
@@ -78,8 +82,5 @@ void UHackableComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                        FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// if (InspectionTimerHandle.IsValid())
-	// GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Cyan, FString(FString::SanitizeFloat(GetWorld()->GetTimerManager().GetTimerRemaining(InspectionTimerHandle))));
 }
 
