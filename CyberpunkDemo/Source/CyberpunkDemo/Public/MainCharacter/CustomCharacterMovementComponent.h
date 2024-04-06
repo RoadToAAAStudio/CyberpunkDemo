@@ -28,7 +28,7 @@ UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CYBERPUNKDEMO_API UCustomCharacterMovementComponent : public UCharacterMovementComponent
 {
 	GENERATED_BODY()
-	
+
 public:
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UStateMachine> StateMachine;
@@ -101,7 +101,7 @@ private:
 public:
 	
 	// State machine transitions methods
-    #pragma region
+    #pragma region STATE_MACHINE_TRANSITIONS_METHODS
 	// From IDLE state
 	bool CanWalkFromIdle();
 	bool CanRunFromIdle();

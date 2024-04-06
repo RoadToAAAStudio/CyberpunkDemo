@@ -20,6 +20,8 @@ class CYBERPUNKDEMO_API UStateJumping : public UFState
 
 	bool bHasJumped;
 
+	FTimerHandle GravityTimer;
+
 public:
 
 	void SetOwner(TObjectPtr<UCustomCharacterMovementComponent> owner);

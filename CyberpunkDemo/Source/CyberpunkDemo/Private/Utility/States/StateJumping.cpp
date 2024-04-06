@@ -15,15 +15,15 @@ void UStateJumping::EnterState()
 	Super::EnterState();
 	Owner->SetCurrentMovementState(ECustomMovementState::Jumping);
 	bHasJumped = false;
-	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, "I AM JUMPING");
 }
 
 void UStateJumping::ExitState()
 {
 	Super::ExitState();
-	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, "I AM NOT JUMPING");
 	Owner->SetLastMovementState(ECustomMovementState::Jumping);
 	Owner->MainCharacter->StopJumping();
+	Owner->GravityScale = Owner->CustomGravity;
+	GravityTimer.Invalidate();
 }
 
 void UStateJumping::Tick()
@@ -41,6 +41,7 @@ void UStateJumping::Tick()
 			Owner->JumpZVelocity = Owner->JumpForce;
 		}
 
+		//Owner->GravityScale = 0;
 		Owner->MainCharacter->Jump();
 		Owner->bWantsToJump = false;
 
@@ -48,5 +49,14 @@ void UStateJumping::Tick()
 		{
 			Owner->bWantsToCrouchCustom = true;
 		}
+	}
+	
+	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Yellow, FString(Owner->Velocity.ToString()));
+		
+	if (Owner->Velocity.Z < 0 && !GravityTimer.IsValid())
+	{
+		GEngine->AddOnScreenDebugMessage(-1,3,FColor::Blue, "REACHED JUMP APEX");
+		Owner->GravityScale = 0;
+		Owner->GetWorld()->GetTimerManager().SetTimer(GravityTimer, FTimerDelegate::CreateLambda([this] { Owner->GravityScale = Owner->CustomGravity * 2; }), 0.05f, false);
 	}
 }

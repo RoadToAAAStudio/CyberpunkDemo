@@ -29,6 +29,8 @@ float MacroDuration = 2.0f;
 #endif
 
 
+
+
 // CONSTRUCTOR
 UCustomCharacterMovementComponent::UCustomCharacterMovementComponent()
 {
@@ -65,7 +67,7 @@ void UCustomCharacterMovementComponent::OnMovementUpdated(float DeltaSeconds, co
 }
 
 // STATE MACHINE
-#pragma region 
+#pragma region STATE_MACHINE
 // Called at begin play to create and setup the movement state machine
 void UCustomCharacterMovementComponent::BuildStateMachine()
 {
@@ -389,7 +391,7 @@ bool UCustomCharacterMovementComponent::CanMantleFromAny()
 	return bCanMantle;
 }
 
-#pragma endregion 
+#pragma endregion STATE_MACHINE
 
 // Called every frame
 void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -400,7 +402,7 @@ void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTic
 }
 
 // MOVEMENT
-#pragma region 
+#pragma region MOVEMENT
 
 void UCustomCharacterMovementComponent::SprintPressed()
 {
@@ -473,7 +475,7 @@ float UCustomCharacterMovementComponent::GetCapsuleHalfHeight() const
 }
 
 // MANTLE SYSTEM
-#pragma region 
+#pragma region MANTLE
 
 bool UCustomCharacterMovementComponent::TryMantle()
 {
@@ -584,8 +586,5 @@ bool UCustomCharacterMovementComponent::TryMantle()
 	
 	return true;
 }
+#pragma endregion
 
-
-
-
-#pragma endregion 
