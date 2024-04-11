@@ -16,7 +16,7 @@
 
 // Shortcut macros
 #if 0
-float MacroDuration = 2.0f;
+float MacroDuration = 5.0f;
 #define PRINT_SCREEN(x) GEngine->AddOnScreenDebugMessage(-1, MacroDuration ? MacroDuration : -1.f, FColor::Yellow, x);
 #define DRAW_POINT(x, c) DrawDebugPoint(GetWorld(), x, 10, c, !MacroDuration, MacroDuration);
 #define DRAW_LINE(x1, x2, c) DrawDebugLine(GetWorld(), x1, x2, c, !MacroDuration, MacroDuration);
@@ -517,8 +517,9 @@ bool UCustomCharacterMovementComponent::TryMantle()
 	}
 	
 	if (!FrontHit.IsValidBlockingHit()) return false;
+	TObjectPtr<AActor> HitActor = FrontHit.GetActor();
 	float CosWallSteepnessAngle = FrontHit.Normal | FVector::UpVector;
-	// Check if the front of the object is too steep OR if the 
+	// Check if the front of the object is too steep
 	if (FMath::Abs(CosWallSteepnessAngle) > CosMantleMinWallSteepnessAngle || (Forward | -FrontHit.Normal) <  CosMantleMaxAlignmentAngle) return false;
 
 	DRAW_POINT(FrontHit.Location, FColor::Red)
@@ -542,7 +543,7 @@ bool UCustomCharacterMovementComponent::TryMantle()
 	if(!GetWorld()->LineTraceMultiByProfile(HeightHits, TraceStart, FrontHit.Location + Forward, "BlockAll", Params)) return false;
 	for(const FHitResult& Hit : HeightHits)
 	{
-		if (Hit.IsValidBlockingHit())
+		if (Hit.IsValidBlockingHit() && !Hit.GetActor()->ActorHasTag("NotMantle"))
 		{
 			SurfaceHit = Hit;
 			break;
@@ -573,6 +574,12 @@ bool UCustomCharacterMovementComponent::TryMantle()
 	if (GetWorld()->OverlapAnyTestByProfile(ClearanceCapsuleLocation, FQuat::Identity, "BlockAll", CapsuleShape, Params))
 	{
 		DRAW_CAPSULE(ClearanceCapsuleLocation, FColor::Red)
+		return false;
+	}
+
+	if (GetWorld()->OverlapAnyTestByProfile(GetActorLocation() + FVector::UpVector * (GetCapsuleHalfHeight() + 1 + GetCapsuleRadius() * 2 * SurfaceSin), FQuat::Identity, "BlockAll", CapsuleShape, Params))
+	{
+		DRAW_CAPSULE(ClearanceCapsuleLocation, FColor::Black)
 		return false;
 	}
 

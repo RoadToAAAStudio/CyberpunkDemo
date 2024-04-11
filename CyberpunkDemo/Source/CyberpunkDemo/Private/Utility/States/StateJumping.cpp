@@ -3,6 +3,7 @@
 
 #include "Utility/States/StateJumping.h"
 
+#include "Kismet/KismetStringLibrary.h"
 #include "MainCharacter/MainCharacter.h"
 
 void UStateJumping::SetOwner(TObjectPtr<UCustomCharacterMovementComponent> owner)
@@ -12,18 +13,31 @@ void UStateJumping::SetOwner(TObjectPtr<UCustomCharacterMovementComponent> owner
 
 void UStateJumping::EnterState()
 {
+	
 	Super::EnterState();
 	Owner->SetCurrentMovementState(ECustomMovementState::Jumping);
 	bHasJumped = false;
+
+	if (Owner->GetLastMovementState() == ECustomMovementState::Jumping)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Red, "ENTERING DOUBLE JUMP");
+		Owner->JumpZVelocity = Owner->SecondJumpForce;
+	}
+	else
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Silver, "ENTERING JUMP");
+		Owner->JumpZVelocity = Owner->JumpForce;
+	}
 }
 
 void UStateJumping::ExitState()
 {
 	Super::ExitState();
+	if (GravityTimer.IsValid()) Owner->GetWorld()->GetTimerManager().ClearTimer(GravityTimer);
+	Owner->GravityScale = Owner->CustomGravity;
+	//GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Green, "EXITING JUMP");
 	Owner->SetLastMovementState(ECustomMovementState::Jumping);
 	Owner->MainCharacter->StopJumping();
-	Owner->GravityScale = Owner->CustomGravity;
-	GravityTimer.Invalidate();
 }
 
 void UStateJumping::Tick()
@@ -32,16 +46,7 @@ void UStateJumping::Tick()
 	if (!Owner->MainCharacter->bIsCrouched && !bHasJumped)
 	{
 		bHasJumped = true;
-		if (!Owner->IsMovingOnGround())
-		{
-			Owner->JumpZVelocity = Owner->SecondJumpForce;
-		}
-		else
-		{
-			Owner->JumpZVelocity = Owner->JumpForce;
-		}
-
-		//Owner->GravityScale = 0;
+		
 		Owner->MainCharacter->Jump();
 		Owner->bWantsToJump = false;
 
@@ -50,13 +55,15 @@ void UStateJumping::Tick()
 			Owner->bWantsToCrouchCustom = true;
 		}
 	}
-	
-	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Yellow, FString(Owner->Velocity.ToString()));
-		
+
 	if (Owner->Velocity.Z < 0 && !GravityTimer.IsValid())
 	{
-		GEngine->AddOnScreenDebugMessage(-1,3,FColor::Blue, "REACHED JUMP APEX");
 		Owner->GravityScale = 0;
 		Owner->GetWorld()->GetTimerManager().SetTimer(GravityTimer, FTimerDelegate::CreateLambda([this] { Owner->GravityScale = Owner->CustomGravity * 2; }), 0.05f, false);
+	}
+	else if (Owner->Velocity.Z >= 0)
+	{
+		if (GravityTimer.IsValid()) Owner->GetWorld()->GetTimerManager().ClearTimer(GravityTimer);
+		Owner->GravityScale = Owner->CustomGravity;
 	}
 }
