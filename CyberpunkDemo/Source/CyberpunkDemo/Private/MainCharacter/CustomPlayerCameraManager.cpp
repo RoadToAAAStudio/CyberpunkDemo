@@ -18,7 +18,7 @@ void ACustomPlayerCameraManager::UpdateViewTarget(FTViewTarget& OutVT, float Del
 	if (TObjectPtr<AMainCharacter> MainCharacter = Cast<AMainCharacter>(GetOwningPlayerController()->GetPawn()))
 	{
 		TObjectPtr<UCustomCharacterMovementComponent> CustomCharacterMovementComponent = MainCharacter->GetCustomCharacterComponent();
-
+		
 		float CHH = CustomCharacterMovementComponent->Crouch_HalfHeight;
 		float SCHH = MainCharacter->GetClass()->GetDefaultObject<ACharacter>()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 		
@@ -44,5 +44,6 @@ void ACustomPlayerCameraManager::UpdateViewTarget(FTViewTarget& OutVT, float Del
 		// THIS BREAKS THE CURRENT AIM METHOD
 		const FVector ArmsOffset = MainCharacter->GetFirstPersonCameraComponent()->GetComponentTransform().InverseTransformPosition(OutVT.POV.Location);
 		MainCharacter->GetMesh1P()->SetRelativeLocation(FVector(-15.f, 0.f, -165.f) + ArmsOffset);
+		
 	}
 }

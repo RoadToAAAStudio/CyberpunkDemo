@@ -122,13 +122,12 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Crouch function
-	//virtual void Crouch(bool bClientSimulation) override;
-
 	// Jump function
 	virtual void Jump() override;
 
 	UFUNCTION(BlueprintImplementableEvent) void Mantle();
+
+	UFUNCTION(BlueprintImplementableEvent) void Vault();
 
 	TObjectPtr<UCustomCharacterMovementComponent> GetCustomCharacterComponent();
 

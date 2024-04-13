@@ -21,6 +21,7 @@ enum class ECustomMovementState : uint8
 	Jumping,
 	Sliding,
 	Mantling,
+	Vaulting,
 	Max UMETA(Hidden)
 };
 
@@ -78,11 +79,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMinWallSteepnessAngle = 75;
 	// Max steepness accepted for the surface the character should mantle to (expressed in degrees)
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxSurfaceAngle = 40;
-	//
 	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxAlignmentAngle = 45;
-	
 	UPROPERTY(BlueprintReadOnly) FVector MantleLocation;
 	
+	// VAULT PROPERTIES
+	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultMaxPossibleHeight = 100;
+	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultMinWidth = 25;
+	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultMaxDistanceCheck = 100;
+	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultLandingPointMaxHeight;
+	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultBaseStartOffset = 20;
+	UPROPERTY(BlueprintReadOnly) FVector VaultLocation;
+	UPROPERTY(BlueprintReadOnly) FVector VaultMiddleLocation;
 	
 	// Bools used to handle movement state transitions
 	UPROPERTY(BlueprintReadOnly) bool bWantsToRun;
@@ -90,8 +97,8 @@ public:
 	UPROPERTY(BlueprintReadOnly) bool bWantsToJump;
 	UPROPERTY(BlueprintReadWrite) bool bCanMantle = false;
 	UPROPERTY(BlueprintReadOnly) bool bHighMantle = false;
-	
-
+	UPROPERTY(BlueprintReadWrite) bool bCanVault = false;
+	UPROPERTY(BlueprintReadOnly) bool bFallingVault = false;
 	
 private:
 
@@ -124,7 +131,6 @@ public:
 	bool CanWalkFromJump();
 	bool CanRunFromJump();
 	bool CanCrouchFromJump();
-	//bool CanMantleFromJump();
 	bool CanJumpFromJump();
 
 	//From CROUCHING state
@@ -136,10 +142,17 @@ public:
 	// From MANTLE state
 	bool CanIdleFromMantle();
 
+	// From VAULT state
+	bool CanIdleFromVault();
+	bool CanWalkFromVault();
+	bool CanRunFromVault();
+
 	// From ANY
 	bool CanMantleFromAny();
+	bool CanVaultFromAny();
 
 	bool TryMantle();
+	bool TryVault();
 	
 #pragma endregion 
 	
@@ -173,6 +186,8 @@ public:
 
 	float GetCapsuleHalfHeight() const;
 
+	
+
 protected:
 	
 	// Called when the game starts
@@ -180,6 +195,7 @@ protected:
 
 	virtual void OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation, const FVector& OldVelocity) override;
 
+	
 	void BuildStateMachine();
 
 	

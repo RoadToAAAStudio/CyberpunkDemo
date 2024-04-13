@@ -11,6 +11,7 @@
 #include "Utility/States/StateCrouching.h"
 #include "Utility/States/StateJumping.h"
 #include "Utility/States/StateRunning.h"
+#include "Utility/States/StateVault.h"
 #include "Utility/States/StateWalking.h"
 #include "Utility/States/UStateMantle.h"
 
@@ -27,9 +28,6 @@ float MacroDuration = 5.0f;
 #define DRAW_LINE(x1, x2, c)
 #define DRAW_CAPSULE(x, c)
 #endif
-
-
-
 
 // CONSTRUCTOR
 UCustomCharacterMovementComponent::UCustomCharacterMovementComponent()
@@ -60,8 +58,7 @@ void UCustomCharacterMovementComponent::BeginPlay()
 	BuildStateMachine();
 }
 
-void UCustomCharacterMovementComponent::OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation,
-	const FVector& OldVelocity)
+void UCustomCharacterMovementComponent::OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation, const FVector& OldVelocity)
 {
 	Super::OnMovementUpdated(DeltaSeconds, OldLocation, OldVelocity);
 }
@@ -99,6 +96,10 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	StateMachine->AddState(StateMantle);
 	StateMantle->SetOwner(this);
 
+	TObjectPtr<UStateVault> StateVault = NewObject<UStateVault>();
+	StateMachine->AddState(StateVault);
+	StateVault->SetOwner(this);
+
 	StateMachine->Init(StateIdle);
 
 	// Create the transitions and add them to the state machine
@@ -133,6 +134,12 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	IdleToMantle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanMantleFromAny);
 	IdleToMantle->Init(StateMantle);
 
+	// Idle TO Vault
+	TObjectPtr<UFTransition> IdleToVault = NewObject<UFTransition>();
+	StateIdle->Transitions.Add(IdleToVault);
+	IdleToVault->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanVaultFromAny);
+	IdleToVault->Init(StateVault);
+
 	// WALKING
 	// Walking TO Idle
 	TObjectPtr<UFTransition> WalkingToIdle = NewObject<UFTransition>();
@@ -164,6 +171,12 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	WalkingToMantle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanMantleFromAny);
 	WalkingToMantle->Init(StateMantle);
 
+	// Walking TO Vault
+	TObjectPtr<UFTransition> WalkingToVault = NewObject<UFTransition>();
+	StateWalking->Transitions.Add(WalkingToVault);
+	WalkingToVault->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanVaultFromAny);
+	WalkingToVault->Init(StateVault);
+
 	// RUNNING
 	// Running TO Idle
 	TObjectPtr<UFTransition> RunningToIdle = NewObject<UFTransition>();
@@ -188,6 +201,12 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	StateRunning->Transitions.Add(RunningToMantle);
 	RunningToMantle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanMantleFromAny);
 	RunningToMantle->Init(StateMantle);
+
+	// Running TO Vault
+	TObjectPtr<UFTransition> RunningToVault = NewObject<UFTransition>();
+	StateRunning->Transitions.Add(RunningToVault);
+	RunningToVault->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanVaultFromAny);
+	RunningToVault->Init(StateVault);
 
 	// JUMP
 	// Jump TO Idle
@@ -257,6 +276,25 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	StateMantle->Transitions.Add(MantleToJump);
 	MantleToJump->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanIdleFromMantle);
 	MantleToJump->Init(StateIdle);
+
+	// VAULT
+	// Vault TO Idle
+	TObjectPtr<UFTransition> VaultToIdle = NewObject<UFTransition>();
+	StateVault->Transitions.Add(VaultToIdle);
+	VaultToIdle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanIdleFromVault);
+	VaultToIdle->Init(StateIdle);
+
+	// Vault TO Walking
+	TObjectPtr<UFTransition> VaultToWalking = NewObject<UFTransition>();
+	StateVault->Transitions.Add(VaultToWalking);
+	VaultToWalking->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanWalkFromVault);
+	VaultToWalking->Init(StateWalking);
+
+	// Vault TO Running
+	TObjectPtr<UFTransition> VaultToRunning = NewObject<UFTransition>();
+	StateVault->Transitions.Add(VaultToRunning);
+	VaultToRunning->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanRunFromVault);
+	VaultToRunning->Init(StateRunning);
 }
 
 void UCustomCharacterMovementComponent::SetCurrentMovementState(ECustomMovementState NewState)
@@ -288,7 +326,7 @@ bool UCustomCharacterMovementComponent::CanCrouchFromIdle()
 
 bool UCustomCharacterMovementComponent::CanJumpFromIdle()
 {
-	return bWantsToJump && !TryMantle();
+	return bWantsToJump && !TryVault() && !TryMantle();
 }
 
 // FROM WALKING
@@ -309,7 +347,7 @@ bool UCustomCharacterMovementComponent::CanCrouchFromWalk()
 
 bool UCustomCharacterMovementComponent::CanJumpFromWalk()
 {
-	return bWantsToJump && !TryMantle();
+	return bWantsToJump && !TryVault() && !TryMantle();
 }
 
 // FROM RUNNING
@@ -325,7 +363,7 @@ bool UCustomCharacterMovementComponent::CanWalkFromRun()
 
 bool UCustomCharacterMovementComponent::CanJumpFromRun()
 {
-	return bWantsToJump && !TryMantle();
+	return bWantsToJump && !TryVault() && !TryMantle();
 }
 
 // FROM JUMP
@@ -348,11 +386,6 @@ bool UCustomCharacterMovementComponent::CanCrouchFromJump()
 {
 	return IsMovingOnGround() && bWantsToCrouchCustom && !bWantsToJump;
 }
-
-// bool UCustomCharacterMovementComponent::CanMantleFromJump()
-// {
-// 	return TryMantle() && Velocity.Z < 0;
-// }
 
 bool UCustomCharacterMovementComponent::CanJumpFromJump()
 {
@@ -386,19 +419,61 @@ bool UCustomCharacterMovementComponent::CanIdleFromMantle()
 	return !bCanMantle;
 }
 
+// FROM VAULT
+bool UCustomCharacterMovementComponent::CanIdleFromVault()
+{
+	return !bCanVault;
+}
+
+bool UCustomCharacterMovementComponent::CanWalkFromVault()
+{
+	return !bCanVault && LastMovementState == ECustomMovementState::Walking;
+}
+
+bool UCustomCharacterMovementComponent::CanRunFromVault()
+{
+	return !bCanVault && LastMovementState == ECustomMovementState::Running;
+}
+
 bool UCustomCharacterMovementComponent::CanMantleFromAny()
 {
-	return bCanMantle;
+	return bCanMantle && !bCanVault;
 }
+
+bool UCustomCharacterMovementComponent::CanVaultFromAny()
+{
+	return bCanVault && !bCanMantle;
+}
+
 
 #pragma endregion STATE_MACHINE
 
 // Called every frame
-void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-                                                      FActorComponentTickFunction* ThisTickFunction)
+void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	StateMachine->Tick();
+}
+
+// CURRENT STATE GETTER
+ECustomMovementState UCustomCharacterMovementComponent::GetCurrentMovementState() const
+{
+	return CurrentMovementState;
+}
+
+ECustomMovementState UCustomCharacterMovementComponent::GetLastMovementState() const
+{
+	return LastMovementState;
+}
+
+float UCustomCharacterMovementComponent::GetCapsuleRadius() const
+{
+	return MainCharacter->GetCapsuleComponent()->GetScaledCapsuleRadius();
+}
+
+float UCustomCharacterMovementComponent::GetCapsuleHalfHeight() const
+{
+	return MainCharacter->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 }
 
 // MOVEMENT
@@ -453,36 +528,16 @@ void UCustomCharacterMovementComponent::ResetDashSpeed()
 
 #pragma endregion
 
-// CURRENT STATE GETTER
-ECustomMovementState UCustomCharacterMovementComponent::GetCurrentMovementState() const
-{
-	return CurrentMovementState;
-}
-
-ECustomMovementState UCustomCharacterMovementComponent::GetLastMovementState() const
-{
-	return LastMovementState;
-}
-
-float UCustomCharacterMovementComponent::GetCapsuleRadius() const
-{
-	return MainCharacter->GetCapsuleComponent()->GetScaledCapsuleRadius();
-}
-
-float UCustomCharacterMovementComponent::GetCapsuleHalfHeight() const
-{
-	return MainCharacter->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-}
-
 // MANTLE SYSTEM
 #pragma region MANTLE
 
 bool UCustomCharacterMovementComponent::TryMantle()
 {
+	if (bCanVault) return false;
+	
 	// Location of the base of the capsule
 	FVector BaseLocation = UpdatedComponent->GetComponentLocation() + FVector::DownVector * GetCapsuleHalfHeight();
 	// Forward vector
-	// [TODO : HERE MAYBE WE NEED TO GET THE CAMERA FORWARD VECTOR]
 	FVector Forward = UpdatedComponent->GetForwardVector().GetSafeNormal2D();
 	// Actors to ignore
 	auto Params = MainCharacter->GetIgnoreCharacterParams();
@@ -517,7 +572,7 @@ bool UCustomCharacterMovementComponent::TryMantle()
 	}
 	
 	if (!FrontHit.IsValidBlockingHit()) return false;
-	TObjectPtr<AActor> HitActor = FrontHit.GetActor();
+	
 	float CosWallSteepnessAngle = FrontHit.Normal | FVector::UpVector;
 	// Check if the front of the object is too steep
 	if (FMath::Abs(CosWallSteepnessAngle) > CosMantleMinWallSteepnessAngle || (Forward | -FrontHit.Normal) <  CosMantleMaxAlignmentAngle) return false;
@@ -582,10 +637,10 @@ bool UCustomCharacterMovementComponent::TryMantle()
 		DRAW_CAPSULE(ClearanceCapsuleLocation, FColor::Black)
 		return false;
 	}
-
-	DRAW_CAPSULE(ClearanceCapsuleLocation, FColor::Green)
 	
-	MantleLocation = ClearanceCapsuleLocation;
+	DRAW_CAPSULE(SurfaceHit.Location + Forward * GetCapsuleRadius() + FVector::UpVector * GetCapsuleHalfHeight(), FColor::Green)
+	
+	MantleLocation = SurfaceHit.Location + Forward * GetCapsuleRadius() + FVector::UpVector * GetCapsuleHalfHeight();
 	bCanMantle = true;
 	bHighMantle = true;
 
@@ -595,3 +650,115 @@ bool UCustomCharacterMovementComponent::TryMantle()
 }
 #pragma endregion
 
+// VAULT SYSTEM
+#pragma region VAULT
+
+bool UCustomCharacterMovementComponent::TryVault()
+{
+	// Location of the base of the capsule
+	FVector BaseLocation = UpdatedComponent->GetComponentLocation() + FVector::DownVector * GetCapsuleHalfHeight();
+	// Forward vector
+	FVector Forward = UpdatedComponent->GetForwardVector().GetSafeNormal2D();
+	// Actors to ignore
+	auto Params = MainCharacter->GetIgnoreCharacterParams();
+
+	FHitResult FrontHit;
+
+	// Scale the distance in which we check for a possible hit with the velocity of the character
+	float CheckDistance = FMath::Clamp(Velocity | Forward, GetCapsuleRadius() + 30, VaultMaxDistanceCheck);
+	
+	// The starting point of the line trace takes into account the step height and a customisable offset
+	FVector FrontStart = BaseLocation + FVector::UpVector * (MaxStepHeight - 1);
+
+	for (int i = 0; i < 10; i++)
+	{
+		DRAW_LINE(FrontStart, FrontStart + Forward * CheckDistance, FColor::Yellow)
+
+		if (GetWorld()->LineTraceSingleByProfile(FrontHit, FrontStart, FrontStart + Forward * CheckDistance, "BlockAll", Params)) break;
+		FrontStart += FVector::UpVector * (GetCapsuleHalfHeight() - (MaxStepHeight - 1)) / 6;
+	}
+
+	if (!FrontHit.IsValidBlockingHit()) return false;
+
+	DRAW_POINT(FrontHit.Location, FColor::Red)
+
+	// CHECK OBSTACLE HEIGHT
+	
+	TArray<FHitResult> HeightHits;
+	FHitResult SurfaceHit; 
+
+	// Project the UP vector onto the normal vector of the object hit and normalize it
+		// This give us a vector that goes UP in the direction of the wall
+	FVector WallUpVector = FVector::VectorPlaneProject(FVector::UpVector, FrontHit.Normal).GetSafeNormal();
+
+	FVector TraceStart = FrontHit.Location + Forward + WallUpVector * (VaultMaxPossibleHeight - (MaxStepHeight - 1));
+	DRAW_LINE(TraceStart, FrontHit.Location + Forward, FColor::Orange);
+
+	if(!GetWorld()->LineTraceMultiByProfile(HeightHits, TraceStart, FrontHit.Location + Forward, "BlockAll", Params)) return false;
+	for(const FHitResult& Hit : HeightHits)
+	{
+		if (Hit.IsValidBlockingHit() && !Hit.GetActor()->ActorHasTag("NotMantle"))
+		{
+			SurfaceHit = Hit;
+			break;
+		}
+	}
+
+	float Height = (SurfaceHit.Location - BaseLocation) | FVector::UpVector;
+
+	PRINT_SCREEN(FString::Printf(TEXT("Height: %f"), Height));
+
+	DRAW_POINT(SurfaceHit.Location, FColor::Blue);
+
+	if (Height > VaultMaxPossibleHeight) return false;
+
+	// CHECK CLEARANCE
+
+	// float SurfaceCos = FVector::UpVector | SurfaceHit.Normal;
+	// float SurfaceSin = FMath::Sqrt(1 - SurfaceCos * SurfaceCos);
+
+	// The point the capsule should mantle to, it takes into account the size of the capsule and any potential steepness of the surface
+	FVector ClearanceCapsuleLocation = SurfaceHit.Location + Forward * GetCapsuleRadius() + FVector::UpVector * GetCapsuleHalfHeight();
+	FCollisionShape CapsuleShape = FCollisionShape::MakeCapsule(GetCapsuleRadius(), GetCapsuleHalfHeight());
+
+	if (GetWorld()->OverlapAnyTestByProfile(ClearanceCapsuleLocation, FQuat::Identity, "BlockAll", CapsuleShape, Params))
+	{
+		DRAW_CAPSULE(ClearanceCapsuleLocation, FColor::Red)
+		return false;
+	}
+
+	if (GetWorld()->OverlapAnyTestByProfile(GetActorLocation() + FVector::UpVector * (GetCapsuleHalfHeight()), FQuat::Identity, "BlockAll", CapsuleShape, Params))
+	{
+		DRAW_CAPSULE(ClearanceCapsuleLocation, FColor::Black)
+		return false;
+	}
+	
+	FVector CapsuleFinalLocationOffset = SurfaceHit.Location + Forward * (GetCapsuleRadius() + VaultMinWidth) + FVector::UpVector * (GetCapsuleHalfHeight() / 2);
+
+	if (GetWorld()->OverlapAnyTestByProfile(CapsuleFinalLocationOffset, FQuat::Identity, "BlockAll", CapsuleShape, Params))
+	{
+		DRAW_CAPSULE(CapsuleFinalLocationOffset, FColor::Silver)
+		return false;
+	}
+
+	FHitResult GroundHit;
+	TArray<AActor*> ActorsToIgnore;
+	if (UKismetSystemLibrary::CapsuleTraceSingleByProfile(GetWorld(), CapsuleFinalLocationOffset, CapsuleFinalLocationOffset + FVector::DownVector * (GetCapsuleHalfHeight() / 2  + 15), GetCapsuleRadius(), GetCapsuleHalfHeight(), "BlockAll", false, ActorsToIgnore, EDrawDebugTrace::None ,GroundHit, true))
+	{
+		bFallingVault = false;
+		VaultMiddleLocation = ClearanceCapsuleLocation - Forward * GetCapsuleRadius();
+		DRAW_CAPSULE(VaultMiddleLocation, FColor::Purple)
+		VaultLocation = GroundHit.Location;
+	}
+	else
+	{
+		if (LastMovementState == ECustomMovementState::Walking || LastMovementState == ECustomMovementState::Running) return false;
+		bFallingVault = true;
+		VaultLocation = CapsuleFinalLocationOffset;
+	}
+	
+	bCanVault = true;
+	return true;
+}
+
+#pragma endregion 
