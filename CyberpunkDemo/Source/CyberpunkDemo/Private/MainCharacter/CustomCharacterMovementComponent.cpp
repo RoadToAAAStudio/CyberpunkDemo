@@ -38,14 +38,6 @@ UCustomCharacterMovementComponent::UCustomCharacterMovementComponent()
 
 	NavAgentProps.bCanCrouch = true;
 	bCanWalkOffLedgesWhenCrouching = true;
-
-	bWantsToJump = false;
-	bWantsToRun = false;
-	bWantsToCrouchCustom = false;
-	Walk_MaxWalkSpeed = 500.0f;
-	Sprint_MaxWalkSpeed = 1000.0f;
-	Crouch_MaxWalkSpeed = 250.0f;
-	Crouch_HalfHeight = 40.0f;
 }
 
 // BEGIN PLAY
@@ -56,11 +48,6 @@ void UCustomCharacterMovementComponent::BeginPlay()
 	SetCrouchedHalfHeight(Crouch_HalfHeight);
 	GravityScale = CustomGravity;
 	BuildStateMachine();
-}
-
-void UCustomCharacterMovementComponent::OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation, const FVector& OldVelocity)
-{
-	Super::OnMovementUpdated(DeltaSeconds, OldLocation, OldVelocity);
 }
 
 // STATE MACHINE
@@ -74,31 +61,31 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	// Create the states and add them to the state machine
 	TObjectPtr<UStateIdle> StateIdle = NewObject<UStateIdle>();
 	StateMachine->AddState(StateIdle);
-	StateIdle->SetOwner(this);
+	StateIdle->Initialize(this, ECustomMovementState::Idle);
 	
 	TObjectPtr<UStateWalking> StateWalking = NewObject<UStateWalking>();
 	StateMachine->AddState(StateWalking);
-	StateWalking->SetOwner(this);
+	StateWalking->Initialize(this, ECustomMovementState::Walking);
 	
 	TObjectPtr<UStateRunning> StateRunning = NewObject<UStateRunning>();
 	StateMachine->AddState(StateRunning);
-	StateRunning->SetOwner(this);
+	StateRunning->Initialize(this, ECustomMovementState::Running);
 
 	TObjectPtr<UStateJumping> StateJumping = NewObject<UStateJumping>();
 	StateMachine->AddState(StateJumping);
-	StateJumping->SetOwner(this);
+	StateJumping->Initialize(this, ECustomMovementState::Jumping);
 
 	TObjectPtr<UStateCrouching> StateCrouching = NewObject<UStateCrouching>();
 	StateMachine->AddState(StateCrouching);
-	StateCrouching->SetOwner(this);
+	StateCrouching->Initialize(this, ECustomMovementState::Crouching);
 
 	TObjectPtr<UUStateMantle> StateMantle = NewObject<UUStateMantle>();
 	StateMachine->AddState(StateMantle);
-	StateMantle->SetOwner(this);
+	StateMantle->Initialize(this, ECustomMovementState::Mantling);
 
 	TObjectPtr<UStateVault> StateVault = NewObject<UStateVault>();
 	StateMachine->AddState(StateVault);
-	StateVault->SetOwner(this);
+	StateVault->Initialize(this, ECustomMovementState::Vaulting);
 
 	StateMachine->Init(StateIdle);
 
@@ -509,7 +496,6 @@ void UCustomCharacterMovementComponent::DashPressed()
 {
 	if (CurrentMovementState == ECustomMovementState::Crouching || CurrentMovementState == ECustomMovementState::Jumping) return;
 	MaxWalkSpeed *= DashSpeedMultiplier;
-	GEngine->AddOnScreenDebugMessage(-1, DashDuration, FColor::Emerald, "I AM DASHING");
 	GetWorld()->GetTimerManager().SetTimer(DashTimer, this, &UCustomCharacterMovementComponent::ResetDashSpeed, DashDuration, false);
 }
 

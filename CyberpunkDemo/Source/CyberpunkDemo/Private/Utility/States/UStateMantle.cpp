@@ -2,34 +2,24 @@
 
 
 #include "Utility/States/UStateMantle.h"
-
 #include "MainCharacter/MainCharacter.h"
-
-class UEnhancedInputLocalPlayerSubsystem;
-
-void UUStateMantle::SetOwner(TObjectPtr<UCustomCharacterMovementComponent> owner)
-{
-	Owner = owner;
-}
 
 void UUStateMantle::EnterState()
 {
 	Super::EnterState();
-	Owner->SetCurrentMovementState(ECustomMovementState::Mantling);
 	// Reset the jump boolean
 	Owner->bWantsToJump = false;
 	Owner->bWantsToRun = false;
 	// Set the player velocity to 0
 	Owner->Velocity = FVector(0,0,0);
-	Owner->MainCharacter->DisableMappingContext(true);
+	Owner->MainCharacter->DisableInput(Cast<APlayerController>(Owner->MainCharacter->GetController()));
 	Owner->MainCharacter->Mantle();
 }
 
 void UUStateMantle::ExitState()
 {
 	Super::ExitState();
-	Owner->SetLastMovementState(ECustomMovementState::Mantling);
-	Owner->MainCharacter->DisableMappingContext(false);
+	Owner->MainCharacter->EnableInput(Cast<APlayerController>(Owner->MainCharacter->GetController()));
 }
 
 void UUStateMantle::Tick()

@@ -3,24 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MainCharacter/CustomCharacterMovementComponent.h"
-#include "Utility/FState.h"
+#include "Utility/StateCyberpunkProject.h"
 #include "StateWalking.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class CYBERPUNKDEMO_API UStateWalking : public UFState
+class CYBERPUNKDEMO_API UStateWalking : public UStateCyberpunkProject
 {
 	GENERATED_BODY()
-
-	UPROPERTY()
-	TObjectPtr<UCustomCharacterMovementComponent> Owner;
 	
 public:
-
-	void SetOwner(TObjectPtr<UCustomCharacterMovementComponent> owner);
 	
 	void EnterState() override;
 	void ExitState() override;

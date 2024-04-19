@@ -3,22 +3,14 @@
 
 #include "Utility/States/StateIdle.h"
 
-
-void UStateIdle::SetOwner(TObjectPtr<UCustomCharacterMovementComponent> owner)
-{
-	Owner = owner;
-}
-
 void UStateIdle::EnterState()
 {
 	Super::EnterState();
-	Owner->SetCurrentMovementState(ECustomMovementState::Idle);
 }
 
 void UStateIdle::ExitState()
 {
 	Super::ExitState();
-	Owner->SetLastMovementState(ECustomMovementState::Idle);
 }
 
 void UStateIdle::Tick()

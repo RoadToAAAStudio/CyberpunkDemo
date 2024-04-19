@@ -9,7 +9,7 @@
 #include "CustomCharacterMovementComponent.generated.h"
 
 class AMainCharacter;
-
+class UStateCyberpunkProject;
 
 UENUM(BlueprintType)
 enum class ECustomMovementState : uint8
@@ -19,96 +19,139 @@ enum class ECustomMovementState : uint8
 	Running,
 	Crouching,
 	Jumping,
-	Sliding,
 	Mantling,
 	Vaulting,
 	Max UMETA(Hidden)
 };
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnterCustomMovementStateSignature, ECustomMovementState, NewState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnExitCustomMovementStateSignature, ECustomMovementState, NewState);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CYBERPUNKDEMO_API UCustomCharacterMovementComponent : public UCharacterMovementComponent
 {
 	GENERATED_BODY()
 
-public:
-	UPROPERTY(BlueprintReadWrite)
-	TObjectPtr<UStateMachine> StateMachine;
-
+friend AMainCharacter;
+friend UStateCyberpunkProject;
 	
+public:
+
 	// Sets default values for this component's properties
 	UCustomCharacterMovementComponent();
 
-	UPROPERTY()
-	TObjectPtr<AMainCharacter> MainCharacter;
+	UPROPERTY() TObjectPtr<AMainCharacter> MainCharacter;
 
+	FOnEnterCustomMovementStateSignature OnEnterCustomMovementState;
+	FOnExitCustomMovementStateSignature OnExitCustomMovementState;
+
+#pragma region MOVEMENT_PROPERTIES
 	// WALK PROPERTIES
-	UPROPERTY(EditDefaultsOnly, Category="Movement|Walk") float Walk_MaxWalkSpeed;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Walk") float Walk_MaxWalkSpeed = 300.0f;;
 
 	// RUN PROPERTIES
-	UPROPERTY(EditDefaultsOnly, Category="Movement|Sprint") float Sprint_MaxWalkSpeed;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Sprint") float Sprint_MaxWalkSpeed = 600.0f;;
 
 	// CROUCH PROPERTIES
-	UPROPERTY(EditDefaultsOnly, Category="Movement|Crouch") float Crouch_MaxWalkSpeed;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Crouch") float Crouch_MaxWalkSpeed = 150.0f;;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement|Crouch", meta = (ClampMin = 55.f)) float Crouch_HalfHeight = 55.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement|Crouch") float Crouch_BlendSpeed = .3f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement|Crouch") float Crouch_BlendSpeed = 0.3f;
 
 	// JUMP PROPERTIES
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Jump") float JumpForce = 500;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Jump") float SecondJumpForce = 700;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Jump") bool bCanDoubleJump = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Jump") float JumpForce = 500.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Jump") float SecondJumpForce = 900.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Jump") bool bCanDoubleJump = true;
 
 	// GRAVITY PROPERTIES
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Gravity") float CustomGravity = 2.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Gravity") float CustomGravity = 2.0f;
 
 	// DASH PROPERTIES
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Dash") float DashDuration = 0.15f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Dash") float DashSpeedMultiplier = 2;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Dash") float DashDuration = 0.25f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Dash") float DashSpeedMultiplier = 10.0f;
 	FTimerHandle DashTimer;
 	
 	// MANTLE PROPERTIES
 	// Max distance to check for a possible mantle
-	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxDistance = 10;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxDistance = 10.0f;
 	// Max height to check for a possible mantle
-	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleReachHeight = 70;
-	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MinMantleDepth = 30;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleReachHeight = 70.0f;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MinMantleDepth = 30.0f;
 	// Offset used to ignore obstacles under a certain height
-	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleBaseStartOffset = 40;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleBaseStartOffset = 40.0f;
 	// Height used to decide if a mantle should be a "high" or "low" one
-	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float LowMantleCutoff = 120;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float LowMantleCutoff = 120.0f;
 	// Minimum steepness accepted for the wall the character should mantle on (expressed in degrees)
-	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMinWallSteepnessAngle = 75;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMinWallSteepnessAngle = 75.0f;
 	// Max steepness accepted for the surface the character should mantle to (expressed in degrees)
-	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxSurfaceAngle = 40;
-	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxAlignmentAngle = 45;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxSurfaceAngle = 40.0f;
+	UPROPERTY(EditDefaultsOnly, Category="Movement|Mantle") float MantleMaxAlignmentAngle = 45.0f;
 	UPROPERTY(BlueprintReadOnly) FVector MantleLocation;
 	
 	// VAULT PROPERTIES
-	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultMaxPossibleHeight = 100;
-	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultMinWidth = 25;
-	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultMaxDistanceCheck = 100;
+	// Max distance to check for a possible vault
+	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultMaxDistanceCheck = 100.0f;
+	// Max height to check for a possible vault
+	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultMaxPossibleHeight = 100.0f;
+	// Max width of a possible vaultable object 
+	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultMinWidth = 25.0f;
+	// 
 	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultLandingPointMaxHeight;
-	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultBaseStartOffset = 20;
+	// Offset used to ignore obstacles under a certain height
+	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultBaseStartOffset = 20.0f;
 	UPROPERTY(BlueprintReadOnly) FVector VaultLocation;
 	UPROPERTY(BlueprintReadOnly) FVector VaultMiddleLocation;
+#pragma endregion
 	
 	// Bools used to handle movement state transitions
-	UPROPERTY(BlueprintReadOnly) bool bWantsToRun;
-	UPROPERTY(BlueprintReadOnly) bool bWantsToCrouchCustom;
-	UPROPERTY(BlueprintReadOnly) bool bWantsToJump;
+	UPROPERTY(BlueprintReadOnly) bool bWantsToRun = false;
+	UPROPERTY(BlueprintReadOnly) bool bWantsToCrouchCustom = false;
+	UPROPERTY(BlueprintReadOnly) bool bWantsToJump = false;
 	UPROPERTY(BlueprintReadWrite) bool bCanMantle = false;
-	UPROPERTY(BlueprintReadOnly) bool bHighMantle = false;
 	UPROPERTY(BlueprintReadWrite) bool bCanVault = false;
+
+	// Bools used to determine whether the kind of mantle/vault to perform
+	UPROPERTY(BlueprintReadOnly) bool bHighMantle = false;
 	UPROPERTY(BlueprintReadOnly) bool bFallingVault = false;
-	
+
+	// Field public for debug reason
+	UPROPERTY(BlueprintReadOnly) TObjectPtr<UStateMachine> StateMachine;
+
 private:
 
 	ECustomMovementState CurrentMovementState = ECustomMovementState::Idle;
 	ECustomMovementState LastMovementState = ECustomMovementState::Idle;
-	
+
 public:
+
+	// To get the current state and set
+	UFUNCTION(BlueprintCallable) ECustomMovementState GetCurrentMovementState() const;
+	UFUNCTION(BlueprintCallable) ECustomMovementState GetLastMovementState() const;
+
 	
-	// State machine transitions methods
-    #pragma region STATE_MACHINE_TRANSITIONS_METHODS
+
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
+							   FActorComponentTickFunction* ThisTickFunction) override;
+
+	float GetCapsuleRadius() const;
+
+	float GetCapsuleHalfHeight() const;
+	
+protected:
+	
+	virtual void BeginPlay() override;
+
+private:
+
+	void BuildStateMachine();
+
+	void SetCurrentMovementState(ECustomMovementState NewState);
+	void SetLastMovementState(ECustomMovementState NewState);
+
+#pragma region STATE_MACHINE_TRANSITIONS_METHODS
+
+	// Used to check whether we can transition from a state to another 
+	
 	// From IDLE state
 	bool CanWalkFromIdle();
 	bool CanRunFromIdle();
@@ -155,7 +198,8 @@ public:
 	bool TryVault();
 	
 #pragma endregion 
-	
+
+#pragma region INPUT_METHODS
 	// Sprint methods
 	UFUNCTION(BlueprintCallable) void SprintPressed();
 	UFUNCTION(BlueprintCallable) void SprintReleased();
@@ -170,35 +214,5 @@ public:
 	// Dash methods
 	UFUNCTION(BlueprintCallable) void DashPressed();
 	UFUNCTION() void ResetDashSpeed();
-
-	// To get the current state and set
-	UFUNCTION(BlueprintCallable) ECustomMovementState GetCurrentMovementState() const;
-	UFUNCTION(BlueprintCallable) ECustomMovementState GetLastMovementState() const;
-
-	void SetCurrentMovementState(ECustomMovementState NewState);
-	void SetLastMovementState(ECustomMovementState NewState);
-
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-							   FActorComponentTickFunction* ThisTickFunction) override;
-
-	float GetCapsuleRadius() const;
-
-	float GetCapsuleHalfHeight() const;
-
-	
-
-protected:
-	
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-	virtual void OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation, const FVector& OldVelocity) override;
-
-	
-	void BuildStateMachine();
-
-	
-
-
+#pragma endregion 
 };

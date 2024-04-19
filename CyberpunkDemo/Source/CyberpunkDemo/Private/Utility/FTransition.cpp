@@ -10,7 +10,6 @@ UFTransition::UFTransition()
 // Init function that substitutes the constructor
 //	here we set:
 //	- the state the transition points to
-//  - the function used to check if the transition is successful or not, we pass it using a TFUNCTION which is a pointer to a static method in the class that holds the state machine
 void UFTransition::Init(const TObjectPtr<UFState> toState)
 {
 	ToState = toState;

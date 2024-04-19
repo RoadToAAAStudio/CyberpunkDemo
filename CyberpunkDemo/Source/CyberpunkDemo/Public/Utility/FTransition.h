@@ -26,12 +26,8 @@ public:
 	// The state this transition points to
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UFState> ToState;
-
-public:
 	
 	bool CheckTransition();
 
 	FOnCheckConditionSignature OnCheckConditionDelegate;
-
-	TFunction<bool()> Condition = nullptr;
 };

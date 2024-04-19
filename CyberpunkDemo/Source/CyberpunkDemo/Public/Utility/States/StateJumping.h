@@ -3,20 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Utility/FState.h"
-#include "MainCharacter/CustomCharacterMovementComponent.h"
+#include "Utility/StateCyberpunkProject.h"
 #include "StateJumping.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class CYBERPUNKDEMO_API UStateJumping : public UFState
+class CYBERPUNKDEMO_API UStateJumping : public UStateCyberpunkProject
 {
 	GENERATED_BODY()
-
-	UPROPERTY()
-	TObjectPtr<UCustomCharacterMovementComponent> Owner;
 
 	bool bHasJumped;
 	bool bIsFalling;
@@ -25,9 +21,9 @@ class CYBERPUNKDEMO_API UStateJumping : public UFState
 
 public:
 
-	void SetOwner(TObjectPtr<UCustomCharacterMovementComponent> owner);
-	
 	void EnterState() override;
 	void ExitState() override;
 	void Tick() override;
+
+	void SecondJumpGravity();
 };

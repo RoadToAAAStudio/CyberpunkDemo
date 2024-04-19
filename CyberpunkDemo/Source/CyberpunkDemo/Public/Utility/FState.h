@@ -7,7 +7,7 @@
 #include "FState.generated.h"
 
 class UFTransition;
-// Abstract state class from which all the state will derive
+// Abstract state class from which all the states will derive
 UCLASS(Abstract)
 class CYBERPUNKDEMO_API UFState : public UObject
 {

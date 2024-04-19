@@ -23,10 +23,6 @@ AMainCharacter::AMainCharacter(const FObjectInitializer& ObjectInitializer)
 {
 
 	CustomCharacterMovementComponent = Cast<UCustomCharacterMovementComponent>(GetCharacterMovement());
-	
-	// Set the booleans for the movement system to false
-	bIsCrouching = false;
-	bIsRunning = false;
 
 	// Set size for a collision capsule [!]
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.f);
@@ -95,14 +91,6 @@ TSet<TSubclassOf<UGameplayAbility>> AMainCharacter::GetPlayerHacks()
 void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	//GEngine->AddOnScreenDebugMessage(-1,0,FColor::Black, FString(FString::FromInt(AbilitySystemComponent->IsActive())));
-}
-
-void AMainCharacter::Jump()
-{
-	Super::Jump();
-	//LaunchCharacter(FVector(0, 0, 500), false, false);
 }
 
 TObjectPtr<UCustomCharacterMovementComponent> AMainCharacter::GetCustomCharacterComponent()
@@ -125,22 +113,6 @@ FCollisionQueryParams AMainCharacter::GetIgnoreCharacterParams() const
 	Params.AddIgnoredActor(this);
 
 	return Params;
-}
-
-void AMainCharacter::DisableMappingContext(bool Enable)
-{
-	if (Subsystem)
-	{
-		if (Enable)
-		{
-			Subsystem->RemoveMappingContext(DefaultMappingContext);
-			//Subsystem->AddMappingContext(EmptyMappingContext, 0);
-		}
-		else
-		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		}
-	}
 }
 
 // Called to bind functionality to input
@@ -170,19 +142,10 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		// Dash
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, CustomCharacterMovementComponent, &UCustomCharacterMovementComponent::DashPressed);
 
-		// Shoot
-		//EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &AMainCharacter::Shoot);
-
 		// Analysis
 		EnhancedInputComponent->BindAction(AnalysisAction, ETriggerEvent::Started, QuickhackSystemComponent, &UQuickhackSystemComponent::HandleAnalysisWidget);
-		//EnhancedInputComponent->BindAction(AnalysisAction, ETriggerEvent::Ongoing, QuickhackSystemComponent, &UQuickhackSystemComponent::Inspect);
 		EnhancedInputComponent->BindAction(AnalysisAction, ETriggerEvent::Completed, QuickhackSystemComponent, &UQuickhackSystemComponent::HandleAnalysisWidget);
 	}
-}
-
-void AMainCharacter::Shoot()
-{
-	AbilitySystemComponent->TryActivateAbility(ShootSpec);
 }
 
 // Called to apply the direction to the movement [!]

@@ -18,5 +18,5 @@ void UGA_Shoot::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 		return;
 	}
 
-	Cast<AMainCharacter>(ActorInfo->OwnerActor)->PerformShoot();
+	//Cast<AMainCharacter>(ActorInfo->OwnerActor)->PerformShoot();
 }

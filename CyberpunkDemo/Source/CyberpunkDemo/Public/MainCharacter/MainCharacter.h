@@ -28,12 +28,6 @@ class CYBERPUNKDEMO_API AMainCharacter : public ACharacter, public IAbilitySyste
 
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Movement")
-	bool bIsRunning;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Movement")
-	bool bIsCrouching;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Aiming")
 	float MouseSensibility = 1;
 	
@@ -44,11 +38,11 @@ protected:
 
 private:
 	
-		/** Pawn mesh: 1st person view (arms; seen only by self) [!] */
+		// Pawn mesh: 1st person view (arms; seen only by self)
     	UPROPERTY(VisibleDefaultsOnly, Category=Mesh)
     	USkeletalMeshComponent* Mesh1P;
     
-    	/** First person camera [!] */
+    	// First person camera
     	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
     	UCameraComponent* FirstPersonCameraComponent;
 
@@ -67,13 +61,10 @@ private:
 		FGameplayAbilitySpecHandle ShootSpec;
 
 	// Input Actions
-	#pragma region 
+	#pragma region INPUT_ACTIONS
     	/** MappingContext [!] */
     	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
     	UInputMappingContext* DefaultMappingContext;
-
-		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-		UInputMappingContext* EmptyMappingContext;
     
     	/** Jump Input Action [!] */
     	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
@@ -107,23 +98,18 @@ private:
 	#pragma endregion 
 
 public:
-
-	// Getter for the ASC
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-
+	
 	// Sets default values for this character's properties
 	AMainCharacter(const FObjectInitializer& ObjectInitializer);
 
-	/** Returns Mesh1P sub-object [!] **/
+	// Returns Mesh1P sub-object
 	UFUNCTION(BlueprintCallable) USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
-	/** Returns FirstPersonCameraComponent sub-object [!] **/
+
+	// Returns FirstPersonCameraComponent sub-object
 	UFUNCTION(BlueprintCallable) UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Jump function
-	virtual void Jump() override;
 
 	UFUNCTION(BlueprintImplementableEvent) void Mantle();
 
@@ -131,13 +117,11 @@ public:
 
 	TObjectPtr<UCustomCharacterMovementComponent> GetCustomCharacterComponent();
 
+	// Getter for the ASC
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
 	// Method that returns all parameters that should be ignored by raycasts, spherecasts and so on
 	FCollisionQueryParams GetIgnoreCharacterParams() const;
-
-	void DisableMappingContext (bool Enable);
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void PerformShoot();
 
 	TSet<TSubclassOf<UGameplayAbility>> GetPlayerHacks();
 
@@ -145,18 +129,15 @@ protected:
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	
+	// APawn interface
+	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 
-	/** Called for movement input [!] */
+#pragma region INPUT_METHODS
+	// Called for movement input
 	void Move(const FInputActionValue& Value);
 
-	/** Called for looking input [!] */
+	// Called for looking input
 	void Look(const FInputActionValue& Value);
-
-	// APawn interface [!]
-	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
-	// End of APawn interface
-
-	void Shoot();
-
-	
+#pragma endregion 
 };
