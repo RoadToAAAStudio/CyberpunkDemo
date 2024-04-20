@@ -97,6 +97,8 @@ private:
 	
 	#pragma endregion 
 
+	float UncrouchedCapsuleHalfHeight;
+	
 public:
 	
 	// Sets default values for this character's properties
@@ -122,6 +124,8 @@ public:
 
 	// Method that returns all parameters that should be ignored by raycasts, spherecasts and so on
 	FCollisionQueryParams GetIgnoreCharacterParams() const;
+
+	UFUNCTION(BlueprintCallable) float GetUncrouchedCapsuleHalfHeight();
 
 	TSet<TSubclassOf<UGameplayAbility>> GetPlayerHacks();
 

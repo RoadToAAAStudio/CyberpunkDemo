@@ -64,6 +64,7 @@ void AMainCharacter::BeginPlay()
 	}
 
 	JumpMaxCount = 2;
+	UncrouchedCapsuleHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 
 	QuickhackSystemComponent->Init(GetIgnoreCharacterParams());
 
@@ -113,6 +114,11 @@ FCollisionQueryParams AMainCharacter::GetIgnoreCharacterParams() const
 	Params.AddIgnoredActor(this);
 
 	return Params;
+}
+
+float AMainCharacter::GetUncrouchedCapsuleHalfHeight()
+{
+	return UncrouchedCapsuleHalfHeight;
 }
 
 // Called to bind functionality to input

@@ -296,17 +296,17 @@ void UCustomCharacterMovementComponent::SetLastMovementState(ECustomMovementStat
 
 // STATE MACHINE CONDITION CHECKER METHODS
 // FROM IDLE
-bool UCustomCharacterMovementComponent::CanWalkFromIdle()
+bool UCustomCharacterMovementComponent::CanWalkFromIdle() const
 {
 	return IsMovingOnGround() && !Velocity.IsZero();
 }
 
-bool UCustomCharacterMovementComponent::CanRunFromIdle()
+bool UCustomCharacterMovementComponent::CanRunFromIdle() const
 {
 	return bWantsToRun;
 }
 
-bool UCustomCharacterMovementComponent::CanCrouchFromIdle()
+bool UCustomCharacterMovementComponent::CanCrouchFromIdle() const
 {
 	return bWantsToCrouchCustom;
 }
@@ -317,17 +317,17 @@ bool UCustomCharacterMovementComponent::CanJumpFromIdle()
 }
 
 // FROM WALKING
-bool UCustomCharacterMovementComponent::CanIdleFromWalk()
+bool UCustomCharacterMovementComponent::CanIdleFromWalk() const
 {
 	return IsMovingOnGround() && Velocity.IsZero();
 }
 
-bool UCustomCharacterMovementComponent::CanRunFromWalk()
+bool UCustomCharacterMovementComponent::CanRunFromWalk() const
 {
 	return IsMovingOnGround() && bWantsToRun;
 }
 
-bool UCustomCharacterMovementComponent::CanCrouchFromWalk()
+bool UCustomCharacterMovementComponent::CanCrouchFromWalk() const
 {
 	return IsMovingOnGround() && bWantsToCrouchCustom;
 }
@@ -338,12 +338,12 @@ bool UCustomCharacterMovementComponent::CanJumpFromWalk()
 }
 
 // FROM RUNNING
-bool UCustomCharacterMovementComponent::CanIdleFromRun()
+bool UCustomCharacterMovementComponent::CanIdleFromRun() const
 {
 	return IsMovingOnGround() && Velocity.IsZero() && !bWantsToRun;
 }
 
-bool UCustomCharacterMovementComponent::CanWalkFromRun()
+bool UCustomCharacterMovementComponent::CanWalkFromRun() const
 {
 	return IsMovingOnGround() && !bWantsToRun;
 }
@@ -354,27 +354,27 @@ bool UCustomCharacterMovementComponent::CanJumpFromRun()
 }
 
 // FROM JUMP
-bool UCustomCharacterMovementComponent::CanIdleFromJump()
+bool UCustomCharacterMovementComponent::CanIdleFromJump() const
 {
 	return IsMovingOnGround() && Velocity.IsZero() && !bWantsToJump;
 }
 
-bool UCustomCharacterMovementComponent::CanWalkFromJump()
+bool UCustomCharacterMovementComponent::CanWalkFromJump() const
 {
 	return IsMovingOnGround() && !bWantsToJump;
 }
 
-bool UCustomCharacterMovementComponent::CanRunFromJump()
+bool UCustomCharacterMovementComponent::CanRunFromJump() const
 {
 	return IsMovingOnGround() && !Velocity.IsZero() && bWantsToRun;
 }
 
-bool UCustomCharacterMovementComponent::CanCrouchFromJump()
+bool UCustomCharacterMovementComponent::CanCrouchFromJump() const
 {
 	return IsMovingOnGround() && bWantsToCrouchCustom && !bWantsToJump;
 }
 
-bool UCustomCharacterMovementComponent::CanJumpFromJump()
+bool UCustomCharacterMovementComponent::CanJumpFromJump() const
 {
 	return bCanDoubleJump && bWantsToJump && MovementMode == MOVE_Falling;
 }
@@ -382,55 +382,72 @@ bool UCustomCharacterMovementComponent::CanJumpFromJump()
 // FROM CROUCH
 bool UCustomCharacterMovementComponent::CanIdleFromCrouch()
 {
-	return IsMovingOnGround() && Velocity.IsZero() && !bWantsToCrouchCustom;
+	return IsMovingOnGround() && Velocity.IsZero() && !bWantsToCrouchCustom && CanUncrouch();
 }
 
 bool UCustomCharacterMovementComponent::CanWalkFromCrouch()
 {
-	return IsMovingOnGround() && !Velocity.IsZero() && !bWantsToCrouchCustom;
+	return IsMovingOnGround() && !Velocity.IsZero() && !bWantsToCrouchCustom && CanUncrouch();
 }
 
 bool UCustomCharacterMovementComponent::CanRunFromCrouch()
 {
-	return IsMovingOnGround() && bWantsToRun;
+	return IsMovingOnGround() && bWantsToRun && CanUncrouch();
 }
 
 bool UCustomCharacterMovementComponent::CanJumpFromCrouch()
 {
-	return bWantsToJump;
+	return bWantsToJump && CanUncrouch();
 }
 
 // FROM MANTLE
-bool UCustomCharacterMovementComponent::CanIdleFromMantle()
+bool UCustomCharacterMovementComponent::CanIdleFromMantle() const
 {
 	return !bCanMantle;
 }
 
 // FROM VAULT
-bool UCustomCharacterMovementComponent::CanIdleFromVault()
+bool UCustomCharacterMovementComponent::CanIdleFromVault() const
 {
 	return !bCanVault;
 }
 
-bool UCustomCharacterMovementComponent::CanWalkFromVault()
+bool UCustomCharacterMovementComponent::CanWalkFromVault() const
 {
 	return !bCanVault && LastMovementState == ECustomMovementState::Walking;
 }
 
-bool UCustomCharacterMovementComponent::CanRunFromVault()
+bool UCustomCharacterMovementComponent::CanRunFromVault() const
 {
 	return !bCanVault && LastMovementState == ECustomMovementState::Running;
 }
 
-bool UCustomCharacterMovementComponent::CanMantleFromAny()
+bool UCustomCharacterMovementComponent::CanMantleFromAny() const
 {
 	return bCanMantle && !bCanVault;
 }
 
-bool UCustomCharacterMovementComponent::CanVaultFromAny()
+bool UCustomCharacterMovementComponent::CanVaultFromAny() const
 {
 	return bCanVault && !bCanMantle;
 }
+
+bool UCustomCharacterMovementComponent::CanUncrouch()
+{
+	FVector BaseLocation = UpdatedComponent->GetComponentLocation() + ((GetCapsuleHalfHeight() - 10) * FVector::UpVector);
+	FCollisionShape CapsuleShape = FCollisionShape::MakeCapsule(GetCapsuleRadius(), MainCharacter->GetUncrouchedCapsuleHalfHeight());
+	auto Params = MainCharacter->GetIgnoreCharacterParams();
+	if (GetWorld()->OverlapAnyTestByProfile(BaseLocation, FQuat::Identity, "BlockAll", CapsuleShape, Params))
+	{
+		DrawDebugCapsule(GetWorld(), BaseLocation, MainCharacter->GetUncrouchedCapsuleHalfHeight(), GetCapsuleRadius(), FQuat::Identity, FColor::Red, false, 1);
+		bWantsToCrouchCustom = true;
+		return false;
+	}
+
+	//DrawDebugCapsule(GetWorld(), BaseLocation, MainCharacter->GetUncrouchedCapsuleHalfHeight(), GetCapsuleRadius(), FQuat::Identity, FColor::Green, false, 1);
+	return true;
+}
+
 
 
 #pragma endregion STATE_MACHINE
@@ -584,6 +601,7 @@ bool UCustomCharacterMovementComponent::TryMantle()
 	if(!GetWorld()->LineTraceMultiByProfile(HeightHits, TraceStart, FrontHit.Location + Forward, "BlockAll", Params)) return false;
 	for(const FHitResult& Hit : HeightHits)
 	{
+		// The tag is for the level designer to specify specific objects that should not be "mantable"
 		if (Hit.IsValidBlockingHit() && !Hit.GetActor()->ActorHasTag("NotMantle"))
 		{
 			SurfaceHit = Hit;
@@ -618,6 +636,7 @@ bool UCustomCharacterMovementComponent::TryMantle()
 		return false;
 	}
 
+	// Check if there are any obstacles between the player and the final point
 	if (GetWorld()->OverlapAnyTestByProfile(GetActorLocation() + FVector::UpVector * (GetCapsuleHalfHeight() + 1 + GetCapsuleRadius() * 2 * SurfaceSin), FQuat::Identity, "BlockAll", CapsuleShape, Params))
 	{
 		DRAW_CAPSULE(ClearanceCapsuleLocation, FColor::Black)
@@ -683,7 +702,8 @@ bool UCustomCharacterMovementComponent::TryVault()
 	if(!GetWorld()->LineTraceMultiByProfile(HeightHits, TraceStart, FrontHit.Location + Forward, "BlockAll", Params)) return false;
 	for(const FHitResult& Hit : HeightHits)
 	{
-		if (Hit.IsValidBlockingHit() && !Hit.GetActor()->ActorHasTag("NotMantle"))
+		// The tag is for the level designer to specify specific objects that should not be "vaultable"
+		if (Hit.IsValidBlockingHit() && !Hit.GetActor()->ActorHasTag("NotVault"))
 		{
 			SurfaceHit = Hit;
 			break;
@@ -700,10 +720,7 @@ bool UCustomCharacterMovementComponent::TryVault()
 
 	// CHECK CLEARANCE
 
-	// float SurfaceCos = FVector::UpVector | SurfaceHit.Normal;
-	// float SurfaceSin = FMath::Sqrt(1 - SurfaceCos * SurfaceCos);
-
-	// The point the capsule should mantle to, it takes into account the size of the capsule and any potential steepness of the surface
+	// The point the capsule should pass while vaulting
 	FVector ClearanceCapsuleLocation = SurfaceHit.Location + Forward * GetCapsuleRadius() + FVector::UpVector * GetCapsuleHalfHeight();
 	FCollisionShape CapsuleShape = FCollisionShape::MakeCapsule(GetCapsuleRadius(), GetCapsuleHalfHeight());
 
@@ -713,6 +730,7 @@ bool UCustomCharacterMovementComponent::TryVault()
 		return false;
 	}
 
+	// Check if there are any obstacles between the player and the final point
 	if (GetWorld()->OverlapAnyTestByProfile(GetActorLocation() + FVector::UpVector * (GetCapsuleHalfHeight()), FQuat::Identity, "BlockAll", CapsuleShape, Params))
 	{
 		DRAW_CAPSULE(ClearanceCapsuleLocation, FColor::Black)
@@ -721,12 +739,14 @@ bool UCustomCharacterMovementComponent::TryVault()
 	
 	FVector CapsuleFinalLocationOffset = SurfaceHit.Location + Forward * (GetCapsuleRadius() + VaultMinWidth) + FVector::UpVector * (GetCapsuleHalfHeight() / 2);
 
+	// Check if there is enough space on the other side of the obstacle
 	if (GetWorld()->OverlapAnyTestByProfile(CapsuleFinalLocationOffset, FQuat::Identity, "BlockAll", CapsuleShape, Params))
 	{
 		DRAW_CAPSULE(CapsuleFinalLocationOffset, FColor::Silver)
 		return false;
 	}
 
+	// If on the other side of the object the ground is at a similar height than the starting point
 	FHitResult GroundHit;
 	TArray<AActor*> ActorsToIgnore;
 	if (UKismetSystemLibrary::CapsuleTraceSingleByProfile(GetWorld(), CapsuleFinalLocationOffset, CapsuleFinalLocationOffset + FVector::DownVector * (GetCapsuleHalfHeight() / 2  + 15), GetCapsuleRadius(), GetCapsuleHalfHeight(), "BlockAll", false, ActorsToIgnore, EDrawDebugTrace::None ,GroundHit, true))

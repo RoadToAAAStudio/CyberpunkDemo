@@ -32,6 +32,7 @@ class CYBERPUNKDEMO_API UCustomCharacterMovementComponent : public UCharacterMov
 {
 	GENERATED_BODY()
 
+// FRIENDS	
 friend AMainCharacter;
 friend UStateCyberpunkProject;
 	
@@ -42,6 +43,7 @@ public:
 
 	UPROPERTY() TObjectPtr<AMainCharacter> MainCharacter;
 
+	// DELEGATES
 	FOnEnterCustomMovementStateSignature OnEnterCustomMovementState;
 	FOnExitCustomMovementStateSignature OnExitCustomMovementState;
 
@@ -127,8 +129,6 @@ public:
 	UFUNCTION(BlueprintCallable) ECustomMovementState GetCurrentMovementState() const;
 	UFUNCTION(BlueprintCallable) ECustomMovementState GetLastMovementState() const;
 
-	
-
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 							   FActorComponentTickFunction* ThisTickFunction) override;
@@ -153,28 +153,28 @@ private:
 	// Used to check whether we can transition from a state to another 
 	
 	// From IDLE state
-	bool CanWalkFromIdle();
-	bool CanRunFromIdle();
-	bool CanCrouchFromIdle();
+	bool CanWalkFromIdle() const;
+	bool CanRunFromIdle() const;
+	bool CanCrouchFromIdle() const;
 	bool CanJumpFromIdle();
 
 	// From WALKING state
-	bool CanIdleFromWalk();
-	bool CanRunFromWalk();
-	bool CanCrouchFromWalk();
+	bool CanIdleFromWalk() const;
+	bool CanRunFromWalk() const;
+	bool CanCrouchFromWalk() const;
 	bool CanJumpFromWalk();
 
 	// From RUNNING state
-	bool CanIdleFromRun();
-	bool CanWalkFromRun();
+	bool CanIdleFromRun() const;
+	bool CanWalkFromRun() const;
 	bool CanJumpFromRun();
 
 	// From JUMP state
-	bool CanIdleFromJump();
-	bool CanWalkFromJump();
-	bool CanRunFromJump();
-	bool CanCrouchFromJump();
-	bool CanJumpFromJump();
+	bool CanIdleFromJump() const;
+	bool CanWalkFromJump() const;
+	bool CanRunFromJump() const;
+	bool CanCrouchFromJump() const;
+	bool CanJumpFromJump() const;
 
 	//From CROUCHING state
 	bool CanIdleFromCrouch();
@@ -183,19 +183,20 @@ private:
 	bool CanJumpFromCrouch();
 
 	// From MANTLE state
-	bool CanIdleFromMantle();
+	bool CanIdleFromMantle() const;
 
 	// From VAULT state
-	bool CanIdleFromVault();
-	bool CanWalkFromVault();
-	bool CanRunFromVault();
+	bool CanIdleFromVault() const;
+	bool CanWalkFromVault() const;
+	bool CanRunFromVault() const;
 
 	// From ANY
-	bool CanMantleFromAny();
-	bool CanVaultFromAny();
+	bool CanMantleFromAny() const;
+	bool CanVaultFromAny() const;
 
 	bool TryMantle();
 	bool TryVault();
+	bool CanUncrouch();
 	
 #pragma endregion 
 
