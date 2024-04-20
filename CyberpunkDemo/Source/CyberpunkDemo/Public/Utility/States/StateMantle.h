@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Utility/StateCyberpunkProject.h"
-#include "UStateMantle.generated.h"
+#include "StateMantle.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class CYBERPUNKDEMO_API UUStateMantle : public UStateCyberpunkProject
+class CYBERPUNKDEMO_API UStateMantle : public UStateCyberpunkProject
 {
 	GENERATED_BODY()
 

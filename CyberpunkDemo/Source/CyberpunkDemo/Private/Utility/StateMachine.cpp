@@ -7,12 +7,12 @@ UStateMachine::UStateMachine()
 {
 }
 
-void UStateMachine::Init(const TObjectPtr<UFState> StartingState)
+void UStateMachine::Init(const TObjectPtr<UState> StartingState)
 {
 	CurrentState = StartingState;
 }
 
-void UStateMachine::AddState(const TObjectPtr<UFState> NewState)
+void UStateMachine::AddState(const TObjectPtr<UState> NewState)
 {
 	States.Add(NewState);
 }

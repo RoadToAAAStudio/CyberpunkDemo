@@ -4,19 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
-#include "FState.generated.h"
+#include "State.generated.h"
 
-class UFTransition;
+class UTransition;
 // Abstract state class from which all the states will derive
 UCLASS(Abstract)
-class CYBERPUNKDEMO_API UFState : public UObject
+class CYBERPUNKDEMO_API UState : public UObject
 {
 	GENERATED_BODY()
 
 public:
 
 	UPROPERTY(BlueprintReadWrite)
-	TArray<TObjectPtr<UFTransition>> Transitions;
+	TArray<TObjectPtr<UTransition>> Transitions;
 	
 	// Called when entering the state
 	virtual void EnterState();

@@ -1,22 +1,22 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Utility/FTransition.h"
+#include "Utility/Transition.h"
 
-UFTransition::UFTransition()
+UTransition::UTransition()
 {
 }
 
 // Init function that substitutes the constructor
 //	here we set:
 //	- the state the transition points to
-void UFTransition::Init(const TObjectPtr<UFState> toState)
+void UTransition::Init(const TObjectPtr<UState> toState)
 {
 	ToState = toState;
 }
 
 // Check if the state machine can transition to the state pointed by this transition (by executing the condition bound to the delegate)
-bool UFTransition::CheckTransition()
+bool UTransition::CheckTransition()
 {
 	if (OnCheckConditionDelegate.IsBound())
 	{

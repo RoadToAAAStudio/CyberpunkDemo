@@ -2,7 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FTransition.h"
+#include "Transition.h"
 #include "UObject/Object.h"
 #include "StateMachine.generated.h"
 
@@ -14,17 +14,17 @@ class CYBERPUNKDEMO_API UStateMachine : public UObject
 public:
 	
 	UPROPERTY(BlueprintReadWrite)
-	TObjectPtr<UFState> CurrentState;
+	TObjectPtr<UState> CurrentState;
 
 	UPROPERTY(BlueprintReadWrite)
-	TArray<TObjectPtr<UFState>> States;
+	TArray<TObjectPtr<UState>> States;
 	
 	
 	UStateMachine();
 
-	void Init(const TObjectPtr<UFState> StartingState);
+	void Init(const TObjectPtr<UState> StartingState);
 
-	void AddState(const TObjectPtr<UFState> NewState);
+	void AddState(const TObjectPtr<UState> NewState);
 
 	void Tick();
 };

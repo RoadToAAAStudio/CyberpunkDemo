@@ -3,29 +3,29 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FState.h"
+#include "State.h"
 #include "UObject/Object.h"
 #include "Templates/Function.h"
-#include "FTransition.generated.h"
+#include "Transition.generated.h"
 
 DECLARE_DELEGATE_RetVal(bool, FOnCheckConditionSignature)
 
 UCLASS()
-class CYBERPUNKDEMO_API UFTransition : public UObject
+class CYBERPUNKDEMO_API UTransition : public UObject
 {
 	GENERATED_BODY()
 
 public:
 
 	// Basic constructor
-	UFTransition();
+	UTransition();
 
 	// Init function that substitutes the constructor
-	void Init(const TObjectPtr<UFState> toState);
+	void Init(const TObjectPtr<UState> toState);
 
 	// The state this transition points to
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFState> ToState;
+	TObjectPtr<UState> ToState;
 	
 	bool CheckTransition();
 

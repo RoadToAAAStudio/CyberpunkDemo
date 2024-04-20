@@ -1,18 +1,18 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Utility/FState.h"
+#include "Utility/State.h"
 
-void UFState::EnterState()
+void UState::EnterState()
 {
 	UE_LOG(LogTemp, Display, TEXT("Entering state: %s"), *this->GetName());
 }
 
-void UFState::Tick()
+void UState::Tick()
 {
 }
 
-void UFState::ExitState()
+void UState::ExitState()
 {
 	UE_LOG(LogTemp, Display, TEXT("Exiting state: %s"), *this->GetName());
 }

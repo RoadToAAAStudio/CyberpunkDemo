@@ -51,7 +51,7 @@ void UStateJumping::Tick()
 	}
 	else if (Owner->Velocity.Z < 0 && !GravityTimer.IsValid() && Owner->GetLastMovementState() == ECustomMovementState::Jumping)
 	{
-		Owner->GravityScale = 1;
+		Owner->GravityScale = 1.5f;
 		Owner->GetWorld()->GetTimerManager().SetTimer(GravityTimer, this, &UStateJumping::SecondJumpGravity, 0.15f, false);
 	}
 	else if (Owner->Velocity.Z >= 0)

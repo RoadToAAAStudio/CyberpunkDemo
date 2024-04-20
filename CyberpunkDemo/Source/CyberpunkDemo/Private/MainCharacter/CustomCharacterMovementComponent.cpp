@@ -7,13 +7,13 @@
 #include "Kismet/GameplayStatics.h"
 #include "MainCharacter/MainCharacter.h"
 #include "Utility/States/StateIdle.h"
-#include "Utility/FTransition.h"
+#include "Utility/Transition.h"
 #include "Utility/States/StateCrouching.h"
 #include "Utility/States/StateJumping.h"
 #include "Utility/States/StateRunning.h"
 #include "Utility/States/StateVault.h"
 #include "Utility/States/StateWalking.h"
-#include "Utility/States/UStateMantle.h"
+#include "Utility/States/StateMantle.h"
 
 // Shortcut macros
 #if 0
@@ -79,7 +79,7 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	StateMachine->AddState(StateCrouching);
 	StateCrouching->Initialize(this, ECustomMovementState::Crouching);
 
-	TObjectPtr<UUStateMantle> StateMantle = NewObject<UUStateMantle>();
+	TObjectPtr<UStateMantle> StateMantle = NewObject<UStateMantle>();
 	StateMachine->AddState(StateMantle);
 	StateMantle->Initialize(this, ECustomMovementState::Mantling);
 
@@ -92,193 +92,193 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	// Create the transitions and add them to the state machine
 	// IDLE
 	// Idle TO Walking
-	TObjectPtr<UFTransition> IdleToWalking = NewObject<UFTransition>();
+	TObjectPtr<UTransition> IdleToWalking = NewObject<UTransition>();
 	StateIdle->Transitions.Add(IdleToWalking);
 	IdleToWalking->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanWalkFromIdle);
 	IdleToWalking->Init(StateWalking);
 
 	// Idle TO Jumping
-	TObjectPtr<UFTransition> IdleToJumping = NewObject<UFTransition>();
+	TObjectPtr<UTransition> IdleToJumping = NewObject<UTransition>();
 	StateIdle->Transitions.Add(IdleToJumping);
 	IdleToJumping->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanJumpFromIdle);
 	IdleToJumping->Init(StateJumping);
 
 	// Idle TO Crouching
-	TObjectPtr<UFTransition> IdleToCrouching = NewObject<UFTransition>();
+	TObjectPtr<UTransition> IdleToCrouching = NewObject<UTransition>();
 	StateIdle->Transitions.Add(IdleToCrouching);
 	IdleToCrouching->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanCrouchFromIdle);
 	IdleToCrouching->Init(StateCrouching);
 
 	// Idle TO Running
-	TObjectPtr<UFTransition> IdleToRunning = NewObject<UFTransition>();
+	TObjectPtr<UTransition> IdleToRunning = NewObject<UTransition>();
 	StateIdle->Transitions.Add(IdleToRunning);
 	IdleToRunning->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanRunFromIdle);
 	IdleToRunning->Init(StateRunning);
 
 	// Idle TO Mantle
-	TObjectPtr<UFTransition> IdleToMantle = NewObject<UFTransition>();
+	TObjectPtr<UTransition> IdleToMantle = NewObject<UTransition>();
 	StateIdle->Transitions.Add(IdleToMantle);
 	IdleToMantle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanMantleFromAny);
 	IdleToMantle->Init(StateMantle);
 
 	// Idle TO Vault
-	TObjectPtr<UFTransition> IdleToVault = NewObject<UFTransition>();
+	TObjectPtr<UTransition> IdleToVault = NewObject<UTransition>();
 	StateIdle->Transitions.Add(IdleToVault);
 	IdleToVault->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanVaultFromAny);
 	IdleToVault->Init(StateVault);
 
 	// WALKING
 	// Walking TO Idle
-	TObjectPtr<UFTransition> WalkingToIdle = NewObject<UFTransition>();
+	TObjectPtr<UTransition> WalkingToIdle = NewObject<UTransition>();
 	StateWalking->Transitions.Add(WalkingToIdle);
 	WalkingToIdle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanIdleFromWalk);
 	WalkingToIdle->Init(StateIdle);
 	
 	// Walking TO Running
-	TObjectPtr<UFTransition> WalkingToRunning = NewObject<UFTransition>();
+	TObjectPtr<UTransition> WalkingToRunning = NewObject<UTransition>();
 	StateWalking->Transitions.Add(WalkingToRunning);
 	WalkingToRunning->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanRunFromWalk);
 	WalkingToRunning->Init(StateRunning);
 
 	// Walking TO Crouching
-	TObjectPtr<UFTransition> WalkingToCrouching = NewObject<UFTransition>();
+	TObjectPtr<UTransition> WalkingToCrouching = NewObject<UTransition>();
 	StateWalking->Transitions.Add(WalkingToCrouching);
 	WalkingToCrouching->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanCrouchFromWalk);
 	WalkingToCrouching->Init(StateCrouching);
 
 	// Walking TO Jump
-	TObjectPtr<UFTransition> WalkingToJump = NewObject<UFTransition>();
+	TObjectPtr<UTransition> WalkingToJump = NewObject<UTransition>();
 	StateWalking->Transitions.Add(WalkingToJump);
 	WalkingToJump->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanJumpFromWalk);
 	WalkingToJump->Init(StateJumping);
 
 	// Walking TO Mantle
-	TObjectPtr<UFTransition> WalkingToMantle = NewObject<UFTransition>();
+	TObjectPtr<UTransition> WalkingToMantle = NewObject<UTransition>();
 	StateWalking->Transitions.Add(WalkingToMantle);
 	WalkingToMantle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanMantleFromAny);
 	WalkingToMantle->Init(StateMantle);
 
 	// Walking TO Vault
-	TObjectPtr<UFTransition> WalkingToVault = NewObject<UFTransition>();
+	TObjectPtr<UTransition> WalkingToVault = NewObject<UTransition>();
 	StateWalking->Transitions.Add(WalkingToVault);
 	WalkingToVault->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanVaultFromAny);
 	WalkingToVault->Init(StateVault);
 
 	// RUNNING
 	// Running TO Idle
-	TObjectPtr<UFTransition> RunningToIdle = NewObject<UFTransition>();
+	TObjectPtr<UTransition> RunningToIdle = NewObject<UTransition>();
 	StateRunning->Transitions.Add(RunningToIdle);
 	RunningToIdle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanIdleFromRun);
 	RunningToIdle->Init(StateIdle);
 
 	// Running TO Walking
-	TObjectPtr<UFTransition> RunningToWalking = NewObject<UFTransition>();
+	TObjectPtr<UTransition> RunningToWalking = NewObject<UTransition>();
 	StateRunning->Transitions.Add(RunningToWalking);
 	RunningToWalking->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanWalkFromRun);
 	RunningToWalking->Init(StateWalking);
 
 	// Running TO Jump
-	TObjectPtr<UFTransition> RunningToJump = NewObject<UFTransition>();
+	TObjectPtr<UTransition> RunningToJump = NewObject<UTransition>();
 	StateRunning->Transitions.Add(RunningToJump);
 	RunningToJump->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanJumpFromRun);
 	RunningToJump->Init(StateJumping);
 
 	// Running TO Mantle
-	TObjectPtr<UFTransition> RunningToMantle = NewObject<UFTransition>();
+	TObjectPtr<UTransition> RunningToMantle = NewObject<UTransition>();
 	StateRunning->Transitions.Add(RunningToMantle);
 	RunningToMantle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanMantleFromAny);
 	RunningToMantle->Init(StateMantle);
 
 	// Running TO Vault
-	TObjectPtr<UFTransition> RunningToVault = NewObject<UFTransition>();
+	TObjectPtr<UTransition> RunningToVault = NewObject<UTransition>();
 	StateRunning->Transitions.Add(RunningToVault);
 	RunningToVault->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanVaultFromAny);
 	RunningToVault->Init(StateVault);
 
 	// JUMP
 	// Jump TO Idle
-	TObjectPtr<UFTransition> JumpToIdle = NewObject<UFTransition>();
+	TObjectPtr<UTransition> JumpToIdle = NewObject<UTransition>();
 	StateJumping->Transitions.Add(JumpToIdle);
 	JumpToIdle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanIdleFromJump);
 	JumpToIdle->Init(StateIdle);
 
 	// Jump TO Walking
-	TObjectPtr<UFTransition> JumpToWalking = NewObject<UFTransition>();
+	TObjectPtr<UTransition> JumpToWalking = NewObject<UTransition>();
 	StateJumping->Transitions.Add(JumpToWalking);
 	JumpToWalking->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanWalkFromJump);
 	JumpToWalking->Init(StateWalking);
 
 	// Jump TO Running
-	TObjectPtr<UFTransition> JumpToRunning = NewObject<UFTransition>();
+	TObjectPtr<UTransition> JumpToRunning = NewObject<UTransition>();
 	StateJumping->Transitions.Add(JumpToRunning);
 	JumpToRunning->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanRunFromJump);
 	JumpToRunning->Init(StateRunning);
 
 	// Jump TO Crouch
-	TObjectPtr<UFTransition> JumpToCrouch = NewObject<UFTransition>();
+	TObjectPtr<UTransition> JumpToCrouch = NewObject<UTransition>();
 	StateJumping->Transitions.Add(JumpToCrouch);
 	JumpToCrouch->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanCrouchFromJump);
 	JumpToCrouch->Init(StateCrouching);
 
 	// Jump TO Mantle
-	TObjectPtr<UFTransition> JumpToMantle = NewObject<UFTransition>();
+	TObjectPtr<UTransition> JumpToMantle = NewObject<UTransition>();
 	StateJumping->Transitions.Add(JumpToMantle);
 	JumpToMantle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::TryMantle);
 	JumpToMantle->Init(StateMantle);
 
 	// Jump TO Jump
-	TObjectPtr<UFTransition> JumpToJump = NewObject<UFTransition>();
+	TObjectPtr<UTransition> JumpToJump = NewObject<UTransition>();
 	StateJumping->Transitions.Add(JumpToJump);
 	JumpToJump->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanJumpFromJump);
 	JumpToJump->Init(StateJumping);
 	
 	// CROUCH
 	// Crouch TO Idle
-	TObjectPtr<UFTransition> CrouchToIdle = NewObject<UFTransition>();
+	TObjectPtr<UTransition> CrouchToIdle = NewObject<UTransition>();
 	StateCrouching->Transitions.Add(CrouchToIdle);
 	CrouchToIdle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanIdleFromCrouch);
 	CrouchToIdle->Init(StateIdle);
 
 	// Crouch TO Walking
-	TObjectPtr<UFTransition> CrouchToWalking = NewObject<UFTransition>();
+	TObjectPtr<UTransition> CrouchToWalking = NewObject<UTransition>();
 	StateCrouching->Transitions.Add(CrouchToWalking);
 	CrouchToWalking->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanWalkFromCrouch);
 	CrouchToWalking->Init(StateWalking);
 
 	// Crouch TO Running
-	TObjectPtr<UFTransition> CrouchToRunning = NewObject<UFTransition>();
+	TObjectPtr<UTransition> CrouchToRunning = NewObject<UTransition>();
 	StateCrouching->Transitions.Add(CrouchToRunning);
 	CrouchToRunning->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanRunFromCrouch);
 	CrouchToRunning->Init(StateRunning);
 
 	// Crouch TO Jump
-	TObjectPtr<UFTransition> CrouchToJump = NewObject<UFTransition>();
+	TObjectPtr<UTransition> CrouchToJump = NewObject<UTransition>();
 	StateCrouching->Transitions.Add(CrouchToJump);
 	CrouchToJump->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanJumpFromCrouch);
 	CrouchToJump->Init(StateJumping);
 
 	// MANTLE
 	// Mantle TO Idle
-	TObjectPtr<UFTransition> MantleToJump = NewObject<UFTransition>();
+	TObjectPtr<UTransition> MantleToJump = NewObject<UTransition>();
 	StateMantle->Transitions.Add(MantleToJump);
 	MantleToJump->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanIdleFromMantle);
 	MantleToJump->Init(StateIdle);
 
 	// VAULT
 	// Vault TO Idle
-	TObjectPtr<UFTransition> VaultToIdle = NewObject<UFTransition>();
+	TObjectPtr<UTransition> VaultToIdle = NewObject<UTransition>();
 	StateVault->Transitions.Add(VaultToIdle);
 	VaultToIdle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanIdleFromVault);
 	VaultToIdle->Init(StateIdle);
 
 	// Vault TO Walking
-	TObjectPtr<UFTransition> VaultToWalking = NewObject<UFTransition>();
+	TObjectPtr<UTransition> VaultToWalking = NewObject<UTransition>();
 	StateVault->Transitions.Add(VaultToWalking);
 	VaultToWalking->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanWalkFromVault);
 	VaultToWalking->Init(StateWalking);
 
 	// Vault TO Running
-	TObjectPtr<UFTransition> VaultToRunning = NewObject<UFTransition>();
+	TObjectPtr<UTransition> VaultToRunning = NewObject<UTransition>();
 	StateVault->Transitions.Add(VaultToRunning);
 	VaultToRunning->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanRunFromVault);
 	VaultToRunning->Init(StateRunning);

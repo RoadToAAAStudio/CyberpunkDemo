@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FState.h"
+#include "State.h"
 #include "MainCharacter/CustomCharacterMovementComponent.h"
 #include "StateCyberpunkProject.generated.h"
 
@@ -11,7 +11,7 @@
  * 
  */
 UCLASS()
-class CYBERPUNKDEMO_API UStateCyberpunkProject : public UFState
+class CYBERPUNKDEMO_API UStateCyberpunkProject : public UState
 {
 	GENERATED_BODY()
 	
