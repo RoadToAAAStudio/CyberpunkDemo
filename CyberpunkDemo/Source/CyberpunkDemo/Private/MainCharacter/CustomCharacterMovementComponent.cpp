@@ -51,6 +51,7 @@ void UCustomCharacterMovementComponent::BeginPlay()
 }
 
 // STATE MACHINE
+// Custom state machine that handles all the different movement states
 #pragma region STATE_MACHINE
 // Called at begin play to create and setup the movement state machine
 void UCustomCharacterMovementComponent::BuildStateMachine()
@@ -90,6 +91,8 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	StateMachine->Init(StateIdle);
 
 	// Create the transitions and add them to the state machine
+	// Bind each transition delegate with a function used to check if the transition is true/false
+	// Set the state that transition points to
 	// IDLE
 	// Idle TO Walking
 	TObjectPtr<UTransition> IdleToWalking = NewObject<UTransition>();
@@ -295,6 +298,7 @@ void UCustomCharacterMovementComponent::SetLastMovementState(ECustomMovementStat
 }
 
 // STATE MACHINE CONDITION CHECKER METHODS
+// These methods are used by the state machine to check if a state can transition to another one and under what conditions
 // FROM IDLE
 bool UCustomCharacterMovementComponent::CanWalkFromIdle() const
 {
@@ -432,6 +436,7 @@ bool UCustomCharacterMovementComponent::CanVaultFromAny() const
 	return bCanVault && !bCanMantle;
 }
 
+// Used to check if there is enough space over the player when trying to exit from the CROUCH state
 bool UCustomCharacterMovementComponent::CanUncrouch()
 {
 	FVector BaseLocation = UpdatedComponent->GetComponentLocation() + ((GetCapsuleHalfHeight() - 10) * FVector::UpVector);
@@ -443,19 +448,15 @@ bool UCustomCharacterMovementComponent::CanUncrouch()
 		bWantsToCrouchCustom = true;
 		return false;
 	}
-
-	//DrawDebugCapsule(GetWorld(), BaseLocation, MainCharacter->GetUncrouchedCapsuleHalfHeight(), GetCapsuleRadius(), FQuat::Identity, FColor::Green, false, 1);
 	return true;
 }
-
-
-
 #pragma endregion STATE_MACHINE
 
 // Called every frame
 void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	// Each tick the state machine checks if, for the current state a transition has become true and eventually performs the transition towards that state
 	StateMachine->Tick();
 }
 
@@ -498,11 +499,6 @@ void UCustomCharacterMovementComponent::JumpPressed()
 	bWantsToJump = true;
 }
 
-void UCustomCharacterMovementComponent::JumpReleased()
-{
-	bWantsToJump = false;
-}
-
 void UCustomCharacterMovementComponent::CrouchPressed()
 {
 	if (CurrentMovementState == ECustomMovementState::Jumping || CurrentMovementState == ECustomMovementState::Running) return;
@@ -532,6 +528,10 @@ void UCustomCharacterMovementComponent::ResetDashSpeed()
 #pragma endregion
 
 // MANTLE SYSTEM
+// The mantle system is used to check if (when jumping/in the jump state) there is an object in front of the character over which he can climb and cannot vault over
+// It uses various raycast to find the object, its height and potential steepness, and if there is enough space over it for the player
+// Lastly it differentiates between a high/low mantle and set a boolean variable to true for the custom state machine to perform the transition
+// The implementation for the mantle is done in blueprint since I use a timeline to perform the movement while the setup for that is done in the "StateMantle.cpp"
 #pragma region MANTLE
 
 bool UCustomCharacterMovementComponent::TryMantle()
@@ -656,6 +656,12 @@ bool UCustomCharacterMovementComponent::TryMantle()
 #pragma endregion
 
 // VAULT SYSTEM
+// The vault system is used to check if (when jumping) there is an object in front of the character over which he can vault
+// It uses various raycast (as for the mantle system) to find the object, its height, if there is enough space over it and most importantly if there is enough space on the other side of the object
+// It differentiates between a normal vault and a "falling" one:
+// - Normal vault: If on the other side of the object the ground is at a similar height than the starting side
+// - Falling vault: If a normal one is not possible, this can be achieved only if the player runs or walks towards the obstacle, if it tries to vault from an IDLE state then a classic mantle would be performed
+// The implementation for the vault is done in blueprint since I use a timeline to perform the movement while the setup for that is done in the "StateVault.cpp"
 #pragma region VAULT
 
 bool UCustomCharacterMovementComponent::TryVault()

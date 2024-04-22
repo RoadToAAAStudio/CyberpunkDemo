@@ -9,6 +9,14 @@ void UStateVault::EnterState()
 	Super::EnterState();
 	Owner->MainCharacter->DisableInput(Cast<APlayerController>(Owner->MainCharacter->GetController()));
 	Owner->bWantsToJump = false;
+	if (Owner->GetLastMovementState() == ECustomMovementState::Running)
+	{
+		Owner->VaultLerpSpeed = 2.0f;
+	}
+	else
+	{
+		Owner->VaultLerpSpeed = 1.5f;
+	}
 	Owner->MainCharacter->Vault();
 }
 

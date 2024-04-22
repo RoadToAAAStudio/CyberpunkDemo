@@ -38,14 +38,15 @@ protected:
 
 private:
 	
-		// Pawn mesh: 1st person view (arms; seen only by self)
-    	UPROPERTY(VisibleDefaultsOnly, Category=Mesh)
-    	USkeletalMeshComponent* Mesh1P;
+	// Pawn mesh: 1st person view (arms; seen only by self)
+    UPROPERTY(VisibleDefaultsOnly, Category=Mesh)
+    USkeletalMeshComponent* Mesh1P;
     
-    	// First person camera
-    	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-    	UCameraComponent* FirstPersonCameraComponent;
-
+    // First person camera
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+    UCameraComponent* FirstPersonCameraComponent;
+	
+#pragma region ABILITY_SYSTEM_COMPONENT (W_I_P)
 		// Ability System Component
 		UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "ASC", meta=(AllowPrivateAccess = "true"))
 		UAbilitySystemComponent* AbilitySystemComponent;
@@ -55,11 +56,12 @@ private:
 		UQuickhackSystemComponent* QuickhackSystemComponent;
 
 		UPROPERTY()
-		UEnhancedInputLocalPlayerSubsystem* Subsystem;
-
-		UPROPERTY()
 		FGameplayAbilitySpecHandle ShootSpec;
+#pragma endregion
 
+	UPROPERTY()
+	UEnhancedInputLocalPlayerSubsystem* Subsystem;
+	
 	// Input Actions
 	#pragma region INPUT_ACTIONS
     	/** MappingContext [!] */
@@ -113,21 +115,24 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION(BlueprintImplementableEvent) void Mantle();
-
-	UFUNCTION(BlueprintImplementableEvent) void Vault();
-
-	TObjectPtr<UCustomCharacterMovementComponent> GetCustomCharacterComponent();
-
+#pragma region ABILITY_SYSTEM_COMPONENT (W_I_P)
 	// Getter for the ASC
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	TSet<TSubclassOf<UGameplayAbility>> GetPlayerHacks();
+#pragma endregion
+	
+	// Getter for the Custom Character Movement Component
+	TObjectPtr<UCustomCharacterMovementComponent> GetCustomCharacterComponent();
 
 	// Method that returns all parameters that should be ignored by raycasts, spherecasts and so on
 	FCollisionQueryParams GetIgnoreCharacterParams() const;
 
 	UFUNCTION(BlueprintCallable) float GetUncrouchedCapsuleHalfHeight();
 
-	TSet<TSubclassOf<UGameplayAbility>> GetPlayerHacks();
+	UFUNCTION(BlueprintImplementableEvent) void Mantle();
+
+	UFUNCTION(BlueprintImplementableEvent) void Vault();
 
 protected:
 	

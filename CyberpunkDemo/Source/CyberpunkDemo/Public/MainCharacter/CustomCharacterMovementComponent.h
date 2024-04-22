@@ -32,7 +32,7 @@ class CYBERPUNKDEMO_API UCustomCharacterMovementComponent : public UCharacterMov
 {
 	GENERATED_BODY()
 
-// FRIENDS	
+// FRIEND CLASSES
 friend AMainCharacter;
 friend UStateCyberpunkProject;
 	
@@ -102,6 +102,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultBaseStartOffset = 20.0f;
 	UPROPERTY(BlueprintReadOnly) FVector VaultLocation;
 	UPROPERTY(BlueprintReadOnly) FVector VaultMiddleLocation;
+	UPROPERTY(BlueprintReadOnly) float VaultLerpSpeed;
 #pragma endregion
 	
 	// Bools used to handle movement state transitions
@@ -207,7 +208,6 @@ private:
 
 	// Jump methods
 	UFUNCTION(BlueprintCallable) void JumpPressed();
-	UFUNCTION(BlueprintCallable) void JumpReleased();
 
 	// Crouch methods
 	UFUNCTION(BlueprintCallable) void CrouchPressed();

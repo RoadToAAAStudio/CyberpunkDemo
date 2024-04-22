@@ -11,6 +11,8 @@ ACustomPlayerCameraManager::ACustomPlayerCameraManager()
 {
 }
 
+
+// Used to fix the camera point of view smoothly when crouching/uncrouching
 void ACustomPlayerCameraManager::UpdateViewTarget(FTViewTarget& OutVT, float DeltaTime)
 {
 	Super::UpdateViewTarget(OutVT, DeltaTime);
@@ -41,9 +43,8 @@ void ACustomPlayerCameraManager::UpdateViewTarget(FTViewTarget& OutVT, float Del
 			OutVT.POV.Location += Offset;
 		}
 
-		// THIS BREAKS THE CURRENT AIM METHOD
+		// TO HANDLE THE ARMS OF THE PLAYER
 		const FVector ArmsOffset = MainCharacter->GetFirstPersonCameraComponent()->GetComponentTransform().InverseTransformPosition(OutVT.POV.Location);
 		MainCharacter->GetMesh1P()->SetRelativeLocation(FVector(-15.f, 0.f, -165.f) + ArmsOffset);
-		
 	}
 }

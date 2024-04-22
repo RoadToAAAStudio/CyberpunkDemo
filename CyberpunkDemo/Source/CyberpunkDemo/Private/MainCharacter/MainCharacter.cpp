@@ -67,9 +67,6 @@ void AMainCharacter::BeginPlay()
 	UncrouchedCapsuleHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 
 	QuickhackSystemComponent->Init(GetIgnoreCharacterParams());
-
-	// Gameplay Ability System
-	ShootSpec = AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(UGA_Shoot::StaticClass()));
 }
 
 TSet<TSubclassOf<UGameplayAbility>> AMainCharacter::GetPlayerHacks()
@@ -130,7 +127,6 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	{
 		// Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, CustomCharacterMovementComponent, &UCustomCharacterMovementComponent::JumpPressed);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, CustomCharacterMovementComponent, &UCustomCharacterMovementComponent::JumpReleased);
 
 		//Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMainCharacter::Move);
