@@ -6,6 +6,8 @@
 #include "UObject/Interface.h"
 #include "IStateTreeNotificationsAcceptor.generated.h"
 
+enum class EBasicEnemyState : uint8;
+
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UStateTreeNotificationsAcceptor : public UInterface
@@ -13,15 +15,11 @@ class UStateTreeNotificationsAcceptor : public UInterface
 	GENERATED_BODY()
 };
 
-/**
- * 
- */
 class CYBERPUNKDEMO_API IStateTreeNotificationsAcceptor
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "State Tree")
-	void AcceptStateTreeNotification(const FName& SourceStateName, const FName& CurrentStateName);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent) void GetChangeOfState(const FName& SourceStateName, const FName& CurrentStateName);
 };

@@ -3,12 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AI/Utility/IStateTreeNotificationsAcceptor.h"
 #include "AI/Utility/SplineContainer.h"
-#include "Components/StateTreeComponent.h"
 #include "GameFramework/Character.h"
 #include "BasicEnemy.generated.h"
 
+class UStateTree;
+class AAIZone;
+struct FBasicEnemyConfigData;
+struct FKnowledgeConfigData;
 class USettableStateTreeComponent;
 class ABasicEnemyController;
 
@@ -30,25 +32,6 @@ enum class EBasicEnemyBehaviour : uint8
 	Max UMETA(Hidden)
 };
 
-UENUM(BlueprintType)
-enum class EBasicEnemyState : uint8
-{
-	None,
-	Unaware,
-	Combat,
-	Alerted,
-	Max UMETA(Hidden)
-};
-
-USTRUCT(BlueprintType)
-struct FBasicEnemyStateMapping : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	EBasicEnemyState StateEnum = EBasicEnemyState::Unaware;
-};
-
 USTRUCT(BlueprintType)
 struct FBasicEnemySupportedBehaviourMapping : public FTableRowBase
 {
@@ -64,153 +47,132 @@ struct FBasicEnemySupportedBehaviourMapping : public FTableRowBase
 	bool IsInterruptible;
 };
 
-/*
-* Actuators expects to find their data here
-* */
-USTRUCT(BlueprintType)
-struct FBasicEnemyActuatorsData
-{
-	GENERATED_BODY()
-	
-};
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBasicEnemyStateChangedSignature, EBasicEnemyState, SourceState, EBasicEnemyState, NewState);
-
 UCLASS()
-class CYBERPUNKDEMO_API ABasicEnemy : public ACharacter, public IStateTreeNotificationsAcceptor
+class CYBERPUNKDEMO_API ABasicEnemy : public ACharacter
 {
 	GENERATED_BODY()
-	
-public:
-	
-#pragma region DELEGATES
-	UPROPERTY(BlueprintAssignable)
-	FOnBasicEnemyStateChangedSignature OnBasicEnemyStateChangedDelegate;
-#pragma endregion
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<ASplineContainer> PatrolSpline;
-	
-protected:
-
-#pragma region DECISIONMAKING
-	UPROPERTY(EditAnywhere, Category = "DecisionMaking")
-	float MinDistanceToShoot = 600.0f;
-
-	UPROPERTY(EditAnywhere, Category = "DecisionMaking")
-	float MaxDistanceToShoot = 1500.0f;
-
-	UPROPERTY(EditAnywhere, Category = "DecisionMaking")
-	float MaxDistanceToQuickMeleeAttack = 200.0f;
-	/*
-	* This reflects BasicEnemy State Tree current state
-	* Transitions:
-	*		Unaware:
-	*			To Combat: if the BasicEnemy sees the player or is Sensed by someone else
-	*		Combat:
-	*			To Alerted: if the combat timer expires
-	*		Alerted:
-	*			To Combat: if the BasicEnemy sees the player or is Sensed by someone else
-	*			To Unaware: if the alerted timer expires
-	*/
-	UPROPERTY(BlueprintReadOnly)
-	EBasicEnemyState CurrentState = EBasicEnemyState::Unaware;
-
-	/*
-	 * All possible behaviour for this enemy
-	 */
-	UPROPERTY()
-	TMap<EBasicEnemyBehaviour, UStateTree*> SupportedBehaviours;
-
-	UPROPERTY()
-	EBasicEnemyBehaviour ChosenBehaviour;
-	
-	UPROPERTY()
-	TObjectPtr<ABasicEnemyController> BasicEnemyController;
-#pragma endregion
-
-#pragma region ACTUATION
-	UPROPERTY(EditAnywhere, Category = "Actuation")
-	float WaitingTimeAtPatrolStart = 5.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Actuation")
-	float WaitingTimeAtPatrolEnd = 5.0f;
-#pragma endregion 
-	
-#pragma region PERSONAL_COMPONENTS	
-	UPROPERTY(EditAnywhere, Instanced, Category = "DecisionMaking")
-	TObjectPtr<UStateTreeComponent> StateMachine;
-	
-	UPROPERTY(EditAnywhere, Category = "DecisionMaking")
-	TObjectPtr<UDataTable> SupportedBehavioursDataTable;
-
-	UPROPERTY(VisibleAnywhere, Category = "Actuation")
-	TObjectPtr<USettableStateTreeComponent> CurrentBehaviour;
-
-#pragma endregion 
 
 public:
-	// Sets default values for this character's properties
-	ABasicEnemy();
-
-#pragma region DECISIONMAKING_GETTERS
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
-	ABasicEnemyController* GetBasicEnemyController() const;
+	UPROPERTY() ABasicEnemyController* BasicEnemyController;
+	UPROPERTY() AAIZone* AIZone;
 	
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | DecisionMaking | Behaviour")
-	EBasicEnemyState GetCurrentState() const;
-	
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | DecisionMaking | Behaviour")
-	TSet<EBasicEnemyBehaviour> GetSupportedBehaviours() const;
-	
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | DecisionMaking | Behaviour")
-	EBasicEnemyBehaviour GetCurrentChosenBehaviour() const;
-	
+#pragma region INPUT_DATA
+#pragma region DEFINE_ARCHETYPE
+	UPROPERTY(EditAnywhere)	TObjectPtr<UDataTable> ConfigData;
 #pragma endregion
 	
-	// StateTree notifications acceptor
-	void AcceptStateTreeNotification_Implementation(const FName& SourceStateName, const FName& CurrentStateName) override;
-	
-protected:
-	
-#pragma region BLUEPRINT_EVENTS
-	// Hook for Derived Blueprints when a StateTree's state change
-	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnStateChanged"))
-	void StateChanged(const EBasicEnemyState SourceState, const EBasicEnemyState NewState);
-#pragma endregion 
+	UPROPERTY(EditAnywhere)	TObjectPtr<ASplineContainer> PatrolSpline;
+#pragma endregion
 
 private:
-	void SelectBehaviour();
-	
-#pragma region FUNCTIONS_LISTENERS
-	// Function listeners
-	UFUNCTION()
-	void NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
-	
-	UFUNCTION()
-	void NotifyPlayerWasSeen(const ABasicEnemyController* NotifierController);
 
-	UFUNCTION()
-	void NotifyCombatTimerFinished();
-
-	UFUNCTION()
-	void NotifyAlertedTimerFinished();
-
-	UFUNCTION()
-	void NotifyGoalGenerated(const TSet<EBasicEnemyGoal> NewGoals, const TSet<EBasicEnemyGoal> RemovedGoals);
-	
-#pragma endregion 
-
-#pragma region FUNCTIONS_OVERRIDES
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-protected:
-	// Called when the game starts or when spawned
+public:
 	virtual void BeginPlay() override;
-#pragma endregion 
+
+private:
+	UFUNCTION()	void NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 };
+	
+// public:
+// 	UPROPERTY(EditAnywhere)
+// 	TObjectPtr<ASplineContainer> PatrolSpline;
+//
+// 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+// 	FBasicEnemyActuatorsData ActuatorsData;
+// 	
+// protected:
+//
+// #pragma region DECISIONMAKING
+// 	UPROPERTY(EditAnywhere, Category = "DecisionMaking")
+// 	float MinDistanceToShoot = 600.0f;
+//
+// 	UPROPERTY(EditAnywhere, Category = "DecisionMaking")
+// 	float MaxDistanceToShoot = 1500.0f;
+//
+// 	UPROPERTY(EditAnywhere, Category = "DecisionMaking")
+// 	float MaxDistanceToQuickMeleeAttack = 200.0f;
+//
+// 	/*
+// 	 * All possible behaviour for this enemy
+// 	 */
+// 	UPROPERTY()
+// 	TMap<EBasicEnemyBehaviour, UStateTree*> SupportedBehaviours;
+//
+// 	UPROPERTY()
+// 	EBasicEnemyBehaviour ChosenBehaviour;
+// 	
+// 	UPROPERTY()
+// 	TObjectPtr<ABasicEnemyController> BasicEnemyController;
+// #pragma endregion
+//
+// #pragma region ACTUATION
+// 	UPROPERTY(EditAnywhere, Category = "Actuation")
+// 	float WaitingTimeAtPatrolStart = 5.0f;
+//
+// 	UPROPERTY(EditAnywhere, Category = "Actuation")
+// 	float WaitingTimeAtPatrolEnd = 5.0f;
+// #pragma endregion 
+// 	
+// #pragma region PERSONAL_COMPONENTS	
+// 	UPROPERTY(EditAnywhere, Instanced, Category = "DecisionMaking")
+// 	TObjectPtr<UStateTreeComponent> StateMachine;
+// 	
+// 	UPROPERTY(EditAnywhere, Category = "DecisionMaking")
+// 	TObjectPtr<UDataTable> SupportedBehavioursDataTable;
+//
+// 	UPROPERTY(VisibleAnywhere, Category = "Actuation")
+// 	TObjectPtr<USettableStateTreeComponent> CurrentBehaviour;
+//
+// #pragma endregion 
+//
+// public:
+// 	// Sets default values for this character's properties
+// 	ABasicEnemy();
+//
+// #pragma region DECISIONMAKING_GETTERS
+// 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | Knowledge")
+// 	ABasicEnemyController* GetBasicEnemyController() const;
+// 	
+// 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | DecisionMaking | Behaviour")
+// 	TSet<EBasicEnemyBehaviour> GetSupportedBehaviours() const;
+// 	
+// 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Personal | DecisionMaking | Behaviour")
+// 	EBasicEnemyBehaviour GetCurrentChosenBehaviour() const;
+// 	
+// #pragma endregion
+// 	
+// private:
+// 	void SelectBehaviour();
+// 	
+// #pragma region FUNCTIONS_LISTENERS
+// 	// Function listeners
+// 	UFUNCTION()
+// 	void NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+// 	
+// 	UFUNCTION()
+// 	void NotifyPlayerWasSeen(const ABasicEnemyController* NotifierController);
+//
+// 	UFUNCTION()
+// 	void NotifyCombatTimerFinished();
+//
+// 	UFUNCTION()
+// 	void NotifyAlertedTimerFinished();
+//
+// 	// UFUNCTION()
+// 	// void NotifyGoalGenerated(const TSet<EBasicEnemyGoal> NewGoals, const TSet<EBasicEnemyGoal> RemovedGoals);
+// 	
+// #pragma endregion 
+//
+// #pragma region FUNCTIONS_OVERRIDES
+// public:	
+// 	// Called every frame
+// 	virtual void Tick(float DeltaTime) override;
+//
+// 	// Called to bind functionality to input
+// 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+//
+// protected:
+// 	// Called when the game starts or when spawned
+// 	virtual void BeginPlay() override;
+// #pragma endregion 
+//};

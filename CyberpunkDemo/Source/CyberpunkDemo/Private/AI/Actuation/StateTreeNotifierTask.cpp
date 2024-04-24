@@ -22,7 +22,7 @@ EStateTreeRunStatus FStateTreeNotifierTask::EnterState(FStateTreeExecutionContex
 		{
 			CurrentStateName = Context.GetStateTree()->GetStates()[Transition.CurrentState.Index].Name;
 		}
-		Cast<IStateTreeNotificationsAcceptor>(Actor)->Execute_AcceptStateTreeNotification(Actor, SourceStateName, CurrentStateName);
+		Cast<IStateTreeNotificationsAcceptor>(Actor)->Execute_GetChangeOfState(Actor, SourceStateName, CurrentStateName);
 	}
 	return EStateTreeRunStatus::Running;
 }
