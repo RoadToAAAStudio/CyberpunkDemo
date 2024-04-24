@@ -123,7 +123,7 @@ public:
 #pragma endregion
 	
 	// Getter for the Custom Character Movement Component
-	TObjectPtr<UCustomCharacterMovementComponent> GetCustomCharacterComponent();
+	UCustomCharacterMovementComponent* GetCustomCharacterMovementComponent();
 
 	// Method that returns all parameters that should be ignored by raycasts, spherecasts and so on
 	FCollisionQueryParams GetIgnoreCharacterParams() const;

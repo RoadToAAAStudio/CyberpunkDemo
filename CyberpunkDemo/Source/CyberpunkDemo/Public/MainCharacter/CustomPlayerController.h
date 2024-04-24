@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "MainCharacter/CustomCharacterMovementComponent.h"
 #include "CustomPlayerController.generated.h"
 
 class UInputMappingContext;
@@ -15,17 +16,29 @@ UCLASS()
 class CYBERPUNKDEMO_API ACustomPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
-protected:
 
+public:
+	UPROPERTY(EditDefaultsOnly) TSubclassOf<UCameraShakeBase> IdleCameraShake;
+	UPROPERTY(EditDefaultsOnly) TSubclassOf<UCameraShakeBase> WalkCameraShake;
+	UPROPERTY(EditDefaultsOnly) TSubclassOf<UCameraShakeBase> RunCameraShake;
+
+protected:
 	/** Input Mapping Context to be used for player input */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputMappingContext* InputMappingContext;
 
-	// Begin Actor interface
+	FTimerHandle timer;
+		
+public:
+
+	UFUNCTION()
+	void PlayCameraShake(ECustomMovementState State);
+
+	UFUNCTION()
+	void StopCameraShake(ECustomMovementState State);
+	
 protected:
-
+	// Begin Actor interface
 	virtual void BeginPlay() override;
-
 	// End Actor interface
 };

@@ -9,10 +9,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
-#include "Abilities/GameplayAbility_CharacterJump.h"
-#include "CyberpunkDemo/CyberpunkDemoCharacter.h"
 #include "Engine/LocalPlayer.h"
-#include "GameplayAbilitySystem/Abilities/GA_Shoot.h"
 #include "MainCharacter/CustomPlayerController.h"
 
 
@@ -21,7 +18,6 @@
 AMainCharacter::AMainCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCustomCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
-
 	CustomCharacterMovementComponent = Cast<UCustomCharacterMovementComponent>(GetCharacterMovement());
 
 	// Set size for a collision capsule [!]
@@ -80,8 +76,8 @@ TSet<TSubclassOf<UGameplayAbility>> AMainCharacter::GetPlayerHacks()
 	// 	}
 	// 	return PlayerHacks;
 	// }
-	PlayerHacks.Add(UGA_Shoot::StaticClass());
-	PlayerHacks.Add(UGameplayAbility_CharacterJump::StaticClass());
+	// PlayerHacks.Add(UGA_Shoot::StaticClass());
+	// PlayerHacks.Add(UGameplayAbility_CharacterJump::StaticClass());
 	return PlayerHacks;
 }
 
@@ -91,9 +87,15 @@ void AMainCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-TObjectPtr<UCustomCharacterMovementComponent> AMainCharacter::GetCustomCharacterComponent()
+UCustomCharacterMovementComponent* AMainCharacter::GetCustomCharacterMovementComponent()
 {
-	return CustomCharacterMovementComponent;
+	if (CustomCharacterMovementComponent)
+	{
+		return CustomCharacterMovementComponent;
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1,5, FColor::Red, "COMPONENT NOT VALID");
+	return nullptr;
 }
 
 UAbilitySystemComponent* AMainCharacter::GetAbilitySystemComponent() const

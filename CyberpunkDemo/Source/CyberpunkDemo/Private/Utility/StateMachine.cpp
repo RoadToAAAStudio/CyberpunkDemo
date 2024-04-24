@@ -10,6 +10,7 @@ UStateMachine::UStateMachine()
 void UStateMachine::Init(const TObjectPtr<UState> StartingState)
 {
 	CurrentState = StartingState;
+	StartingState->EnterState();
 }
 
 void UStateMachine::AddState(const TObjectPtr<UState> NewState)

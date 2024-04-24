@@ -168,7 +168,7 @@ void ABasicEnemyController::SensorsUpdate(float DeltaTime)
 		if (PersonalKnowledge.Tags.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.PlayerIsInCone"))))
 		{
 			AMainCharacter* Player = Cast<AMainCharacter>(PersonalKnowledge.PlayerInSightCone);
-			float CrouchMultiplier = Player->GetCustomCharacterComponent()->GetCurrentMovementState() == ECustomMovementState::Crouching? SightCrouchMultiplier : 1.0f;
+			float CrouchMultiplier = Player->GetCustomCharacterMovementComponent()->GetCurrentMovementState() == ECustomMovementState::Crouching? SightCrouchMultiplier : 1.0f;
 			float DistanceMultiplier = FMath::GetMappedRangeValueClamped(UE::Math::TVector2<float>(0.0f, 2500.0f), UE::Math::TVector2<float>(SightMaxMultiplier, SightMinMultiplier), FVector::Distance(GetPawn()->GetActorLocation(), PersonalKnowledge.PlayerInSightCone->GetActorLocation()));
 
 			SightBar->AddAmount(SightIncreaseRate * DistanceMultiplier * CrouchMultiplier * DeltaTime);

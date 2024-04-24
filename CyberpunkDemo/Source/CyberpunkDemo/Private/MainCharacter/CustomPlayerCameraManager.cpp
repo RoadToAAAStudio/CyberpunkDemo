@@ -19,7 +19,7 @@ void ACustomPlayerCameraManager::UpdateViewTarget(FTViewTarget& OutVT, float Del
 	
 	if (TObjectPtr<AMainCharacter> MainCharacter = Cast<AMainCharacter>(GetOwningPlayerController()->GetPawn()))
 	{
-		TObjectPtr<UCustomCharacterMovementComponent> CustomCharacterMovementComponent = MainCharacter->GetCustomCharacterComponent();
+		TObjectPtr<UCustomCharacterMovementComponent> CustomCharacterMovementComponent = MainCharacter->GetCustomCharacterMovementComponent();
 		
 		float CHH = CustomCharacterMovementComponent->Crouch_HalfHeight;
 		float SCHH = MainCharacter->GetClass()->GetDefaultObject<ACharacter>()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
