@@ -11,7 +11,6 @@ void UStateDash::EnterState()
 	Super::EnterState();
 	Owner->MaxWalkSpeed = Owner->DashSpeedMultiplier * Owner->Walk_MaxWalkSpeed;
 	Owner->GetWorld()->GetTimerManager().SetTimer(DashTimer, FTimerDelegate::CreateLambda([this] { Owner->bWantsToDash = false; }), Owner->DashDuration, false);
-	Cast<ACustomPlayerController>(Owner->MainCharacter->Controller)->DashCameraShake;
 }
 
 void UStateDash::Tick()

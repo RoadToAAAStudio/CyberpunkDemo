@@ -115,6 +115,24 @@ FCollisionQueryParams AMainCharacter::GetIgnoreCharacterParams() const
 	return Params;
 }
 
+void AMainCharacter::SwitchTransitionMappingContext(bool On)
+{
+	if (!Subsystem) return;
+	
+	if (On)
+	{
+		Subsystem->AddMappingContext(TransitionMappingContext, 0);
+		Subsystem->RemoveMappingContext(DefaultMappingContext);
+
+	}
+	else
+	{
+		Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		Subsystem->RemoveMappingContext(TransitionMappingContext);
+
+	}
+}
+
 float AMainCharacter::GetUncrouchedCapsuleHalfHeight()
 {
 	return UncrouchedCapsuleHalfHeight;

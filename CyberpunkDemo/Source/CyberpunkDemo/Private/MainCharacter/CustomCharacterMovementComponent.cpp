@@ -17,12 +17,12 @@
 #include "Utility/States/StateMantle.h"
 
 // Shortcut macros
-#if 0
-float MacroDuration = 5.0f;
-#define PRINT_SCREEN(x) GEngine->AddOnScreenDebugMessage(-1, MacroDuration ? MacroDuration : -1.f, FColor::Yellow, x);
-#define DRAW_POINT(x, c) DrawDebugPoint(GetWorld(), x, 10, c, !MacroDuration, MacroDuration);
-#define DRAW_LINE(x1, x2, c) DrawDebugLine(GetWorld(), x1, x2, c, !MacroDuration, MacroDuration);
-#define DRAW_CAPSULE(x, c) DrawDebugCapsule(GetWorld(), x, GetCapsuleHalfHeight(), GetCapsuleRadius(), FQuat::Identity, c, !MacroDuration, MacroDuration);
+#if 1
+float Duration = 5.0f;
+#define PRINT_SCREEN(x) GEngine->AddOnScreenDebugMessage(-1, Duration ? Duration : -1.f, FColor::Yellow, x);
+#define DRAW_POINT(x, c) DrawDebugPoint(GetWorld(), x, 10, c, !Duration, Duration);
+#define DRAW_LINE(x1, x2, c) DrawDebugLine(GetWorld(), x1, x2, c, !Duration, Duration);
+#define DRAW_CAPSULE(x, c) DrawDebugCapsule(GetWorld(), x, GetCapsuleHalfHeight(), GetCapsuleRadius(), FQuat::Identity, c, !Duration, Duration);
 #else
 #define PRINT_SCREEN(x)
 #define DRAW_POINT(x, c)
@@ -331,7 +331,7 @@ bool UCustomCharacterMovementComponent::CanWalkFromIdle() const
 
 bool UCustomCharacterMovementComponent::CanRunFromIdle() const
 {
-	return bWantsToRun;
+	return bWantsToRun && !Velocity.IsZero();
 }
 
 bool UCustomCharacterMovementComponent::CanCrouchFromIdle() const
@@ -576,8 +576,6 @@ bool UCustomCharacterMovementComponent::TryMantle()
 	//
 	float CosMantleMaxAlignmentAngle = FMath::Cos(FMath::DegreesToRadians(MantleMaxAlignmentAngle));
 
-	PRINT_SCREEN("Starting mantle attempt")
-
 	// CHECK OBSTACLE FRONT FACE
 	
 	FHitResult FrontHit;
@@ -778,18 +776,20 @@ bool UCustomCharacterMovementComponent::TryVault()
 	// If on the other side of the object the ground is at a similar height than the starting point
 	FHitResult GroundHit;
 	TArray<AActor*> ActorsToIgnore;
+	VaultMiddleLocation = ClearanceCapsuleLocation - Forward * GetCapsuleRadius();
+
 	if (UKismetSystemLibrary::CapsuleTraceSingleByProfile(GetWorld(), CapsuleFinalLocationOffset, CapsuleFinalLocationOffset + FVector::DownVector * (GetCapsuleHalfHeight() / 2  + 15), GetCapsuleRadius(), GetCapsuleHalfHeight(), "BlockAll", false, ActorsToIgnore, EDrawDebugTrace::None ,GroundHit, true))
 	{
 		bFallingVault = false;
-		VaultMiddleLocation = ClearanceCapsuleLocation - Forward * GetCapsuleRadius();
 		DRAW_CAPSULE(VaultMiddleLocation, FColor::Purple)
 		VaultLocation = GroundHit.Location;
 	}
 	else
 	{
-		if (LastMovementState == ECustomMovementState::Walking || LastMovementState == ECustomMovementState::Running) return false;
+		if (Velocity.IsZero()) return false;
 		bFallingVault = true;
 		VaultLocation = CapsuleFinalLocationOffset;
+		DRAW_CAPSULE(VaultLocation, FColor::Blue)
 	}
 	
 	bCanVault = true;

@@ -22,6 +22,7 @@ public:
 	UPROPERTY(EditDefaultsOnly) TSubclassOf<UCameraShakeBase> WalkCameraShake;
 	UPROPERTY(EditDefaultsOnly) TSubclassOf<UCameraShakeBase> RunCameraShake;
 	UPROPERTY(EditDefaultsOnly) TSubclassOf<UCameraShakeBase> DashCameraShake;
+	UPROPERTY(EditDefaultsOnly) TSubclassOf<UCameraShakeBase> CrouchCameraShake;
 
 protected:
 	/** Input Mapping Context to be used for player input */

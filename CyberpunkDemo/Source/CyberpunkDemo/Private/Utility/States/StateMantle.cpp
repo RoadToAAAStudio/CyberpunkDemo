@@ -9,17 +9,19 @@ void UStateMantle::EnterState()
 	Super::EnterState();
 	// Reset the jump boolean
 	Owner->bWantsToJump = false;
-	Owner->bWantsToRun = false;
+	//Owner->bWantsToRun = false;
 	// Set the player velocity to 0
 	Owner->Velocity = FVector(0,0,0);
-	Owner->MainCharacter->DisableInput(Cast<APlayerController>(Owner->MainCharacter->GetController()));
+	//Owner->MainCharacter->DisableInput(Cast<APlayerController>(Owner->MainCharacter->GetController()));
+	Owner->MainCharacter->SwitchTransitionMappingContext(true);
 	Owner->MainCharacter->Mantle();
 }
 
 void UStateMantle::ExitState()
 {
 	Super::ExitState();
-	Owner->MainCharacter->EnableInput(Cast<APlayerController>(Owner->MainCharacter->GetController()));
+	Owner->MainCharacter->SwitchTransitionMappingContext(false);
+	//Owner->MainCharacter->EnableInput(Cast<APlayerController>(Owner->MainCharacter->GetController()));
 }
 
 void UStateMantle::Tick()

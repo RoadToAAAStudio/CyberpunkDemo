@@ -47,6 +47,10 @@ void ACustomPlayerController::PlayCameraShake(ECustomMovementState State)
 	case ECustomMovementState::Dashing:
 		ClientStartCameraShake(DashCameraShake);
 		break;
+
+	case ECustomMovementState::Crouching:
+		ClientStartCameraShake(CrouchCameraShake);
+		break;
 		
 	}
 }
@@ -69,6 +73,10 @@ void ACustomPlayerController::StopCameraShake(ECustomMovementState State)
 
 	case ECustomMovementState::Dashing:
 		ClientStopCameraShake(DashCameraShake);
+		break;
+
+	case ECustomMovementState::Crouching:
+		ClientStopCameraShake(CrouchCameraShake);
 		break;
 		
 	}

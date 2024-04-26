@@ -61,43 +61,46 @@ private:
 
 	UPROPERTY()
 	UEnhancedInputLocalPlayerSubsystem* Subsystem;
-	
+
 	// Input Actions
-	#pragma region INPUT_ACTIONS
-    	/** MappingContext [!] */
-    	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-    	UInputMappingContext* DefaultMappingContext;
+#pragma region INPUT_ACTIONS
+    /** MappingContext [!] */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+    UInputMappingContext* DefaultMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UInputMappingContext* TransitionMappingContext;
     
-    	/** Jump Input Action [!] */
-    	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-    	UInputAction* JumpAction;
+    /** Jump Input Action [!] */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+    UInputAction* JumpAction;
     
-    	/** Move Input Action [!] */
-    	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-    	UInputAction* MoveAction;
+    /** Move Input Action [!] */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+    UInputAction* MoveAction;
 
-		/** Look Input Action [!] */
-		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	    UInputAction* LookAction;
+	/** Look Input Action [!] */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	   UInputAction* LookAction;
 
-		// Sprint action
-		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true") )
-		UInputAction* SprintAction;
+	// Sprint action
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true") )
+	UInputAction* SprintAction;
 
-		// Crouch action
-		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-		UInputAction* CrouchAction;
+	// Crouch action
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* CrouchAction;
 
-		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta =(AllowPrivateAccess = "true"))
-		UInputAction* DashAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta =(AllowPrivateAccess = "true"))
+	UInputAction* DashAction;
 
-		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta =(AllowPrivateAccess = "true"))
-		UInputAction* ShootAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta =(AllowPrivateAccess = "true"))
+	UInputAction* ShootAction;
 
-		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta =(AllowPrivateAccess = "true"))
-		UInputAction* AnalysisAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta =(AllowPrivateAccess = "true"))
+	UInputAction* AnalysisAction;
 	
-	#pragma endregion 
+#pragma endregion 
 
 	float UncrouchedCapsuleHalfHeight;
 	
@@ -127,6 +130,8 @@ public:
 
 	// Method that returns all parameters that should be ignored by raycasts, spherecasts and so on
 	FCollisionQueryParams GetIgnoreCharacterParams() const;
+
+	UFUNCTION() void SwitchTransitionMappingContext(bool On);
 
 	UFUNCTION(BlueprintCallable) float GetUncrouchedCapsuleHalfHeight();
 

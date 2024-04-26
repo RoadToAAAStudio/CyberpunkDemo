@@ -7,8 +7,9 @@
 void UStateVault::EnterState()
 {
 	Super::EnterState();
-	Owner->MainCharacter->DisableInput(Cast<APlayerController>(Owner->MainCharacter->GetController()));
+	//Owner->MainCharacter->DisableInput(Cast<APlayerController>(Owner->MainCharacter->GetController()));
 	Owner->bWantsToJump = false;
+	Owner->MainCharacter->SwitchTransitionMappingContext(true);
 	if (Owner->GetLastMovementState() == ECustomMovementState::Running)
 	{
 		Owner->VaultLerpSpeed = 2.0f;
@@ -23,7 +24,8 @@ void UStateVault::EnterState()
 void UStateVault::ExitState()
 {
 	Super::ExitState();
-	Owner->MainCharacter->EnableInput(Cast<APlayerController>(Owner->MainCharacter->GetController()));
+	Owner->MainCharacter->SwitchTransitionMappingContext(false);
+	//Owner->MainCharacter->EnableInput(Cast<APlayerController>(Owner->MainCharacter->GetController()));
 }
 
 void UStateVault::Tick()
