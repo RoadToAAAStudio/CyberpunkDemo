@@ -65,6 +65,9 @@ public:
 	UPROPERTY(BlueprintAssignable)	FOnSoundForgottenSignature			OnSoundForgottenDelegate;
 #pragma endregion
 
+	UPROPERTY(BlueprintReadOnly)	TObjectPtr<UAttributeBar> SightBar;
+	UPROPERTY(BlueprintReadOnly)	TObjectPtr<UAttributeBar> HearingBar;
+	
 private:
 #pragma region INJECTED_DEPENDENCIES
 	UPROPERTY()	UBasicEnemyPerceptionComponent* PerceptionComponent = nullptr;
@@ -72,8 +75,6 @@ private:
 	const FBasicEnemySharedKnowledge* SharedKnowledge; 
 #pragma endregion
 	
-	UPROPERTY()	TObjectPtr<UAttributeBar> SightBar;
-	UPROPERTY()	TObjectPtr<UAttributeBar> HearingBar;
 
 	FBasicEnemyPersonalKnowledge PersonalKnowledge;
 

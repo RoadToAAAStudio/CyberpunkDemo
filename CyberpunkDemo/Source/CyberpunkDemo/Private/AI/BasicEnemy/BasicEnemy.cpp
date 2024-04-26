@@ -323,7 +323,10 @@ void ABasicEnemy::BeginPlay()
 	Super::BeginPlay();
 
 	BasicEnemyController = Cast<ABasicEnemyController>(GetController());
-	BasicEnemyController->Initialize(this);
+	if (BasicEnemyController)
+	{
+		BasicEnemyController->Initialize(this);
+	}
 	
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABasicEnemy::NotifySomethingEnteredInTheTrigger);
 }

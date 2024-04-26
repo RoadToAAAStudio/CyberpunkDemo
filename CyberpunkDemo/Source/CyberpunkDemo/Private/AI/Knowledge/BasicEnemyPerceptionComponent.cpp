@@ -26,11 +26,13 @@ void UBasicEnemyPerceptionComponent::SetUpFromData(const UDataTable* KnowledgeCo
 			SightConfig->PeripheralVisionAngleDegrees	= ConfigData->SightPeripheralVisionAngleDegrees;
 			SightConfig->NearClippingRadius				= ConfigData->SightNearClippingRadius;	
 			SightConfig->PointOfViewBackwardOffset		= ConfigData->SightPointOfViewBackwardOffset;
+			ConfigureSense(*SightConfig);
 		}
 		else if (SenseConfig->GetClass() == UAISenseConfig_Hearing::StaticClass())
 		{
 			UAISenseConfig_Hearing* HearingConfig = Cast<UAISenseConfig_Hearing>(SenseConfig);
 			HearingConfig->HearingRange					= ConfigData->HearingRange;
+			ConfigureSense(*HearingConfig);
 		}
 	}
 }

@@ -49,7 +49,7 @@ struct FSettableInt
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(BlueprintReadOnly) int Data = INT32_MAX;
+	UPROPERTY(BlueprintReadOnly) int Data = 0;
 	UPROPERTY(BlueprintReadOnly) bool bIsSet = false;
 	
 public:

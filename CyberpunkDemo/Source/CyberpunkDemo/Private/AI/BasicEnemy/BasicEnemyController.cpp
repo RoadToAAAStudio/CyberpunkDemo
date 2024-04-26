@@ -416,27 +416,37 @@
 ABasicEnemyController::ABasicEnemyController(const FObjectInitializer& ObjectInitializer)
 {
 	// Construct Perception Component
-	PerceptionComponent = CreateDefaultSubobject<UBasicEnemyPerceptionComponent>(TEXT("PerceptionComponent"));
-	SetPerceptionComponent(*PerceptionComponent);
-
-	UAISenseConfig_Sight* SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
-	if (SightConfig)
 	{
-		AAIController::GetPerceptionComponent()->SetDominantSense(SightConfig->GetSenseImplementation());
-		AAIController::GetPerceptionComponent()->ConfigureSense(*SightConfig);
-	}
+		PerceptionComponent = CreateDefaultSubobject<UBasicEnemyPerceptionComponent>(TEXT("PerceptionComponent"));
+		SetPerceptionComponent(*PerceptionComponent);
 
-	UAISenseConfig_Hearing* HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("HearingConfig"));
-	if (HearingConfig)
-	{
-		AAIController::GetPerceptionComponent()->ConfigureSense(*HearingConfig);
+		UAISenseConfig_Sight* SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
+		if (SightConfig)
+		{
+			SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+			SightConfig->DetectionByAffiliation.bDetectEnemies = true;
+			AAIController::GetPerceptionComponent()->SetDominantSense(SightConfig->GetSenseImplementation());
+			AAIController::GetPerceptionComponent()->ConfigureSense(*SightConfig);
+		}
+
+		UAISenseConfig_Hearing* HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("HearingConfig"));
+		if (HearingConfig)
+		{
+			SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+			SightConfig->DetectionByAffiliation.bDetectEnemies = true;
+			AAIController::GetPerceptionComponent()->ConfigureSense(*HearingConfig);
+		}
 	}
 
 	// Construct Knowledge Component
-	KnowledgeComponent = CreateDefaultSubobject<UBasicEnemyKnowledgeComponent>(TEXT("KnowledgeComponent"));
-
+	{
+		KnowledgeComponent = CreateDefaultSubobject<UBasicEnemyKnowledgeComponent>(TEXT("KnowledgeComponent"));
+	}
+	
 	// Construct State Machine Component
-	StateMachine = CreateDefaultSubobject<UStateTree>(TEXT("StateMachine"));
+	{
+		StateMachine = CreateDefaultSubobject<UStateTree>(TEXT("StateMachine"));
+	}
 }
 
 void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
@@ -477,6 +487,11 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 	KnowledgeComponent->Initialize(Cast<UBasicEnemyPerceptionComponent>(PerceptionComponent), this, &BasicEnemy->AIZone->GetSharedKnowledge());
 }
 
+#if 1
+float MacroDuration = 5.0f;
+#define PRINT_SCREEN(x) GEngine->AddOnScreenDebugMessage(-1, MacroDuration ? MacroDuration : -1.f, FColor::Yellow, x);
+#endif
+
 void ABasicEnemyController::GetChangeOfState_Implementation(const FName& SourceStateName, const FName& NextStateName)
 {
 	const UEnum* GoalEnum = FindFirstObjectSafe<UEnum>(TEXT("EBasicEnemyState"));
@@ -484,9 +499,13 @@ void ABasicEnemyController::GetChangeOfState_Implementation(const FName& SourceS
 
 	int32 Index = GoalEnum->GetIndexByName(SourceStateName);
 	EBasicEnemyState SourceState = Index != INDEX_NONE? static_cast<EBasicEnemyState>(Index) : EBasicEnemyState::None;
+
+	PRINT_SCREEN(NextStateName.ToString());
 	
 	Index = GoalEnum->GetIndexByName(NextStateName);
 	EBasicEnemyState NextState = Index != INDEX_NONE? static_cast<EBasicEnemyState>(Index) : EBasicEnemyState::None;
+
+	
 	
 	StateChanged(SourceState, NextState);
 	OnBasicEnemyStateChangedDelegate.Broadcast(SourceState, NextState);

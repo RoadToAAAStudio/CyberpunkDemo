@@ -58,10 +58,10 @@ public:
 	
 #pragma region INPUT_DATA
 #pragma region DEFINE_ARCHETYPE
-	UPROPERTY(EditAnywhere)	TObjectPtr<UDataTable> ConfigData;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)	TObjectPtr<UDataTable> ConfigData;
 #pragma endregion
 	
-	UPROPERTY(EditAnywhere)	TObjectPtr<ASplineContainer> PatrolSpline;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)	TObjectPtr<ASplineContainer> PatrolSpline;
 #pragma endregion
 
 private:

@@ -39,7 +39,7 @@ public:
 #pragma region AI_COMPONENTS
 	UPROPERTY(BlueprintReadOnly) TObjectPtr<UBasicEnemyPerceptionComponent> SenseComponent;
 	UPROPERTY(BlueprintReadOnly) TObjectPtr<UBasicEnemyKnowledgeComponent> KnowledgeComponent;
-	UPROPERTY(BlueprintReadOnly) TObjectPtr<UStateTree> StateMachine;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) TObjectPtr<UStateTree> StateMachine;
 #pragma endregion
 private:
 #pragma region INJECTED_DEPENDENCIES

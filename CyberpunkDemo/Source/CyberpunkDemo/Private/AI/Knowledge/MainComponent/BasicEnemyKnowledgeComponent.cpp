@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AI/Knowledge/MainComponent/BasicEnemyKnowledgeComponent.h"
+#include "AI/BasicEnemy/BasicEnemy.h"
 #include "AI/BasicEnemy/BasicEnemyConfigData.h"
 #include "AI/BasicEnemy/BasicEnemyController.h"
 #include "AI/Knowledge/AttributeBar.h"
@@ -38,7 +39,7 @@ void UBasicEnemyKnowledgeComponent::TickComponent(float DeltaTime, ELevelTick Ti
 	
 				// Figure out Crouch Multiplier
 				float CrouchMultiplier = 1.0f;
-				if (Player->GetCustomCharacterComponent()->GetCurrentMovementState() == ECustomMovementState::Crouching)
+				if (Player->GetCustomCharacterMovementComponent()->GetCurrentMovementState() == ECustomMovementState::Crouching)
 				{
 					CrouchMultiplier = SightCrouchMultiplier;
 				}
@@ -54,17 +55,13 @@ void UBasicEnemyKnowledgeComponent::TickComponent(float DeltaTime, ELevelTick Ti
 			}
 			else
 			{
-				if (!SightBar) return;
 				SightBar->Remove(SightBaseDecreaseRate * DeltaTime);
 			}
 		}
 	
 		if (IsHearingEnabled())
 		{
-			if (HearingBar->GetValue() > 0)
-			{
-				HearingBar->Remove(HearingBaseDecreaseRate * DeltaTime);
-			}
+			HearingBar->Remove(HearingBaseDecreaseRate * DeltaTime);
 		}
 	}
 	
@@ -74,9 +71,10 @@ void UBasicEnemyKnowledgeComponent::TickComponent(float DeltaTime, ELevelTick Ti
 		if (Agent)
 		{
 			PersonalKnowledge.AgentLocation = Agent->GetActorLocation();
+			PersonalKnowledge.AgentDistanceFromSpawn = FVector::Distance(PersonalKnowledge.AgentSpawnLocation.Get(), PersonalKnowledge.Agent.Get()->GetActorLocation());
 		}
 	
-		APawn* Player = (SharedKnowledge->Player.Get());
+		AMainCharacter* Player = (PersonalKnowledge.PlayerInSightCone.Get());
 		if (Player)
 		{
 			PersonalKnowledge.DistanceFromPlayer = FVector::Distance(PersonalKnowledge.AgentLocation.Get(), Player->GetActorLocation());
@@ -113,6 +111,10 @@ void UBasicEnemyKnowledgeComponent::Initialize(	UBasicEnemyPerceptionComponent* 
 	// Initialize Knowledge
 	{
 		PersonalKnowledge.Agent = Cast<AController>(GetOwner())->GetPawn();
+		PersonalKnowledge.AgentSpawnLocation = PersonalKnowledge.Agent.Get()->GetActorLocation();
+
+		ASplineContainer* SplineContainer = Cast<ABasicEnemy>(Cast<AController>(GetOwner())->GetPawn())->PatrolSpline;
+		PersonalKnowledge.PatrolSpline = SplineContainer? Cast<USplineComponent>(SplineContainer->GetComponentByClass(USplineComponent::StaticClass())) : nullptr;
 	}
 
 	// Initialize Generators

@@ -15,6 +15,6 @@ class CYBERPUNKDEMO_API UBasicEnemyPerceptionComponent : public UAIPerceptionCom
 public:
 	void SetUpFromData(const UDataTable* ConfigData);
 	
-	UFUNCTION(BlueprintCallable)    TArray<UAISenseConfig*>&	GetSenses();
-	UFUNCTION(BlueprintCallable)	UAISenseConfig*				GetSense(TSubclassOf<UAISenseConfig> Type);
+	UFUNCTION(BlueprintCallable, BlueprintPure)		TArray<UAISenseConfig*>&	GetSenses();
+	UFUNCTION(BlueprintCallable, BlueprintPure)		UAISenseConfig*				GetSense(TSubclassOf<UAISenseConfig> Type);
 };
