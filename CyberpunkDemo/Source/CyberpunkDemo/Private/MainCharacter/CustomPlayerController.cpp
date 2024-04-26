@@ -2,6 +2,7 @@
 
 
 #include "MainCharacter/CustomPlayerController.h"
+
 #include "EnhancedInputSubsystems.h"
 #include "Kismet/GameplayStatics.h"
 #include "MainCharacter/MainCharacter.h"
@@ -42,6 +43,11 @@ void ACustomPlayerController::PlayCameraShake(ECustomMovementState State)
 	case ECustomMovementState::Running:
 		ClientStartCameraShake(RunCameraShake);
 		break;
+
+	case ECustomMovementState::Dashing:
+		ClientStartCameraShake(DashCameraShake);
+		break;
+		
 	}
 }
 
@@ -60,6 +66,11 @@ void ACustomPlayerController::StopCameraShake(ECustomMovementState State)
 	case ECustomMovementState::Running:
 		ClientStopCameraShake(RunCameraShake);
 		break;
+
+	case ECustomMovementState::Dashing:
+		ClientStopCameraShake(DashCameraShake);
+		break;
+		
 	}
 }
 

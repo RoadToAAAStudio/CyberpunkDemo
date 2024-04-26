@@ -21,6 +21,7 @@ enum class ECustomMovementState : uint8
 	Jumping,
 	Mantling,
 	Vaulting,
+	Dashing,
 	Max UMETA(Hidden)
 };
 
@@ -70,7 +71,6 @@ public:
 	// DASH PROPERTIES
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Dash") float DashDuration = 0.25f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement|Dash") float DashSpeedMultiplier = 10.0f;
-	FTimerHandle DashTimer;
 	
 	// MANTLE PROPERTIES
 	// Max distance to check for a possible mantle
@@ -109,6 +109,7 @@ public:
 	UPROPERTY(BlueprintReadOnly) bool bWantsToRun = false;
 	UPROPERTY(BlueprintReadOnly) bool bWantsToCrouchCustom = false;
 	UPROPERTY(BlueprintReadOnly) bool bWantsToJump = false;
+	UPROPERTY(BlueprintReadOnly) bool bWantsToDash = false;
 	UPROPERTY(BlueprintReadWrite) bool bCanMantle = false;
 	UPROPERTY(BlueprintReadWrite) bool bCanVault = false;
 
@@ -191,9 +192,13 @@ private:
 	bool CanWalkFromVault() const;
 	bool CanRunFromVault() const;
 
+	// From DASH state
+	bool CanIdleFromDash() const;
+
 	// From ANY
 	bool CanMantleFromAny() const;
 	bool CanVaultFromAny() const;
+	bool CanDashFromAny() const;
 
 	bool TryMantle();
 	bool TryVault();
@@ -214,6 +219,5 @@ private:
 
 	// Dash methods
 	UFUNCTION(BlueprintCallable) void DashPressed();
-	UFUNCTION() void ResetDashSpeed();
 #pragma endregion 
 };

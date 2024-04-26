@@ -9,6 +9,7 @@
 #include "Utility/States/StateIdle.h"
 #include "Utility/Transition.h"
 #include "Utility/States/StateCrouching.h"
+#include "Utility/States/StateDash.h"
 #include "Utility/States/StateJumping.h"
 #include "Utility/States/StateRunning.h"
 #include "Utility/States/StateVault.h"
@@ -87,6 +88,10 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	TObjectPtr<UStateVault> StateVault = NewObject<UStateVault>();
 	StateMachine->AddState(StateVault);
 	StateVault->Initialize(this, ECustomMovementState::Vaulting);
+
+	TObjectPtr<UStateDash> StateDash = NewObject<UStateDash>();
+	StateMachine->AddState(StateDash);
+	StateDash->Initialize(this, ECustomMovementState::Dashing);
 
 	StateMachine->Init(StateIdle);
 
@@ -167,6 +172,12 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	WalkingToVault->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanVaultFromAny);
 	WalkingToVault->Init(StateVault);
 
+	// Walking TO Dash
+	TObjectPtr<UTransition> WalkingToDash = NewObject<UTransition>();
+	StateWalking->Transitions.Add(WalkingToDash);
+	WalkingToDash->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanDashFromAny);
+	WalkingToDash->Init(StateDash);
+
 	// RUNNING
 	// Running TO Idle
 	TObjectPtr<UTransition> RunningToIdle = NewObject<UTransition>();
@@ -197,6 +208,12 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	StateRunning->Transitions.Add(RunningToVault);
 	RunningToVault->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanVaultFromAny);
 	RunningToVault->Init(StateVault);
+
+	// Running TO Dash
+	TObjectPtr<UTransition> RunningToDash = NewObject<UTransition>();
+	StateRunning->Transitions.Add(RunningToDash);
+	RunningToDash->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanDashFromAny);
+	RunningToDash->Init(StateDash);
 
 	// JUMP
 	// Jump TO Idle
@@ -285,6 +302,13 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	StateVault->Transitions.Add(VaultToRunning);
 	VaultToRunning->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanRunFromVault);
 	VaultToRunning->Init(StateRunning);
+
+	// DASH
+	// Dash TO Idle
+	TObjectPtr<UTransition> DashToIdle = NewObject<UTransition>();
+	StateDash->Transitions.Add(DashToIdle);
+	DashToIdle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanIdleFromDash);
+	DashToIdle->Init(StateIdle);
 }
 
 void UCustomCharacterMovementComponent::SetCurrentMovementState(ECustomMovementState NewState)
@@ -426,6 +450,13 @@ bool UCustomCharacterMovementComponent::CanRunFromVault() const
 	return !bCanVault && LastMovementState == ECustomMovementState::Running;
 }
 
+// FROM DASH
+bool UCustomCharacterMovementComponent::CanIdleFromDash() const
+{
+	return !bWantsToDash;
+}
+
+// FROM ANY
 bool UCustomCharacterMovementComponent::CanMantleFromAny() const
 {
 	return bCanMantle && !bCanVault;
@@ -435,6 +466,12 @@ bool UCustomCharacterMovementComponent::CanVaultFromAny() const
 {
 	return bCanVault && !bCanMantle;
 }
+
+bool UCustomCharacterMovementComponent::CanDashFromAny() const
+{
+	return bWantsToDash;
+}
+
 
 // Used to check if there is enough space over the player when trying to exit from the CROUCH state
 bool UCustomCharacterMovementComponent::CanUncrouch()
@@ -508,21 +545,7 @@ void UCustomCharacterMovementComponent::CrouchPressed()
 void UCustomCharacterMovementComponent::DashPressed()
 {
 	if (CurrentMovementState == ECustomMovementState::Crouching || CurrentMovementState == ECustomMovementState::Jumping) return;
-	MaxWalkSpeed *= DashSpeedMultiplier;
-	GetWorld()->GetTimerManager().SetTimer(DashTimer, this, &UCustomCharacterMovementComponent::ResetDashSpeed, DashDuration, false);
-}
-
-void UCustomCharacterMovementComponent::ResetDashSpeed()
-{
-	switch (CurrentMovementState)
-	{
-	case ECustomMovementState::Walking:
-		MaxWalkSpeed = Walk_MaxWalkSpeed;
-		break;
-	case ECustomMovementState::Running:
-		MaxWalkSpeed = Sprint_MaxWalkSpeed;
-		break;
-	}
+	bWantsToDash = !bWantsToDash;
 }
 
 #pragma endregion

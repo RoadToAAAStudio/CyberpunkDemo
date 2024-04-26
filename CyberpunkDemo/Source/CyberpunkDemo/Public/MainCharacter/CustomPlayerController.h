@@ -21,6 +21,7 @@ public:
 	UPROPERTY(EditDefaultsOnly) TSubclassOf<UCameraShakeBase> IdleCameraShake;
 	UPROPERTY(EditDefaultsOnly) TSubclassOf<UCameraShakeBase> WalkCameraShake;
 	UPROPERTY(EditDefaultsOnly) TSubclassOf<UCameraShakeBase> RunCameraShake;
+	UPROPERTY(EditDefaultsOnly) TSubclassOf<UCameraShakeBase> DashCameraShake;
 
 protected:
 	/** Input Mapping Context to be used for player input */
@@ -28,17 +29,14 @@ protected:
 	UInputMappingContext* InputMappingContext;
 
 	FTimerHandle timer;
-		
-public:
+	
+	// Begin Actor interface
+	virtual void BeginPlay() override;
+	// End Actor interface
 
 	UFUNCTION()
 	void PlayCameraShake(ECustomMovementState State);
 
 	UFUNCTION()
 	void StopCameraShake(ECustomMovementState State);
-	
-protected:
-	// Begin Actor interface
-	virtual void BeginPlay() override;
-	// End Actor interface
 };
