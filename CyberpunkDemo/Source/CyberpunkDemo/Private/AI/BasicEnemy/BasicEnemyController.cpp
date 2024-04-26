@@ -445,7 +445,7 @@ ABasicEnemyController::ABasicEnemyController(const FObjectInitializer& ObjectIni
 	
 	// Construct State Machine Component
 	{
-		StateMachine = CreateDefaultSubobject<UStateTree>(TEXT("StateMachine"));
+		StateMachine = CreateDefaultSubobject<UStateTreeComponent>(TEXT("StateMachine"));
 	}
 }
 
@@ -475,16 +475,21 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 					KnowledgeComponent->SetUpFromData(ConfigData->KnowledgeConfigData);
 				}
 
+				if (StateMachine)
+				{
+					StateMachine->StartLogic();
+				}
+				
 				// TODO SetUp Other Systems
 				
 				break;
 			}
 		}
-		
 	}
 	
 	// Initialization of Knowledge Component
 	KnowledgeComponent->Initialize(Cast<UBasicEnemyPerceptionComponent>(PerceptionComponent), this, &BasicEnemy->AIZone->GetSharedKnowledge());
+	KnowledgeComponent->OnPlayerSeenDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyPlayerWasSeen);
 }
 
 #if 1
@@ -500,13 +505,31 @@ void ABasicEnemyController::GetChangeOfState_Implementation(const FName& SourceS
 	int32 Index = GoalEnum->GetIndexByName(SourceStateName);
 	EBasicEnemyState SourceState = Index != INDEX_NONE? static_cast<EBasicEnemyState>(Index) : EBasicEnemyState::None;
 
-	PRINT_SCREEN(NextStateName.ToString());
-	
 	Index = GoalEnum->GetIndexByName(NextStateName);
 	EBasicEnemyState NextState = Index != INDEX_NONE? static_cast<EBasicEnemyState>(Index) : EBasicEnemyState::None;
-
-	
 	
 	StateChanged(SourceState, NextState);
 	OnBasicEnemyStateChangedDelegate.Broadcast(SourceState, NextState);
 }
+
+#pragma region EVENT_LISTENERS
+void ABasicEnemyController::NotifyPlayerWasSeen(const APawn* Notifier)
+{
+	/*
+	 * This listener is called when this actor sees the player or someone else did (via AIZone shared knowledge)
+	 * This means that it will be called twice on the actor who actually saw the Player
+	 * So the message to the StateTree should be called only once
+	 */
+	StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.PlayerWasSeen")));
+}
+
+void ABasicEnemyController::NotifyCombatTimerFinished()
+{
+	StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.CombatTimerFinished")));
+}
+
+void ABasicEnemyController::NotifyAlertedTimerFinished()
+{
+	StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.AlertedTimerFinished")));
+}
+#pragma endregion 

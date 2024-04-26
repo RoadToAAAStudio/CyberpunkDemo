@@ -116,8 +116,8 @@ public:
 
 private:
 #pragma region PERSONAL_COMPONENTS
-	UPROPERTY() TObjectPtr<UBoxComponent>		BoxTrigger;
-	UPROPERTY() TObjectPtr<UStateTreeComponent>	StateMachine;
+	UPROPERTY(EditAnywhere) TObjectPtr<UBoxComponent>		BoxTrigger;
+	UPROPERTY(EditAnywhere) TObjectPtr<UStateTreeComponent>	StateMachine;
 #pragma endregion
 
 	FBasicEnemySharedKnowledge SharedKnowledge;
@@ -125,6 +125,11 @@ private:
 public:
 	AAIZone();
 	const FBasicEnemySharedKnowledge& GetSharedKnowledge() const;
+
+#pragma region INTERFACE_METHODS
+	void GetChangeOfState_Implementation(const FName& SourceStateName, const FName& NextStateName) override;
+#pragma endregion
+	
 protected:
 #pragma region BLUEPRINT_EVENTS
 	// Hook for Derived Blueprints when a StateTree's state change

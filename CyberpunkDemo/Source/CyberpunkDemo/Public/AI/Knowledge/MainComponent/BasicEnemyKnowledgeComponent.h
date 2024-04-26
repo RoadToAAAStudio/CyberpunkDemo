@@ -47,6 +47,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams	(FOnSenseToggledSignature,				const
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam     (FOnPlayerEnteredSightConeSignature,	const APawn*, Owner);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam     (FOnPlayerExitedSightConeSignature,		const APawn*, Owner);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam     (FOnPlayerSeenSignature,				const APawn*, Owner);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam     (FOnPlayerHiddenSignature,				const APawn*, Owner);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams    (FOnSomethingHeardSignature,            const APawn*, Owner, const FAIStimulus, Stimulus);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams    (FOnSoundForgottenSignature,            const APawn*, Owner, const FAIStimulus, Stimulus);
 
@@ -61,6 +62,7 @@ public:
 	UPROPERTY(BlueprintAssignable)	FOnPlayerEnteredSightConeSignature	OnPlayerEnteredSightConeDelegate;
 	UPROPERTY(BlueprintAssignable)	FOnPlayerExitedSightConeSignature	OnPlayerExitedSightConeDelegate;
 	UPROPERTY(BlueprintAssignable)	FOnPlayerSeenSignature				OnPlayerSeenDelegate;
+	UPROPERTY(BlueprintAssignable)	FOnPlayerHiddenSignature			OnPlayerHiddenDelegate;
 	UPROPERTY(BlueprintAssignable)	FOnSomethingHeardSignature			OnSomethingHeardDelegate;
 	UPROPERTY(BlueprintAssignable)	FOnSoundForgottenSignature			OnSoundForgottenDelegate;
 #pragma endregion
@@ -119,6 +121,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnPlayerEnteredSightCone"))	void PlayerEnteredSightCone();
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnPlayerExitedSightCone"))	void PlayerExitedSightCone();
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnPlayerSeen"))				void PlayerSeen();
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnPlayerHidden"))				void PlayerHidden();
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnSomethingHeard"))           void SomethingHeard(const FAIStimulus Stimulus);
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnSoundForgotten"))           void SoundForgotten(const FAIStimulus Stimulus);
 #pragma endregion
@@ -126,6 +129,7 @@ protected:
 private:
 #pragma region EVENT_LISTENERS
 	UFUNCTION()     void NotifySightBarFull();
+	UFUNCTION()     void NotifySightBarEmpty();
 	UFUNCTION()     void NotifyHearingBarFull();
 	UFUNCTION()		void NotifyReceiveStimulus(AActor* Actor, const FAIStimulus Stimulus);
 	UFUNCTION()		void NotifyStateChanged(EBasicEnemyState OldState, EBasicEnemyState NewState);

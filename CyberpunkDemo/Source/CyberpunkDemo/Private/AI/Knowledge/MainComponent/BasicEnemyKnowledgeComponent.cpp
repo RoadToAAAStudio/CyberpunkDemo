@@ -99,19 +99,22 @@ void UBasicEnemyKnowledgeComponent::Initialize(	UBasicEnemyPerceptionComponent* 
 	BasicEnemyController = BasicEnemyControllerInput;
 	SharedKnowledge = SharedKnowledgeInput;
 
-	PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &UBasicEnemyKnowledgeComponent::NotifyReceiveStimulus);
-	BasicEnemyController->OnBasicEnemyStateChangedDelegate.AddDynamic(this, &UBasicEnemyKnowledgeComponent::NotifyStateChanged);
+	PerceptionComponent->OnTargetPerceptionUpdated.AddUniqueDynamic(this, &UBasicEnemyKnowledgeComponent::NotifyReceiveStimulus);
+	BasicEnemyController->OnBasicEnemyStateChangedDelegate.AddUniqueDynamic(this, &UBasicEnemyKnowledgeComponent::NotifyStateChanged);
 
 	// Initialize Sensors
 	{
 		ToggleSight(true);
 		ToggleHearing(true);
+		
 	}
 
 	// Initialize Knowledge
 	{
 		PersonalKnowledge.Agent = Cast<AController>(GetOwner())->GetPawn();
 		PersonalKnowledge.AgentSpawnLocation = PersonalKnowledge.Agent.Get()->GetActorLocation();
+
+		PersonalKnowledge.AgentState = EBasicEnemyState::Unaware;
 
 		ASplineContainer* SplineContainer = Cast<ABasicEnemy>(Cast<AController>(GetOwner())->GetPawn())->PatrolSpline;
 		PersonalKnowledge.PatrolSpline = SplineContainer? Cast<USplineComponent>(SplineContainer->GetComponentByClass(USplineComponent::StaticClass())) : nullptr;
@@ -182,11 +185,13 @@ void UBasicEnemyKnowledgeComponent::ToggleSight(bool Enable)
 {
 	if (Enable)
 	{
-		SightBar->OnBarFilledDelegate.AddDynamic(this, &UBasicEnemyKnowledgeComponent::NotifySightBarFull);
+		SightBar->OnBarFilledDelegate.AddUniqueDynamic(this, &UBasicEnemyKnowledgeComponent::NotifySightBarFull);
+		SightBar->OnBarEmptiedDelegate.AddUniqueDynamic(this, &UBasicEnemyKnowledgeComponent::NotifySightBarEmpty);
 	}
 	else
 	{
 		SightBar->OnBarFilledDelegate.RemoveDynamic(this, &UBasicEnemyKnowledgeComponent::NotifySightBarFull);
+		SightBar->OnBarEmptiedDelegate.RemoveDynamic(this, &UBasicEnemyKnowledgeComponent::NotifySightBarEmpty);
 	}
 	
 	bSightEnabled = Enable;
@@ -199,7 +204,7 @@ void UBasicEnemyKnowledgeComponent::ToggleHearing(bool Enable)
 {
 	if (Enable)
 	{
-		HearingBar->OnBarFilledDelegate.AddDynamic(this, &UBasicEnemyKnowledgeComponent::NotifyHearingBarFull);
+		HearingBar->OnBarFilledDelegate.AddUniqueDynamic(this, &UBasicEnemyKnowledgeComponent::NotifyHearingBarFull);
 	}
 	else
 	{
@@ -264,6 +269,12 @@ void UBasicEnemyKnowledgeComponent::NotifySightBarFull()
 {
 	PlayerSeen();
 	OnPlayerSeenDelegate.Broadcast(PersonalKnowledge.Agent.Get());
+}
+
+void UBasicEnemyKnowledgeComponent::NotifySightBarEmpty()
+{
+	PlayerHidden();
+	OnPlayerHiddenDelegate.Broadcast(PersonalKnowledge.Agent.Get());
 }
 
 void UBasicEnemyKnowledgeComponent::NotifyHearingBarFull()

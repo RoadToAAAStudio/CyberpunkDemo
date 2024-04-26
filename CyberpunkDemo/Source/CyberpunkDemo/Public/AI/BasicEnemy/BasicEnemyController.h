@@ -39,7 +39,7 @@ public:
 #pragma region AI_COMPONENTS
 	UPROPERTY(BlueprintReadOnly) TObjectPtr<UBasicEnemyPerceptionComponent> SenseComponent;
 	UPROPERTY(BlueprintReadOnly) TObjectPtr<UBasicEnemyKnowledgeComponent> KnowledgeComponent;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly) TObjectPtr<UStateTree> StateMachine;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) TObjectPtr<UStateTreeComponent> StateMachine;
 #pragma endregion
 private:
 #pragma region INJECTED_DEPENDENCIES
@@ -57,6 +57,13 @@ protected:
 #pragma region BLUEPRINT_EVENT
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnStateChanged"))	void StateChanged(EBasicEnemyState SourceState, EBasicEnemyState NextState);
 #pragma endregion
+	
+private:
+#pragma region EVENT_LISTENERS
+	UFUNCTION() void NotifyPlayerWasSeen(const APawn* Notifier);
+	UFUNCTION() void NotifyCombatTimerFinished();
+	UFUNCTION() void NotifyAlertedTimerFinished();
+#pragma endregion 
 };
 // #pragma region SENSORS_COMPONENTS
 // 	// Dependencies with Configs and Components

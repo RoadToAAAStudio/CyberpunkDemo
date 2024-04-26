@@ -242,6 +242,71 @@ const FBasicEnemySharedKnowledge& AAIZone::GetSharedKnowledge() const
 	return SharedKnowledge;
 }
 
+void AAIZone::GetChangeOfState_Implementation(const FName& SourceStateName, const FName& CurrentStateName)
+{
+	const UEnum* GoalEnum = FindFirstObjectSafe<UEnum>(TEXT("EAIZoneState"));
+	if (!GoalEnum) return;
+
+	int32 Index = GoalEnum->GetIndexByName(SourceStateName);
+	EAIZoneState SourceState = Index != INDEX_NONE? static_cast<EAIZoneState>(Index) : EAIZoneState::None;
+	
+	Index = GoalEnum->GetIndexByName(CurrentStateName);
+	EAIZoneState NewState = Index != INDEX_NONE? static_cast<EAIZoneState>(Index) : EAIZoneState::None;
+	
+	SharedKnowledge.AIZoneState = NewState;
+	
+	switch (SourceState)
+	{
+		case EAIZoneState::Unaware:
+			break;
+			
+		case EAIZoneState::Combat:
+		{
+			SharedKnowledge.Player = nullptr;
+			PlayerForgotten();
+			OnPlayerIsForgottenDelegate.Broadcast();
+		}
+		break;
+			
+		case EAIZoneState::Alerted:
+			break;
+			
+		case EAIZoneState::Max:
+			break;
+	}
+	
+	switch (NewState)
+	{
+		case EAIZoneState::Unaware:
+			break;
+			
+		case EAIZoneState::Combat:
+			break;
+			
+		case EAIZoneState::Alerted:
+		{
+			// Start Alerted Timer
+			FTimerDelegate TimerCallback = FTimerDelegate::CreateLambda([this]()
+			{
+				StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.AlertedTimerFinished")));
+				AlertedTimerFinished();
+				OnAlertedTimerFinishedDelegate.Broadcast();
+			});
+
+			GetWorld()->GetTimerManager().SetTimer(SharedKnowledge.AlertedTimer.Get(), TimerCallback, SharedKnowledge.AlertedTimerDuration.Get(), false);
+			AlertedTimerStarted();
+			OnAlertedTimerStartedDelegate.Broadcast();
+		}
+		break;
+			
+		case EAIZoneState::Max:
+			break;
+	}
+	
+	StateChanged(SourceState, NewState);
+	OnAIZoneManagerStateChangedDelegate.Broadcast(SourceState, NewState);
+}
+
 #pragma region FUNCTIONS_LISTENERS
 void AAIZone::NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
