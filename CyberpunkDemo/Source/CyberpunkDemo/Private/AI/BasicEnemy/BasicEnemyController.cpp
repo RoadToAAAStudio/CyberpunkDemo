@@ -475,10 +475,7 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 					KnowledgeComponent->SetUpFromData(ConfigData->KnowledgeConfigData);
 				}
 
-				if (StateMachine)
-				{
-					StateMachine->StartLogic();
-				}
+
 				
 				// TODO SetUp Other Systems
 				
@@ -486,10 +483,26 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 			}
 		}
 	}
+
+	// Hook to AIZone
+	{
+		BasicEnemy->AIZone->OnCombatTimerFinishedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyCombatTimerFinished);
+		BasicEnemy->AIZone->OnAlertedTimerFinishedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyAlertedTimerFinished);
+	}
 	
 	// Initialization of Knowledge Component
-	KnowledgeComponent->Initialize(Cast<UBasicEnemyPerceptionComponent>(PerceptionComponent), this, &BasicEnemy->AIZone->GetSharedKnowledge());
-	KnowledgeComponent->OnPlayerSeenDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyPlayerWasSeen);
+	{
+		KnowledgeComponent->Initialize(Cast<UBasicEnemyPerceptionComponent>(PerceptionComponent), this, &BasicEnemy->AIZone->GetSharedKnowledge());
+		KnowledgeComponent->OnPlayerSeenDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyPlayerWasSeen);
+	}
+
+	// Initialize State Machine
+	{
+		if (StateMachine)
+		{
+			StateMachine->StartLogic();
+		}
+	}
 }
 
 #if 1

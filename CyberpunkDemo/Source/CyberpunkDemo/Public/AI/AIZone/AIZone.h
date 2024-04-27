@@ -114,6 +114,11 @@ public:
 	UPROPERTY(BlueprintAssignable)	FOnAIZoneManagerStateChangedSignature	OnAIZoneManagerStateChangedDelegate;
 #pragma endregion
 
+#pragma region SETTINGS
+	UPROPERTY(EditAnywhere) float CombatTimerDuration;
+	UPROPERTY(EditAnywhere) float AlertedTimerDuration;
+#pragma endregion
+	
 private:
 #pragma region PERSONAL_COMPONENTS
 	UPROPERTY(EditAnywhere) TObjectPtr<UBoxComponent>		BoxTrigger;
@@ -131,6 +136,8 @@ public:
 #pragma endregion
 	
 protected:
+	virtual void BeginPlay() override;
+	
 #pragma region BLUEPRINT_EVENTS
 	// Hook for Derived Blueprints when a StateTree's state change
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnPlayerSensed"))			void PlayerSensed();

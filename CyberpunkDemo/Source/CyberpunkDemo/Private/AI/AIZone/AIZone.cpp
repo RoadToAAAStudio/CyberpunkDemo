@@ -307,6 +307,14 @@ void AAIZone::GetChangeOfState_Implementation(const FName& SourceStateName, cons
 	OnAIZoneManagerStateChangedDelegate.Broadcast(SourceState, NewState);
 }
 
+void AAIZone::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SharedKnowledge.CombatTimerDuration = CombatTimerDuration;
+	SharedKnowledge.AlertedTimerDuration = AlertedTimerDuration;
+}
+
 #pragma region FUNCTIONS_LISTENERS
 void AAIZone::NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -347,24 +355,23 @@ void AAIZone::NotifyPlayerExitedInSightCone(const APawn* PawnOwner)
 {
 	SharedKnowledge.NumberOfSightConesThePlayerIsIn = SharedKnowledge.NumberOfSightConesThePlayerIsIn.Get() - 1;
 
-	if (SharedKnowledge.NumberOfSightConesThePlayerIsIn.Get() == 0)
-	{
-		if (SharedKnowledge.AIZoneState == EAIZoneState::Combat)
-		{
-			FTimerDelegate TimerCallback = FTimerDelegate::CreateLambda([this]()
-			{
-				StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.CombatTimerFinished")));
-				CombatTimerFinished();
-				OnCombatTimerFinishedDelegate.Broadcast();
-			});
+	if (SharedKnowledge.NumberOfSightConesThePlayerIsIn.Get() > 0) return;
 
-			GetWorld()->GetTimerManager().SetTimer(SharedKnowledge.CombatTimer.Get(), TimerCallback, SharedKnowledge.CombatTimerDuration.Get(), false);
-			CombatTimerStarted();
-			OnCombatTimerStartedDelegate.Broadcast();
-		}
-		PlayerInNoSightCone();
-		OnPlayerIsInNoSightConeDelegate.Broadcast();
+	if (SharedKnowledge.AIZoneState == EAIZoneState::Combat)
+	{
+		FTimerDelegate TimerCallback = FTimerDelegate::CreateLambda([this]()
+		{
+			StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.CombatTimerFinished")));
+			CombatTimerFinished();
+			OnCombatTimerFinishedDelegate.Broadcast();
+		});
+
+		GetWorld()->GetTimerManager().SetTimer(SharedKnowledge.CombatTimer.Get(), TimerCallback, SharedKnowledge.CombatTimerDuration.Get(), false);
+		CombatTimerStarted();
+		OnCombatTimerStartedDelegate.Broadcast();
 	}
+	PlayerInNoSightCone();
+	OnPlayerIsInNoSightConeDelegate.Broadcast();
 }
 
 void AAIZone::NotifyPlayerWasSeen(const APawn* PawnOwner)
