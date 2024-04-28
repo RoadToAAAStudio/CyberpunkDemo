@@ -129,7 +129,7 @@ private:
 
 public:
 	AAIZone();
-	const FBasicEnemySharedKnowledge& GetSharedKnowledge() const;
+	UFUNCTION(BlueprintCallable) const FBasicEnemySharedKnowledge& GetSharedKnowledge() const;
 
 #pragma region INTERFACE_METHODS
 	void GetChangeOfState_Implementation(const FName& SourceStateName, const FName& NextStateName) override;

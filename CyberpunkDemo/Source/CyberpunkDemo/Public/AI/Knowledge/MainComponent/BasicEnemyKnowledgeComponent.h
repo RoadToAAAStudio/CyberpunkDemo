@@ -8,6 +8,7 @@
 #include "Components/ActorComponent.h"
 #include "BasicEnemyKnowledgeComponent.generated.h"
 
+class UGoalGenerator;
 class UAttributeBar;
 class UBasicEnemyPerceptionComponent;
 class USplineComponent;
@@ -29,18 +30,19 @@ struct FBasicEnemyPersonalKnowledge
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(BlueprintReadWrite) FSettablePawn					Agent;
-	UPROPERTY(BlueprintReadWrite) FSettableVector			    AgentLocation;
-	UPROPERTY(BlueprintReadWrite) FSettableVector			    AgentSpawnLocation;
-	UPROPERTY(BlueprintReadWrite) FSettableFloat			    AgentDistanceFromSpawn;
-	UPROPERTY(BlueprintReadWrite) EBasicEnemyState				AgentState;
-	                                        
-	UPROPERTY(BlueprintReadWrite) FSettableSpline				PatrolSpline;
-	UPROPERTY(BlueprintReadWrite) FSettableMainCharacter		PlayerInSightCone;
-	UPROPERTY(BlueprintReadWrite) FSettableFloat			    DistanceFromPlayer;
-	UPROPERTY(BlueprintReadWrite) FSettableAIStimulus		    HeardStimulus;
-	UPROPERTY(BlueprintReadWrite) FSettableVector			    CoverLocation;
-	//UPROPERTY() TSet<EBasicEnemyGoalType>	    GeneratedGoals;
+	UPROPERTY(BlueprintReadWrite) FSettablePawn					        Agent;
+	UPROPERTY(BlueprintReadWrite) FSettableVector			            AgentLocation;
+	UPROPERTY(BlueprintReadWrite) FSettableVector			            AgentSpawnLocation;
+	UPROPERTY(BlueprintReadWrite) FSettableFloat			            AgentDistanceFromSpawn;
+	UPROPERTY(BlueprintReadWrite) EBasicEnemyState				        AgentState;
+	                                                                    
+	UPROPERTY(BlueprintReadWrite) FSettableSpline				        PatrolSpline;
+	UPROPERTY(BlueprintReadWrite) FSettableMainCharacter		        PlayerInSightCone;
+	UPROPERTY(BlueprintReadWrite) FSettableFloat			            DistanceFromPlayer;
+	UPROPERTY(BlueprintReadWrite) FSettableAIStimulus		            HeardStimulus;
+	UPROPERTY(BlueprintReadWrite) FSettableVector			            CoverLocation;
+	
+	UPROPERTY(BlueprintReadWrite) TSet<TObjectPtr<UGoalGenerator>>		GoalGenerators;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams	(FOnSenseToggledSignature,				const UClass*, SenseConfig, bool, Enabled);
@@ -74,11 +76,10 @@ private:
 #pragma region INJECTED_DEPENDENCIES
 	UPROPERTY()	UBasicEnemyPerceptionComponent* PerceptionComponent = nullptr;
 	UPROPERTY() ABasicEnemyController* BasicEnemyController = nullptr;
-	const FBasicEnemySharedKnowledge* SharedKnowledge; 
+	UPROPERTY() AAIZone* AIZone; 
 #pragma endregion
 	
-
-	FBasicEnemyPersonalKnowledge PersonalKnowledge;
+	UPROPERTY() FBasicEnemyPersonalKnowledge PersonalKnowledge;
 
 #pragma region SENSORS_CONFIGS
 	bool    bSightEnabled			    = true;
@@ -102,9 +103,9 @@ public:
 	void SetUpFromData(const UDataTable* ConfigData);
 	void Initialize(UBasicEnemyPerceptionComponent* PerceptionComponent,
 					ABasicEnemyController* BasicEnemyController,
-					const FBasicEnemySharedKnowledge* SharedKnowledge);
+					AAIZone* AIZone);
 	UFUNCTION(BlueprintCallable) const FBasicEnemyPersonalKnowledge& GetPersonalKnowledge() const;
-	UFUNCTION(BlueprintCallable) const FBasicEnemySharedKnowledge& GetSharedKnowledge() const;
+	UFUNCTION(BlueprintCallable) const AAIZone* GetAIZone() const;
 	
 #pragma region SENSORS_PUBLIC_CONTROLS
 	UFUNCTION(BlueprintCallable)    bool IsSightEnabled		() const;

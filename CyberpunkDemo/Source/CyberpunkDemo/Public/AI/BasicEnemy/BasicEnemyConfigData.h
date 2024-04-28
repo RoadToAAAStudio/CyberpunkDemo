@@ -6,6 +6,8 @@
 #include "UObject/Object.h"
 #include "BasicEnemyConfigData.generated.h"
 
+enum class EBasicEnemyGoalType : uint8;
+
 USTRUCT(BlueprintType)
 struct FActuatorsConfigData : public FTableRowBase
 {
@@ -41,6 +43,9 @@ struct FKnowledgeConfigData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)	float SightDistanceMaxMultiplier	    = 1.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)	float HearingBaseDecreaseRate		    = 1.0f;
+
+	// Goals Generation
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)	TArray<EBasicEnemyGoalType> SupportedGoals;
 };
 
 USTRUCT(BlueprintType)

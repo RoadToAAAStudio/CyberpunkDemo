@@ -474,8 +474,6 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 				{
 					KnowledgeComponent->SetUpFromData(ConfigData->KnowledgeConfigData);
 				}
-
-
 				
 				// TODO SetUp Other Systems
 				
@@ -492,7 +490,7 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 	
 	// Initialization of Knowledge Component
 	{
-		KnowledgeComponent->Initialize(Cast<UBasicEnemyPerceptionComponent>(PerceptionComponent), this, &BasicEnemy->AIZone->GetSharedKnowledge());
+		KnowledgeComponent->Initialize(Cast<UBasicEnemyPerceptionComponent>(PerceptionComponent), this, BasicEnemy->AIZone);
 		KnowledgeComponent->OnPlayerSeenDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyPlayerWasSeen);
 	}
 

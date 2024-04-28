@@ -6,6 +6,7 @@
 #include "AI/BasicEnemy/BasicEnemyController.h"
 #include "AI/Knowledge/AttributeBar.h"
 #include "AI/Knowledge/BasicEnemyPerceptionComponent.h"
+#include "AI/Knowledge/GoalGenerators.h"
 #include "Kismet/GameplayStatics.h"
 #include "MainCharacter/MainCharacter.h"
 #include "Perception/AISenseConfig_Hearing.h"
@@ -20,7 +21,7 @@ UBasicEnemyKnowledgeComponent::UBasicEnemyKnowledgeComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 	
 	PersonalKnowledge = FBasicEnemyPersonalKnowledge();
-	SharedKnowledge = nullptr;
+	AIZone = nullptr;
 }
 
 // Called every frame
@@ -89,7 +90,7 @@ void UBasicEnemyKnowledgeComponent::TickComponent(float DeltaTime, ELevelTick Ti
 
 void UBasicEnemyKnowledgeComponent::Initialize(	UBasicEnemyPerceptionComponent* PerceptionComponentInput,
 												ABasicEnemyController* BasicEnemyControllerInput,
-												const FBasicEnemySharedKnowledge* SharedKnowledgeInput)
+												AAIZone* AIZoneInput)
 {
 	SightBar = NewObject<UAttributeBar>();
 	HearingBar = NewObject<UAttributeBar>();
@@ -97,7 +98,7 @@ void UBasicEnemyKnowledgeComponent::Initialize(	UBasicEnemyPerceptionComponent* 
 	
 	PerceptionComponent = PerceptionComponentInput;
 	BasicEnemyController = BasicEnemyControllerInput;
-	SharedKnowledge = SharedKnowledgeInput;
+	AIZone = AIZoneInput;
 
 	PerceptionComponent->OnTargetPerceptionUpdated.AddUniqueDynamic(this, &UBasicEnemyKnowledgeComponent::NotifyReceiveStimulus);
 	BasicEnemyController->OnBasicEnemyStateChangedDelegate.AddUniqueDynamic(this, &UBasicEnemyKnowledgeComponent::NotifyStateChanged);
@@ -106,7 +107,6 @@ void UBasicEnemyKnowledgeComponent::Initialize(	UBasicEnemyPerceptionComponent* 
 	{
 		ToggleSight(true);
 		ToggleHearing(true);
-		
 	}
 
 	// Initialize Knowledge
@@ -128,17 +128,17 @@ void UBasicEnemyKnowledgeComponent::Initialize(	UBasicEnemyPerceptionComponent* 
 
 void UBasicEnemyKnowledgeComponent::SetUpFromData(const UDataTable* ConfigDataTable)
 {
+	const FKnowledgeConfigData* ConfigData = nullptr;
+	for (auto& RowName : ConfigDataTable->GetRowNames())
+	{
+		ConfigData = ConfigDataTable->FindRow<FKnowledgeConfigData>(RowName, "");
+		if (!ConfigData) continue;
+		break;
+	}
+	if (!ConfigData) return;
+	
 	// Set Up Sensors
 	{
-		const FKnowledgeConfigData* ConfigData = nullptr;
-		for (auto& RowName : ConfigDataTable->GetRowNames())
-		{
-			ConfigData = ConfigDataTable->FindRow<FKnowledgeConfigData>(RowName, "");
-			if (!ConfigData) continue;
-			break;
-		}
-		if (!ConfigData) return;
-	
 		SightBaseIncreaseRate		= ConfigData->SightBaseIncreaseRate;			
 		SightBaseDecreaseRate		= ConfigData->SightBaseDecreaseRate;			
 		SightCrouchMultiplier		= ConfigData->SightCrouchMultiplier;			
@@ -150,18 +150,39 @@ void UBasicEnemyKnowledgeComponent::SetUpFromData(const UDataTable* ConfigDataTa
 
 	// Set Up Knowledge
 	{
-		for (auto& RowName : ConfigDataTable->GetRowNames())
-		{
-			const FKnowledgeConfigData* ConfigData = ConfigDataTable->FindRow<FKnowledgeConfigData>(RowName, "");
-			if (!ConfigData) continue;
-			// TODO SetUp Knowledge
-			break;
-		}
+
 	}
 	
 	// Set Up Goal Generators
 	{
-		
+		for (const EBasicEnemyGoalType& GoalGeneratorType : ConfigData->SupportedGoals)
+		{
+			switch (GoalGeneratorType)
+			{
+				case EBasicEnemyGoalType::Patrol:
+				{
+					UPatrolGoalGenerator* PatrolGoalGenerator = NewObject<UPatrolGoalGenerator>();
+					PatrolGoalGenerator->Initialize(this);
+					PersonalKnowledge.GoalGenerators.Add(PatrolGoalGenerator);	
+					break;
+				}
+				case EBasicEnemyGoalType::Search:
+				{
+					USearchGoalGenerator* SearchGoalGenerator = NewObject<USearchGoalGenerator>();
+					SearchGoalGenerator->Initialize(this);
+					PersonalKnowledge.GoalGenerators.Add(SearchGoalGenerator);
+					break;
+				}
+
+				case EBasicEnemyGoalType::Combat:
+				{
+					UCombatGoalGenerator* CombatGoalGenerator = NewObject<UCombatGoalGenerator>();
+					CombatGoalGenerator->Initialize(this);
+					PersonalKnowledge.GoalGenerators.Add(CombatGoalGenerator);	
+					break;
+				}
+			}
+		}
 	}
 }
 
@@ -169,10 +190,9 @@ const FBasicEnemyPersonalKnowledge& UBasicEnemyKnowledgeComponent::GetPersonalKn
 {
 	return PersonalKnowledge;
 }
-
-const FBasicEnemySharedKnowledge& UBasicEnemyKnowledgeComponent::GetSharedKnowledge() const
+const AAIZone* UBasicEnemyKnowledgeComponent::GetAIZone() const
 {
-	return *SharedKnowledge;
+	return AIZone;
 }
 
 #pragma region SENSORS_PUBLIC_CONTROLS
