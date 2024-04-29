@@ -84,7 +84,17 @@ void UBasicEnemyKnowledgeComponent::TickComponent(float DeltaTime, ELevelTick Ti
 	
 	// Update Goals
 	{
-		
+		for (auto& GoalGenerator : PersonalKnowledge.GoalGenerators)
+		{
+			if (GoalGenerator->CanBeGenerated())
+			{
+				GoalGenerator->Generate();
+			}
+			else
+			{
+				GoalGenerator->Destroy();
+			}
+		}
 	}
 }
 
@@ -155,33 +165,11 @@ void UBasicEnemyKnowledgeComponent::SetUpFromData(const UDataTable* ConfigDataTa
 	
 	// Set Up Goal Generators
 	{
-		for (const EBasicEnemyGoalType& GoalGeneratorType : ConfigData->SupportedGoals)
+		for (const TSubclassOf<UGoalGenerator>& GoalGeneratorClass : ConfigData->SupportedGoals)
 		{
-			switch (GoalGeneratorType)
-			{
-				case EBasicEnemyGoalType::Patrol:
-				{
-					UPatrolGoalGenerator* PatrolGoalGenerator = NewObject<UPatrolGoalGenerator>();
-					PatrolGoalGenerator->Initialize(this);
-					PersonalKnowledge.GoalGenerators.Add(PatrolGoalGenerator);	
-					break;
-				}
-				case EBasicEnemyGoalType::Search:
-				{
-					USearchGoalGenerator* SearchGoalGenerator = NewObject<USearchGoalGenerator>();
-					SearchGoalGenerator->Initialize(this);
-					PersonalKnowledge.GoalGenerators.Add(SearchGoalGenerator);
-					break;
-				}
-
-				case EBasicEnemyGoalType::Combat:
-				{
-					UCombatGoalGenerator* CombatGoalGenerator = NewObject<UCombatGoalGenerator>();
-					CombatGoalGenerator->Initialize(this);
-					PersonalKnowledge.GoalGenerators.Add(CombatGoalGenerator);	
-					break;
-				}
-			}
+			UGoalGenerator* GoalGenerator = NewObject<UGoalGenerator>(this, GoalGeneratorClass);
+			GoalGenerator->Initialize(this);
+			PersonalKnowledge.GoalGenerators.Add(GoalGenerator);
 		}
 	}
 }

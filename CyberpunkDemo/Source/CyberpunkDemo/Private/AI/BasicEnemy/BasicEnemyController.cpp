@@ -484,6 +484,8 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 
 	// Hook to AIZone
 	{
+
+		BasicEnemy->AIZone->OnPlayerIsSensedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyPlayerWasSeen);
 		BasicEnemy->AIZone->OnCombatTimerFinishedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyCombatTimerFinished);
 		BasicEnemy->AIZone->OnAlertedTimerFinishedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyAlertedTimerFinished);
 	}

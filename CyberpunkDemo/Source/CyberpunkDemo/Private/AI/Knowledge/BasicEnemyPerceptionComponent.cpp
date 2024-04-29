@@ -31,7 +31,7 @@ void UBasicEnemyPerceptionComponent::SetUpFromData(const UDataTable* KnowledgeCo
 		else if (SenseConfig->GetClass() == UAISenseConfig_Hearing::StaticClass())
 		{
 			UAISenseConfig_Hearing* HearingConfig = Cast<UAISenseConfig_Hearing>(SenseConfig);
-			HearingConfig->HearingRange					= ConfigData->HearingRange;
+			HearingConfig->HearingRange	= ConfigData->HearingRange;
 			ConfigureSense(*HearingConfig);
 		}
 	}
