@@ -8,8 +8,7 @@ UTransition::UTransition()
 }
 
 // Init function that substitutes the constructor
-//	here we set:
-//	- the state the transition points to
+//	here we set the state the transition points to
 void UTransition::Init(const TObjectPtr<UState> toState)
 {
 	ToState = toState;
@@ -22,9 +21,7 @@ bool UTransition::CheckTransition()
 	{
 		return OnCheckConditionDelegate.Execute();
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Transition to %s is not bound"), *ToState->GetName());
-	}
-	return true;
+
+	UE_LOG(LogTemp, Warning, TEXT("Transition to %s is not bound"), *ToState->GetName());
+	return false;
 }

@@ -13,6 +13,8 @@ void UStateCyberpunkProject::EnterState()
 {
 	Super::EnterState();
 	Owner->SetCurrentMovementState(State);
+	// Delegate for any object who might be interested in knowing when the state machine
+	// enters a specific state
 	Owner->OnEnterCustomMovementState.Broadcast(State);
 }
 
