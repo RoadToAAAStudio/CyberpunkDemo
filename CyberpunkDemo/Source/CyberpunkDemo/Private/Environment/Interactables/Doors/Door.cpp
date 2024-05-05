@@ -27,7 +27,9 @@ void ADoor::BeginPlay()
 		for (int i = 0; i < Conditions.Num(); i++)
 		{
 			Conditions[i]->AddUnlockInput(InspectInputs);
+			ChecksResults.Add(Conditions[i]->Check());
 		}
+		OnInspectDelegate.Execute(InspectInputs,ChecksResults);
 	}
 }
 

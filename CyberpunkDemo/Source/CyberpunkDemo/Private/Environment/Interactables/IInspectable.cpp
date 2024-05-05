@@ -7,4 +7,5 @@
 // Add default functionality here for any IInspectable functions that are not pure virtual.
 void IInspectable::Inspect()
 {
+	
 }
