@@ -95,7 +95,7 @@ public:
 	// Max height to check for a possible vault
 	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultMaxPossibleHeight = 100.0f;
 	// Max width of a possible vaultable object 
-	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultMinWidth = 25.0f;
+	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultMaxPossibleWidth = 25.0f;
 	// 
 	UPROPERTY(EditDefaultsOnly, Category = "Movement|Vault") float VaultLandingPointMaxHeight;
 	// Offset used to ignore obstacles under a certain height
@@ -116,7 +116,7 @@ public:
 	// Bools used to determine whether the kind of mantle/vault to perform
 	UPROPERTY(BlueprintReadOnly) bool bHighMantle = false;
 	UPROPERTY(BlueprintReadOnly) bool bFallingVault = false;
-
+	
 	// Field public for debug reason
 	UPROPERTY(BlueprintReadOnly) TObjectPtr<UStateMachine> StateMachine;
 
@@ -189,8 +189,6 @@ private:
 
 	// From VAULT state
 	bool CanIdleFromVault() const;
-	bool CanWalkFromVault() const;
-	bool CanRunFromVault() const;
 
 	// From DASH state
 	bool CanIdleFromDash() const;

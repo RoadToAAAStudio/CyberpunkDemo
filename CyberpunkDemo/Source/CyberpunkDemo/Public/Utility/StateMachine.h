@@ -19,7 +19,6 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TArray<TObjectPtr<UState>> States;
 	
-	
 	UStateMachine();
 
 	void Init(const TObjectPtr<UState> StartingState);

@@ -41,6 +41,7 @@ void UInteractionSystemComponent::TickComponent(float DeltaTime, ELevelTick Tick
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	Inspect();
 }
+
 //return tobjptr aactor
 void UInteractionSystemComponent::Inspect()
 {

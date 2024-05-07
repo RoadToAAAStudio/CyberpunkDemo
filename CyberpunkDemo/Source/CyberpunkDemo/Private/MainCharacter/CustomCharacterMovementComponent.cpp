@@ -17,7 +17,7 @@
 #include "Utility/States/StateMantle.h"
 
 // Shortcut macros
-#if 1
+#if 0
 float Duration = 5.0f;
 #define PRINT_SCREEN(x) GEngine->AddOnScreenDebugMessage(-1, Duration ? Duration : -1.f, FColor::Yellow, x);
 #define DRAW_POINT(x, c) DrawDebugPoint(GetWorld(), x, 10, c, !Duration, Duration);
@@ -291,18 +291,6 @@ void UCustomCharacterMovementComponent::BuildStateMachine()
 	VaultToIdle->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanIdleFromVault);
 	VaultToIdle->Init(StateIdle);
 
-	// Vault TO Walking
-	TObjectPtr<UTransition> VaultToWalking = NewObject<UTransition>();
-	StateVault->Transitions.Add(VaultToWalking);
-	VaultToWalking->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanWalkFromVault);
-	VaultToWalking->Init(StateWalking);
-
-	// Vault TO Running
-	TObjectPtr<UTransition> VaultToRunning = NewObject<UTransition>();
-	StateVault->Transitions.Add(VaultToRunning);
-	VaultToRunning->OnCheckConditionDelegate.BindUObject(this, &UCustomCharacterMovementComponent::CanRunFromVault);
-	VaultToRunning->Init(StateRunning);
-
 	// DASH
 	// Dash TO Idle
 	TObjectPtr<UTransition> DashToIdle = NewObject<UTransition>();
@@ -440,16 +428,6 @@ bool UCustomCharacterMovementComponent::CanIdleFromVault() const
 	return !bCanVault;
 }
 
-bool UCustomCharacterMovementComponent::CanWalkFromVault() const
-{
-	return !bCanVault && LastMovementState == ECustomMovementState::Walking;
-}
-
-bool UCustomCharacterMovementComponent::CanRunFromVault() const
-{
-	return !bCanVault && LastMovementState == ECustomMovementState::Running;
-}
-
 // FROM DASH
 bool UCustomCharacterMovementComponent::CanIdleFromDash() const
 {
@@ -481,7 +459,6 @@ bool UCustomCharacterMovementComponent::CanUncrouch()
 	auto Params = MainCharacter->GetIgnoreCharacterParams();
 	if (GetWorld()->OverlapAnyTestByProfile(BaseLocation, FQuat::Identity, "BlockAll", CapsuleShape, Params))
 	{
-		DrawDebugCapsule(GetWorld(), BaseLocation, MainCharacter->GetUncrouchedCapsuleHalfHeight(), GetCapsuleRadius(), FQuat::Identity, FColor::Red, false, 1);
 		bWantsToCrouchCustom = true;
 		return false;
 	}
@@ -560,7 +537,7 @@ void UCustomCharacterMovementComponent::DashPressed()
 bool UCustomCharacterMovementComponent::TryMantle()
 {
 	if (bCanVault) return false;
-	
+
 	// Location of the base of the capsule
 	FVector BaseLocation = UpdatedComponent->GetComponentLocation() + FVector::DownVector * GetCapsuleHalfHeight();
 	// Forward vector
@@ -569,11 +546,9 @@ bool UCustomCharacterMovementComponent::TryMantle()
 	auto Params = MainCharacter->GetIgnoreCharacterParams();
 	// Max height reachable by the mantle
 	float MaxHeight = GetCapsuleHalfHeight() * 2 + MantleReachHeight;
-	//
+	
 	float CosMantleMinWallSteepnessAngle = FMath::Cos(FMath::DegreesToRadians(MantleMinWallSteepnessAngle));
-	//
 	float CosMantleMaxSurfaceAngle = FMath::Cos(FMath::DegreesToRadians(MantleMaxSurfaceAngle));
-	//
 	float CosMantleMaxAlignmentAngle = FMath::Cos(FMath::DegreesToRadians(MantleMaxAlignmentAngle));
 
 	// CHECK OBSTACLE FRONT FACE
@@ -589,8 +564,6 @@ bool UCustomCharacterMovementComponent::TryMantle()
 
 	for (int i = 0; i < 10; i++)
 	{
-		DRAW_LINE(FrontStart, FrontStart + Forward * CheckDistance, FColor::Red)
-
 		if (GetWorld()->LineTraceSingleByProfile(FrontHit, FrontStart, FrontStart + Forward * CheckDistance, "BlockAll", Params)) break;
 		FrontStart += FVector::UpVector * (2.f * GetCapsuleHalfHeight() - (MaxStepHeight - 1)) / 9;
 	}
@@ -617,6 +590,7 @@ bool UCustomCharacterMovementComponent::TryMantle()
 	// The starting point for the line trace is the location of the wall + a forward vector scaled by the WALL-UP vector times the magnitude we want this vector (the max height we can perform the mantle), all divided by WALL-SIN
 		// WALL-SIN will be between 0 and 1 thus making TRACE-START bigger to account for the potential steepness of the wall (to ensure that TRACE-START is always of the same length)
 	FVector TraceStart = FrontHit.Location + Forward + WallUpVector * (MaxHeight - (MaxStepHeight - 1)) / WallSin;
+	DRAW_POINT(TraceStart, FColor::Yellow);
 	DRAW_LINE(TraceStart, FrontHit.Location + Forward, FColor::Orange);
 
 	if(!GetWorld()->LineTraceMultiByProfile(HeightHits, TraceStart, FrontHit.Location + Forward, "BlockAll", Params)) return false;
@@ -635,8 +609,6 @@ bool UCustomCharacterMovementComponent::TryMantle()
 
 	// We can consider the value of the dot product as the component of the first vector over the second one, thus giving us the height of the surface from the base location
 	float Height = (SurfaceHit.Location - BaseLocation) | FVector::UpVector;
-
-	PRINT_SCREEN(FString::Printf(TEXT("Height: %f"), Height));
 
 	DRAW_POINT(SurfaceHit.Location, FColor::Blue);
 
@@ -704,8 +676,6 @@ bool UCustomCharacterMovementComponent::TryVault()
 
 	for (int i = 0; i < 10; i++)
 	{
-		DRAW_LINE(FrontStart, FrontStart + Forward * CheckDistance, FColor::Yellow)
-
 		if (GetWorld()->LineTraceSingleByProfile(FrontHit, FrontStart, FrontStart + Forward * CheckDistance, "BlockAll", Params)) break;
 		FrontStart += FVector::UpVector * (GetCapsuleHalfHeight() - (MaxStepHeight - 1)) / 6;
 	}
@@ -724,7 +694,8 @@ bool UCustomCharacterMovementComponent::TryVault()
 	FVector WallUpVector = FVector::VectorPlaneProject(FVector::UpVector, FrontHit.Normal).GetSafeNormal();
 
 	FVector TraceStart = FrontHit.Location + Forward + WallUpVector * (VaultMaxPossibleHeight - (MaxStepHeight - 1));
-	DRAW_LINE(TraceStart, FrontHit.Location + Forward, FColor::Orange);
+	DRAW_POINT(TraceStart, FColor::Yellow)
+	DRAW_LINE(TraceStart, FrontHit.Location + Forward, FColor::Orange)
 
 	if(!GetWorld()->LineTraceMultiByProfile(HeightHits, TraceStart, FrontHit.Location + Forward, "BlockAll", Params)) return false;
 	for(const FHitResult& Hit : HeightHits)
@@ -738,8 +709,6 @@ bool UCustomCharacterMovementComponent::TryVault()
 	}
 
 	float Height = (SurfaceHit.Location - BaseLocation) | FVector::UpVector;
-
-	PRINT_SCREEN(FString::Printf(TEXT("Height: %f"), Height));
 
 	DRAW_POINT(SurfaceHit.Location, FColor::Blue);
 
@@ -764,7 +733,7 @@ bool UCustomCharacterMovementComponent::TryVault()
 		return false;
 	}
 	
-	FVector CapsuleFinalLocationOffset = SurfaceHit.Location + Forward * (GetCapsuleRadius() + VaultMinWidth) + FVector::UpVector * (GetCapsuleHalfHeight() / 2);
+	FVector CapsuleFinalLocationOffset = SurfaceHit.Location + Forward * (GetCapsuleRadius() + VaultMaxPossibleWidth) + FVector::UpVector * (GetCapsuleHalfHeight() / 2);
 
 	// Check if there is enough space on the other side of the obstacle
 	if (GetWorld()->OverlapAnyTestByProfile(CapsuleFinalLocationOffset, FQuat::Identity, "BlockAll", CapsuleShape, Params))
@@ -783,6 +752,7 @@ bool UCustomCharacterMovementComponent::TryVault()
 		bFallingVault = false;
 		DRAW_CAPSULE(VaultMiddleLocation, FColor::Purple)
 		VaultLocation = GroundHit.Location;
+		DRAW_CAPSULE(VaultLocation, FColor::Green)
 	}
 	else
 	{

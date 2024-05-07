@@ -6,6 +6,7 @@
 #include "UObject/Object.h"
 #include "UnlockCondition.generated.h"
 
+UENUM(BlueprintType)
 enum class EInspectInput:uint8
 {
 	Nothing,
