@@ -6,32 +6,32 @@
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Sight.h"
 
-void UBasicEnemyPerceptionComponent::SetUpFromData(const UDataTable* KnowledgeConfigData)
+void UBasicEnemyPerceptionComponent::SetUpFromData(const FPerceptionConfigData& PerceptionConfigData)
 {
-	const FKnowledgeConfigData* ConfigData = nullptr;
-	for (auto& RowName : KnowledgeConfigData->GetRowNames())
-	{
-		ConfigData = KnowledgeConfigData->FindRow<FKnowledgeConfigData>(RowName, "");
-		if (!ConfigData) continue;
-		break;
-	}
+	// const FKnowledgeConfigData* ConfigData = nullptr;
+	// for (auto& RowName : KnowledgeConfigData->GetRowNames())
+	// {
+	// 	ConfigData = KnowledgeConfigData->FindRow<FKnowledgeConfigData>(RowName, "");
+	// 	if (!ConfigData) continue;
+	// 	break;
+	// }
 	
 	for (auto& SenseConfig : SensesConfig)
 	{
 		if (SenseConfig->GetClass() == UAISenseConfig_Sight::StaticClass())
 		{
 			UAISenseConfig_Sight* SightConfig = Cast<UAISenseConfig_Sight>(SenseConfig);
-			SightConfig->SightRadius		            = ConfigData->SightRadius;
-			SightConfig->LoseSightRadius	            = ConfigData->SightLoseRadius;
-			SightConfig->PeripheralVisionAngleDegrees	= ConfigData->SightPeripheralVisionAngleDegrees;
-			SightConfig->NearClippingRadius				= ConfigData->SightNearClippingRadius;	
-			SightConfig->PointOfViewBackwardOffset		= ConfigData->SightPointOfViewBackwardOffset;
+			SightConfig->SightRadius		            = PerceptionConfigData.SightRadius;
+			SightConfig->LoseSightRadius	            = PerceptionConfigData.SightLoseRadius;
+			SightConfig->PeripheralVisionAngleDegrees	= PerceptionConfigData.SightPeripheralVisionAngleDegrees;
+			SightConfig->NearClippingRadius				= PerceptionConfigData.SightNearClippingRadius;	
+			SightConfig->PointOfViewBackwardOffset		= PerceptionConfigData.SightPointOfViewBackwardOffset;
 			ConfigureSense(*SightConfig);
 		}
 		else if (SenseConfig->GetClass() == UAISenseConfig_Hearing::StaticClass())
 		{
 			UAISenseConfig_Hearing* HearingConfig = Cast<UAISenseConfig_Hearing>(SenseConfig);
-			HearingConfig->HearingRange	= ConfigData->HearingRange;
+			HearingConfig->HearingRange	= PerceptionConfigData.HearingRange;
 			ConfigureSense(*HearingConfig);
 		}
 	}

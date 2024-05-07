@@ -10,21 +10,7 @@ class UGoalGenerator;
 enum class EBasicEnemyGoalType : uint8;
 
 USTRUCT(BlueprintType)
-struct FActuatorsConfigData : public FTableRowBase
-{
-	GENERATED_BODY()
-	// TODO
-};
-
-USTRUCT(BlueprintType)
-struct FBrainConfigData : public FTableRowBase
-{
-	GENERATED_BODY()
-	// TODO
-};
-
-USTRUCT(BlueprintType)
-struct FKnowledgeConfigData : public FTableRowBase
+struct FPerceptionConfigData
 {
 	GENERATED_BODY()
 
@@ -34,7 +20,14 @@ struct FKnowledgeConfigData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)	float SightPeripheralVisionAngleDegrees = 60.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)	float SightNearClippingRadius			= 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)	float SightPointOfViewBackwardOffset	= 0.0f;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)	float HearingRange						= 100.0f;
+};
+
+USTRUCT(BlueprintType)
+struct FSensorsConfigData
+{
+	GENERATED_BODY()
 
 	// Sensors Configs
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)	float SightBaseIncreaseRate				= 1.0f;
@@ -44,19 +37,22 @@ struct FKnowledgeConfigData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)	float SightDistanceMaxMultiplier	    = 1.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)	float HearingBaseDecreaseRate		    = 1.0f;
-
-	// Goals Generation
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)	TArray<TSubclassOf<UGoalGenerator>> SupportedGoals;
 };
 
-USTRUCT(BlueprintType)
-struct FBasicEnemyConfigData : public FTableRowBase
+UCLASS(Blueprintable)
+class CYBERPUNKDEMO_API UBasicEnemyConfigData : public UDataAsset
 {
 	GENERATED_BODY()
+	
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Knowledge | Sensors")
+	FSensorsConfigData SensorsConfigData;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)  TObjectPtr<UDataTable>  KnowledgeConfigData;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)  TObjectPtr<UDataTable>  BrainConfigData;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)  TObjectPtr<UDataTable>  ActuatorsConfigData;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Knowledge | Perception")
+	FPerceptionConfigData PerceptionConfigData;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Knowledge | Goals")
+	TArray<TSubclassOf<UGoalGenerator>> SupportedGoals;
 };
 
 

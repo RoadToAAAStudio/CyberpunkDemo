@@ -7,9 +7,10 @@
 #include "GameFramework/Character.h"
 #include "BasicEnemy.generated.h"
 
+class UBasicEnemyConfigData;
 class UStateTree;
 class AAIZone;
-struct FBasicEnemyConfigData;
+//struct FBasicEnemyConfigData;
 struct FKnowledgeConfigData;
 class USettableStateTreeComponent;
 class ABasicEnemyController;
@@ -55,10 +56,10 @@ class CYBERPUNKDEMO_API ABasicEnemy : public ACharacter
 public:
 	UPROPERTY() ABasicEnemyController* BasicEnemyController;
 	UPROPERTY() AAIZone* AIZone;
-	
 #pragma region INPUT_DATA
 #pragma region DEFINE_ARCHETYPE
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)	TObjectPtr<UDataTable> ConfigData;
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly)	TObjectPtr<UDataTable> ConfigData;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)	TObjectPtr<UBasicEnemyConfigData> ConfigData;
 #pragma endregion
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)	TObjectPtr<ASplineContainer> PatrolSpline;

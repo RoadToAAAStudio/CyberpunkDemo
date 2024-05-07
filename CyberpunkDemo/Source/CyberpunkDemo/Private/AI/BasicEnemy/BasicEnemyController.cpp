@@ -455,30 +455,41 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 	BasicEnemy = Cast<ABasicEnemy>(BasicEnemyInput);
 	if (BasicEnemy)
 	{
-		UDataTable* BasicEnemyConfigData = BasicEnemy->ConfigData;
-		if (BasicEnemyConfigData)
+		//UDataTable* BasicEnemyConfigData = BasicEnemy->ConfigData;
+		UBasicEnemyConfigData* ConfigData = BasicEnemy->ConfigData;
+		if (ConfigData)
 		{
-			for (auto& RowName : BasicEnemyConfigData->GetRowNames())
+			// Initialization of Perception Component
+			if (Cast<UBasicEnemyPerceptionComponent>(GetPerceptionComponent()))
 			{
-				const FBasicEnemyConfigData* ConfigData = BasicEnemyConfigData->FindRow<FBasicEnemyConfigData>(RowName, "");
-				if (!ConfigData) continue;
-
-				// Initialization of Perception Component
-				if (Cast<UBasicEnemyPerceptionComponent>(GetPerceptionComponent()))
-				{
-					Cast<UBasicEnemyPerceptionComponent>(GetPerceptionComponent())->SetUpFromData(ConfigData->KnowledgeConfigData);
-				}
-
-				// Initialization of Knowledge Component From Data
-				if (KnowledgeComponent)
-				{
-					KnowledgeComponent->SetUpFromData(ConfigData->KnowledgeConfigData);
-				}
-				
-				// TODO SetUp Other Systems
-				
-				break;
+				Cast<UBasicEnemyPerceptionComponent>(GetPerceptionComponent())->SetUpFromData(ConfigData->PerceptionConfigData);
 			}
+			// Initialization of Knowledge Component From Data
+			if (KnowledgeComponent)
+			{
+				KnowledgeComponent->SetUpFromData(ConfigData->SensorsConfigData, ConfigData->SupportedGoals);
+			}
+			// for (auto& RowName : BasicEnemyConfigData->GetRowNames())
+			// {
+			// 	// const FBasicEnemyConfigData* ConfigData = BasicEnemyConfigData->FindRow<FBasicEnemyConfigData>(RowName, "");
+			// 	// if (!ConfigData) continue;
+			//
+			// 	// Initialization of Perception Component
+			// 	if (Cast<UBasicEnemyPerceptionComponent>(GetPerceptionComponent()))
+			// 	{
+			// 		//Cast<UBasicEnemyPerceptionComponent>(GetPerceptionComponent())->SetUpFromData(ConfigData->KnowledgeConfigData);
+			// 	}
+			//
+			// 	// Initialization of Knowledge Component From Data
+			// 	if (KnowledgeComponent)
+			// 	{
+			// 		//KnowledgeComponent->SetUpFromData(ConfigData->KnowledgeConfigData);
+			// 	}
+			// 	
+			// 	// TODO SetUp Other Systems
+			// 	
+			// 	break;
+			// }
 		}
 	}
 
@@ -504,11 +515,6 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 		}
 	}
 }
-
-#if 1
-float MacroDuration = 5.0f;
-#define PRINT_SCREEN(x) GEngine->AddOnScreenDebugMessage(-1, MacroDuration ? MacroDuration : -1.f, FColor::Yellow, x);
-#endif
 
 void ABasicEnemyController::GetChangeOfState_Implementation(const FName& SourceStateName, const FName& NextStateName)
 {

@@ -23,7 +23,7 @@ enum class EBasicEnemyGoalType : uint8
 	Max UMETA(Hidden)
 };
 
-UCLASS(Abstract, BlueprintType)
+UCLASS(Abstract, EditInlineNew, BlueprintType)
 class CYBERPUNKDEMO_API UGoalGenerator : public UObject
 {
 	GENERATED_BODY()
@@ -45,7 +45,7 @@ class CYBERPUNKDEMO_API UPatrolGoalGenerator : public UGoalGenerator
 	GENERATED_BODY()
 private:
 	UPROPERTY() const TObjectPtr<USplineComponent> Spline;
-public:
+public: 
 	virtual bool CanBeGenerated() const override;
 	virtual EBasicEnemyGoalType GetType() const override;
 	const USplineComponent* GetGoal() const;

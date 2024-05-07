@@ -8,6 +8,7 @@
 #include "Components/ActorComponent.h"
 #include "BasicEnemyKnowledgeComponent.generated.h"
 
+struct FSensorsConfigData;
 class UGoalGenerator;
 class UAttributeBar;
 class UBasicEnemyPerceptionComponent;
@@ -100,7 +101,7 @@ public:
 	UBasicEnemyKnowledgeComponent();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void SetUpFromData(const UDataTable* ConfigData);
+	void SetUpFromData(const FSensorsConfigData& SensorsConfigData, const TArray<TSubclassOf<UGoalGenerator>>& SupportedGoals);
 	void Initialize(UBasicEnemyPerceptionComponent* PerceptionComponent,
 					ABasicEnemyController* BasicEnemyController,
 					AAIZone* AIZone);

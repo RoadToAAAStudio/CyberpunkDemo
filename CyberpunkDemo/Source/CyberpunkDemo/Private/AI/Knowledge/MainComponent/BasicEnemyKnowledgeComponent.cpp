@@ -132,30 +132,24 @@ void UBasicEnemyKnowledgeComponent::Initialize(	UBasicEnemyPerceptionComponent* 
 
 	// Initialize Generators
 	{
-		
+		for (auto& GoalGenerator : PersonalKnowledge.GoalGenerators)
+		{
+			GoalGenerator->Initialize(this);
+		}
 	}
 }
 
-void UBasicEnemyKnowledgeComponent::SetUpFromData(const UDataTable* ConfigDataTable)
+void UBasicEnemyKnowledgeComponent::SetUpFromData(const FSensorsConfigData& SensorsConfigData, const TArray<TSubclassOf<UGoalGenerator>>& SupportedGoals)
 {
-	const FKnowledgeConfigData* ConfigData = nullptr;
-	for (auto& RowName : ConfigDataTable->GetRowNames())
-	{
-		ConfigData = ConfigDataTable->FindRow<FKnowledgeConfigData>(RowName, "");
-		if (!ConfigData) continue;
-		break;
-	}
-	if (!ConfigData) return;
-	
 	// Set Up Sensors
 	{
-		SightBaseIncreaseRate		= ConfigData->SightBaseIncreaseRate;			
-		SightBaseDecreaseRate		= ConfigData->SightBaseDecreaseRate;			
-		SightCrouchMultiplier		= ConfigData->SightCrouchMultiplier;			
-		SightDistanceMinMultiplier	= ConfigData->SightDistanceMinMultiplier;	
-		SightDistanceMaxMultiplier	= ConfigData->SightDistanceMaxMultiplier;
+		SightBaseIncreaseRate		= SensorsConfigData.SightBaseIncreaseRate;			
+		SightBaseDecreaseRate		= SensorsConfigData.SightBaseDecreaseRate;			
+		SightCrouchMultiplier		= SensorsConfigData.SightCrouchMultiplier;			
+		SightDistanceMinMultiplier	= SensorsConfigData.SightDistanceMinMultiplier;	
+		SightDistanceMaxMultiplier	= SensorsConfigData.SightDistanceMaxMultiplier;
 
-		HearingBaseDecreaseRate		= ConfigData->HearingBaseDecreaseRate;
+		HearingBaseDecreaseRate		= SensorsConfigData.HearingBaseDecreaseRate;
 	}
 
 	// Set Up Knowledge
@@ -165,11 +159,9 @@ void UBasicEnemyKnowledgeComponent::SetUpFromData(const UDataTable* ConfigDataTa
 	
 	// Set Up Goal Generators
 	{
-		for (const TSubclassOf<UGoalGenerator>& GoalGeneratorClass : ConfigData->SupportedGoals)
+		for (const TSubclassOf<UGoalGenerator>& GoalGeneratorClass : SupportedGoals)
 		{
-			UGoalGenerator* GoalGenerator = NewObject<UGoalGenerator>(this, GoalGeneratorClass);
-			GoalGenerator->Initialize(this);
-			PersonalKnowledge.GoalGenerators.Add(GoalGenerator);
+			PersonalKnowledge.GoalGenerators.Add(NewObject<UGoalGenerator>(this, GoalGeneratorClass));
 		}
 	}
 }
