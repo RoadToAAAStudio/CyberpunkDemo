@@ -6,8 +6,7 @@
 #include "UObject/Object.h"
 #include "BasicEnemyConfigData.generated.h"
 
-class UGoalGenerator;
-enum class EBasicEnemyGoalType : uint8;
+class UStateTree;
 
 USTRUCT(BlueprintType)
 struct FPerceptionConfigData
@@ -50,9 +49,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Knowledge | Perception")
 	FPerceptionConfigData PerceptionConfigData;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Knowledge | Goals")
-	TArray<TSubclassOf<UGoalGenerator>> SupportedGoals;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Brain")
+	TObjectPtr<UStateTree> Behaviour;
 };
 
 

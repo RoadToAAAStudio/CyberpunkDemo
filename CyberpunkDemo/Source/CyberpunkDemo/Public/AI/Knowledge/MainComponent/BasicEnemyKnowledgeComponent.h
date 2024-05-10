@@ -31,19 +31,19 @@ struct FBasicEnemyPersonalKnowledge
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(BlueprintReadWrite) FSettablePawn					        Agent;
-	UPROPERTY(BlueprintReadWrite) FSettableVector			            AgentLocation;
-	UPROPERTY(BlueprintReadWrite) FSettableVector			            AgentSpawnLocation;
-	UPROPERTY(BlueprintReadWrite) FSettableFloat			            AgentDistanceFromSpawn;
-	UPROPERTY(BlueprintReadWrite) EBasicEnemyState				        AgentState;
-	                                                                    
-	UPROPERTY(BlueprintReadWrite) FSettableSpline				        PatrolSpline;
-	UPROPERTY(BlueprintReadWrite) FSettableMainCharacter		        PlayerInSightCone;
-	UPROPERTY(BlueprintReadWrite) FSettableFloat			            DistanceFromPlayer;
-	UPROPERTY(BlueprintReadWrite) FSettableAIStimulus		            HeardStimulus;
-	UPROPERTY(BlueprintReadWrite) FSettableVector			            CoverLocation;
-	
-	UPROPERTY(BlueprintReadWrite) TSet<TObjectPtr<UGoalGenerator>>		GoalGenerators;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FSettablePawn					    Agent;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FSettableVector			            AgentLocation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FSettableVector			            AgentSpawnLocation;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite) FSettableRotator			        AgentSpawnRotation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FSettableFloat			            AgentDistanceFromSpawn;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) EBasicEnemyState				    AgentState;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FVector>						PatrolWaypoints;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FSettableSpline				        PatrolSpline;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FSettableMainCharacter		        PlayerInSightCone;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FSettableFloat			            DistanceFromPlayer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FSettableVector						HeardStimulusLocation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FSettableVector			            CoverLocation;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams	(FOnSenseToggledSignature,				const UClass*, SenseConfig, bool, Enabled);
@@ -74,13 +74,13 @@ public:
 	UPROPERTY(BlueprintReadOnly)	TObjectPtr<UAttributeBar> HearingBar;
 	
 private:
+	UPROPERTY(EditDefaultsOnly) FBasicEnemyPersonalKnowledge PersonalKnowledge;
 #pragma region INJECTED_DEPENDENCIES
 	UPROPERTY()	UBasicEnemyPerceptionComponent* PerceptionComponent = nullptr;
 	UPROPERTY() ABasicEnemyController* BasicEnemyController = nullptr;
 	UPROPERTY() AAIZone* AIZone; 
 #pragma endregion
 	
-	UPROPERTY() FBasicEnemyPersonalKnowledge PersonalKnowledge;
 
 #pragma region SENSORS_CONFIGS
 	bool    bSightEnabled			    = true;
@@ -101,7 +101,7 @@ public:
 	UBasicEnemyKnowledgeComponent();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void SetUpFromData(const FSensorsConfigData& SensorsConfigData, const TArray<TSubclassOf<UGoalGenerator>>& SupportedGoals);
+	void SetUpFromData(const FSensorsConfigData& SensorsConfigData);
 	void Initialize(UBasicEnemyPerceptionComponent* PerceptionComponent,
 					ABasicEnemyController* BasicEnemyController,
 					AAIZone* AIZone);

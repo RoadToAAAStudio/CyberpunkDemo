@@ -6,6 +6,7 @@
 #include "Perception/AIPerceptionTypes.h"
 #include "KnowledgeTypes.generated.h"
 
+class ASplineContainer;
 class AMainCharacter;
 class USplineComponent;
 
@@ -15,8 +16,8 @@ struct FSettableVector
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(BlueprintReadOnly) FVector Data = FVector(INFINITY, INFINITY, INFINITY);
-	UPROPERTY(BlueprintReadOnly) bool bIsSet = false;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) FVector Data = FVector(INFINITY, INFINITY, INFINITY);
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) bool bIsSet = false;
 	
 public:
 	void Set(const FVector& Vector);
@@ -27,13 +28,30 @@ public:
 };
 
 USTRUCT(BlueprintType)
+struct FSettableRotator
+{
+	GENERATED_BODY()
+	
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) FRotator Data = FRotator(INFINITY, INFINITY, INFINITY);
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) bool bIsSet = false;
+	
+public:
+	void Set(const FRotator& Rotator);
+	void UnSet();
+	const FRotator& Get() const;
+	bool IsSet() const;
+	void operator=(const FRotator& Rotator);
+};
+
+USTRUCT(BlueprintType)
 struct FSettableFloat
 {
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(BlueprintReadOnly) float Data = INFINITY;
-	UPROPERTY(BlueprintReadOnly) bool bIsSet	= false;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) float Data = INFINITY;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) bool bIsSet	= false;
 public:
 	void Set(float Float);
 	void UnSet();
@@ -49,8 +67,8 @@ struct FSettableInt
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(BlueprintReadOnly) int Data = 0;
-	UPROPERTY(BlueprintReadOnly) bool bIsSet = false;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) int Data = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) bool bIsSet = false;
 	
 public:
 	void Set(int Int);
@@ -65,7 +83,7 @@ struct FSettablePawn
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(BlueprintReadOnly) TObjectPtr<APawn> Data = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) TObjectPtr<APawn> Data = nullptr;
 public:
 	void Set(APawn* Object);
 	void UnSet();
@@ -79,13 +97,13 @@ struct FSettableSpline
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(BlueprintReadOnly) TObjectPtr<USplineComponent> Data = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) TObjectPtr<ASplineContainer> Data = nullptr;
 public:
-	void Set(USplineComponent* Object);
+	void Set(ASplineContainer* Object);
 	void UnSet();
-	USplineComponent* Get() const;
+	ASplineContainer* Get() const;
 	bool IsSet() const;
-	void operator=(USplineComponent* Object);
+	void operator=(ASplineContainer* Object);
 };
 
 USTRUCT(BlueprintType)
@@ -93,7 +111,7 @@ struct FSettableMainCharacter
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(BlueprintReadOnly) TObjectPtr<AMainCharacter> Data = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) TObjectPtr<AMainCharacter> Data = nullptr;
 public:
 	void Set(AMainCharacter* Object);
 	void UnSet();
@@ -108,8 +126,8 @@ struct FSettableAIStimulus
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(BlueprintReadOnly) FAIStimulus Data;
-	UPROPERTY(BlueprintReadOnly) bool bIsSet = false;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) FAIStimulus Data;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) bool bIsSet = false;
 public:
 	void Set(const FAIStimulus& Stimulus);
 	void UnSet();
@@ -124,8 +142,8 @@ struct FSettableTimerHandle
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(BlueprintReadOnly) FTimerHandle Data;
-	UPROPERTY(BlueprintReadOnly) bool bIsSet = false;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) FTimerHandle Data;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) bool bIsSet = false;
 public:
 	void Set(const FTimerHandle& Timer);
 	void UnSet();

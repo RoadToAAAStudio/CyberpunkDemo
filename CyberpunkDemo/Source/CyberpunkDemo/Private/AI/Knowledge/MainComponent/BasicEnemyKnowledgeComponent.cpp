@@ -6,7 +6,6 @@
 #include "AI/BasicEnemy/BasicEnemyController.h"
 #include "AI/Knowledge/AttributeBar.h"
 #include "AI/Knowledge/BasicEnemyPerceptionComponent.h"
-#include "AI/Knowledge/GoalGenerators.h"
 #include "Kismet/GameplayStatics.h"
 #include "MainCharacter/MainCharacter.h"
 #include "Perception/AISenseConfig_Hearing.h"
@@ -81,21 +80,6 @@ void UBasicEnemyKnowledgeComponent::TickComponent(float DeltaTime, ELevelTick Ti
 			PersonalKnowledge.DistanceFromPlayer = FVector::Distance(PersonalKnowledge.AgentLocation.Get(), Player->GetActorLocation());
 		}
 	}
-	
-	// Update Goals
-	{
-		for (auto& GoalGenerator : PersonalKnowledge.GoalGenerators)
-		{
-			if (GoalGenerator->CanBeGenerated())
-			{
-				GoalGenerator->Generate();
-			}
-			else
-			{
-				GoalGenerator->Destroy();
-			}
-		}
-	}
 }
 
 void UBasicEnemyKnowledgeComponent::Initialize(	UBasicEnemyPerceptionComponent* PerceptionComponentInput,
@@ -123,23 +107,24 @@ void UBasicEnemyKnowledgeComponent::Initialize(	UBasicEnemyPerceptionComponent* 
 	{
 		PersonalKnowledge.Agent = Cast<AController>(GetOwner())->GetPawn();
 		PersonalKnowledge.AgentSpawnLocation = PersonalKnowledge.Agent.Get()->GetActorLocation();
-
+		PersonalKnowledge.AgentSpawnRotation = PersonalKnowledge.Agent.Get()->GetActorRotation();
 		PersonalKnowledge.AgentState = EBasicEnemyState::Unaware;
 
 		ASplineContainer* SplineContainer = Cast<ABasicEnemy>(Cast<AController>(GetOwner())->GetPawn())->PatrolSpline;
-		PersonalKnowledge.PatrolSpline = SplineContainer? Cast<USplineComponent>(SplineContainer->GetComponentByClass(USplineComponent::StaticClass())) : nullptr;
-	}
-
-	// Initialize Generators
-	{
-		for (auto& GoalGenerator : PersonalKnowledge.GoalGenerators)
+		if (SplineContainer)
 		{
-			GoalGenerator->Initialize(this);
+			PersonalKnowledge.PatrolSpline = SplineContainer;
+			USplineComponent* Spline = SplineContainer->Spline;
+			int32 numberOfWaypoints = Spline->GetNumberOfSplinePoints();
+			for (int i = 0; i < numberOfWaypoints; i++)
+			{
+				PersonalKnowledge.PatrolWaypoints.Add(Spline->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::World));
+			}
 		}
 	}
 }
 
-void UBasicEnemyKnowledgeComponent::SetUpFromData(const FSensorsConfigData& SensorsConfigData, const TArray<TSubclassOf<UGoalGenerator>>& SupportedGoals)
+void UBasicEnemyKnowledgeComponent::SetUpFromData(const FSensorsConfigData& SensorsConfigData)
 {
 	// Set Up Sensors
 	{
@@ -155,14 +140,6 @@ void UBasicEnemyKnowledgeComponent::SetUpFromData(const FSensorsConfigData& Sens
 	// Set Up Knowledge
 	{
 
-	}
-	
-	// Set Up Goal Generators
-	{
-		for (const TSubclassOf<UGoalGenerator>& GoalGeneratorClass : SupportedGoals)
-		{
-			PersonalKnowledge.GoalGenerators.Add(NewObject<UGoalGenerator>(this, GoalGeneratorClass));
-		}
 	}
 }
 
@@ -250,9 +227,9 @@ void UBasicEnemyKnowledgeComponent::NotifyReceiveStimulus(AActor* Actor, const F
 		}
 		else
 		{
-			if (Stimulus.StimulusLocation == PersonalKnowledge.HeardStimulus.Get().StimulusLocation)
+			if (Stimulus.StimulusLocation == PersonalKnowledge.HeardStimulusLocation.Get())
 			{
-				PersonalKnowledge.HeardStimulus.UnSet();
+				PersonalKnowledge.HeardStimulusLocation.UnSet();
 			}
 			SoundForgotten(Stimulus);
 			OnSoundForgottenDelegate.Broadcast(PersonalKnowledge.Agent.Get(), Stimulus);
@@ -279,7 +256,7 @@ void UBasicEnemyKnowledgeComponent::NotifySightBarEmpty()
 
 void UBasicEnemyKnowledgeComponent::NotifyHearingBarFull()
 {
-	PersonalKnowledge.HeardStimulus.Set(TemporaryHeardStimulus);
+	PersonalKnowledge.HeardStimulusLocation.Set(TemporaryHeardStimulus.StimulusLocation);
 	SomethingHeard(TemporaryHeardStimulus);
 	OnSomethingHeardDelegate.Broadcast(PersonalKnowledge.Agent.Get(), TemporaryHeardStimulus);
 }

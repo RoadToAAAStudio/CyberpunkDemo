@@ -31,6 +31,34 @@ void FSettableVector::operator=(const FVector& Vector)
 	bIsSet = true;
 }
 
+// Rotator ------------------------------------------------------------------
+void FSettableRotator::Set(const FRotator& Rotator)
+{
+	Data = Rotator;
+	bIsSet = true;
+}
+
+void FSettableRotator::UnSet()
+{
+	bIsSet = false;
+}
+
+const FRotator& FSettableRotator::Get() const
+{
+	return Data;
+}
+
+bool FSettableRotator::IsSet() const
+{
+	return bIsSet;
+}
+
+void FSettableRotator::operator=(const FRotator& Rotator)
+{
+	Data = Rotator;
+	bIsSet = true;
+}
+
 
 // Float ---------------------------------------------------------------------
 void FSettableFloat::Set(float Float)
@@ -116,7 +144,7 @@ void FSettablePawn::operator=(APawn* Object)
 }
 
 // Settable Spline --------------------------------------------------------------
-void FSettableSpline::Set(USplineComponent* Object)
+void FSettableSpline::Set(ASplineContainer* Object)
 {
 	Data = Object;
 }
@@ -126,7 +154,7 @@ void FSettableSpline::UnSet()
 	Data = nullptr;
 }
 
-USplineComponent* FSettableSpline::Get() const
+ASplineContainer* FSettableSpline::Get() const
 {
 	return Data;
 }
@@ -136,7 +164,7 @@ bool FSettableSpline::IsSet() const
 	return Data != nullptr;
 }
 
-void FSettableSpline::operator=(USplineComponent* Object)
+void FSettableSpline::operator=(ASplineContainer* Object)
 {
 	Data = Object;
 }

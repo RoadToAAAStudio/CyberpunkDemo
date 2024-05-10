@@ -20,8 +20,10 @@ public:
 	// Sets default values for this actor's properties
 	ASplineContainer();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<USplineComponent> Spline;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) TObjectPtr<USplineComponent> Spline;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) float FirstPointDelayDuration;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) float SecondPointDelayDuration;
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

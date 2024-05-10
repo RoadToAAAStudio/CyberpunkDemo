@@ -42,12 +42,15 @@ EStateTreeRunStatus FStateTreeRunSTTask::Tick(FStateTreeExecutionContext& Contex
 void FStateTreeRunSTTask::ExitState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const
 {
     FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
-    
-    FStateTreeExecutionContext ChildContext(*Context.GetOwner(), *InstanceData.StateTreeRef.GetStateTree(), InstanceData.InstanceData);
-    if (SetContextRequirements(Context, ChildContext, true))
+
+    if (InstanceData.StateTreeRef.IsValid())
     {
-        ChildContext.SetParameters(InstanceData.StateTreeRef.GetParameters());
-        ChildContext.Stop();
+        FStateTreeExecutionContext ChildContext(*Context.GetOwner(), *InstanceData.StateTreeRef.GetStateTree(), InstanceData.InstanceData);
+        if (SetContextRequirements(Context, ChildContext, true))
+        {
+            ChildContext.SetParameters(InstanceData.StateTreeRef.GetParameters());
+            ChildContext.Stop();
+        }
     }
 }
 

@@ -7,5 +7,4 @@ void USettableStateTreeComponent::SetTree(UStateTree* TargetTree)
 {
 	StopLogic("StateTree Changed");
 	StateTreeRef.SetStateTree(TargetTree);
-	StartLogic();
 }
