@@ -23,15 +23,6 @@ enum class EAIZoneState : uint8
 	Max UMETA(Hidden)
 };
 
-USTRUCT(BlueprintType)
-struct FAIZoneMapping : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	EAIZoneState StateEnum = EAIZoneState::Unaware;
-};
-
 USTRUCT(Blueprintable)
 struct FBasicEnemySharedKnowledge
 {
@@ -42,37 +33,37 @@ struct FBasicEnemySharedKnowledge
 	 * This is set if AIZone is in Unaware or Alerted State and some BasicEnemy sees the player
 	 * This is unset Combat state is exited
 	 */
-	UPROPERTY(BlueprintReadOnly)	FSettablePawn Player;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FSettablePawn Player;
 
 	/*
 	 * The Combat Timer is Set when CurrentState is Combat and the Player is in no BasicEnemy SightCone
 	 * This is cleared if the CurrentState is Combat and the Player enters some BasicEnemySightCone
 	 */
-	UPROPERTY(BlueprintReadOnly)	FSettableTimerHandle CombatTimer;
-	UPROPERTY(BlueprintReadOnly)	FSettableFloat CombatTimerDuration;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FSettableTimerHandle CombatTimer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FSettableFloat CombatTimerDuration;
 
 
 	/*
 	 * The Alerted Timer is Set when Alerted is entered
 	 * this is cleared if the Current State is Alerted and the Player is seen
 	 */
-	UPROPERTY(BlueprintReadOnly)	FSettableTimerHandle AlertedTimer;
-	UPROPERTY(BlueprintReadOnly)	FSettableFloat AlertedTimerDuration;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FSettableTimerHandle AlertedTimer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FSettableFloat AlertedTimerDuration;
 	
 	/*
 	 * Increased/Decreased when the player enters/exits a sight cone
 	 */
-	UPROPERTY(BlueprintReadOnly)	FSettableInt NumberOfSightConesThePlayerIsIn;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FSettableInt NumberOfSightConesThePlayerIsIn;
 
 	/*
 	 * List of Enemies (spawned) in the TriggerBox
 	 */
-	UPROPERTY(BlueprintReadOnly)	TArray<TObjectPtr<ABasicEnemy>> Enemies;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	TArray<TObjectPtr<ABasicEnemy>> Enemies;
 
 	/*
 	 * List of Cover Points (Spawned) in the TriggerBox
 	 */
-	UPROPERTY(BlueprintReadOnly)	TArray<TObjectPtr<ALocation>> CoverLocations;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	TMap<FVector, TObjectPtr<ALocation>> CoverPerLocations;
 	
 	/*
 	 * This reflects AIZone State Tree current state
@@ -85,7 +76,7 @@ struct FBasicEnemySharedKnowledge
 	 *			To Combat: if some BasicEnemy sees the player
 	 *			To Unaware: if the alerted timer expires
 	 */
-	UPROPERTY(BlueprintReadOnly)	EAIZoneState AIZoneState;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	EAIZoneState AIZoneState;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam		(FOnPlayerSensedSignature,				const APawn*, Owner);

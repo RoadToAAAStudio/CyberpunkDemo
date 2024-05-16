@@ -47,7 +47,6 @@ void UEnvQueryGenerator_ActorPositions::GenerateItems(FEnvQueryInstance& QueryIn
 	{
 		TArray<FVector> ContextLocations;
 		QueryInstance.PrepareContext(SearchCenter, ContextLocations);
-
 		SearchRadius.BindData(QueryOwner, QueryInstance.QueryID);
 		const float RadiusValue = SearchRadius.GetValue();
 		const float RadiusSq = FMath::Square(RadiusValue);

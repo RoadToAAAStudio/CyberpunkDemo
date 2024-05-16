@@ -321,7 +321,7 @@ void AAIZone::NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* Overlapped
 	if (Cast<ALocation>(OtherActor))
 	{
 		ALocation* Location = Cast<ALocation>(OtherActor);
-		SharedKnowledge.CoverLocations.Add(Location);
+		SharedKnowledge.CoverPerLocations.Add(Location->GetActorLocation(), Location);
 	}
 	else if (Cast<ABasicEnemy>(OtherActor))
 	{
