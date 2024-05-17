@@ -110,13 +110,13 @@ public:
 	UPROPERTY(EditAnywhere) float AlertedTimerDuration;
 #pragma endregion
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite) FBasicEnemySharedKnowledge SharedKnowledge;
 private:
 #pragma region PERSONAL_COMPONENTS
 	UPROPERTY(EditAnywhere) TObjectPtr<UBoxComponent>		BoxTrigger;
 	UPROPERTY(EditAnywhere) TObjectPtr<UStateTreeComponent>	StateMachine;
 #pragma endregion
 
-	FBasicEnemySharedKnowledge SharedKnowledge;
 
 public:
 	AAIZone();

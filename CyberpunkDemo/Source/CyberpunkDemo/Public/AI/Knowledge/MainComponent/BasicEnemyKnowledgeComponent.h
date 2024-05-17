@@ -26,6 +26,24 @@ enum class EBasicEnemyState : uint8
 	Max UMETA(Hidden)
 };
 
+UENUM(BlueprintType, Blueprintable)
+enum class EBasicEnemyBehaviour : uint8
+{
+	None,
+	Idle,
+	ReturnToSpawnPoint,
+	Patrol,
+	BlindInvestigation,
+	Investigation,
+	Shoot,
+	QuickMeleeAttack,
+	ThrowGrenade,
+	MoveToCover,
+	ShootFromCover,
+	ThrowGrenadeFromCover,
+	Max UMETA(Hidden)
+};
+
 USTRUCT(Blueprintable)
 struct FBasicEnemyPersonalKnowledge
 {
@@ -37,6 +55,7 @@ struct FBasicEnemyPersonalKnowledge
     UPROPERTY(EditAnywhere, BlueprintReadWrite) FSettableRotator			        AgentSpawnRotation;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FSettableFloat			            AgentDistanceFromSpawn;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) EBasicEnemyState				    AgentState;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) EBasicEnemyBehaviour				AgentBehaviour;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FVector>						PatrolWaypoints;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FSettableSpline				        PatrolSpline;
@@ -105,7 +124,7 @@ public:
 	void Initialize(UBasicEnemyPerceptionComponent* PerceptionComponent,
 					ABasicEnemyController* BasicEnemyController,
 					AAIZone* AIZone);
-	// UFUNCTION(BlueprintCallable) FBasicEnemyPersonalKnowledge& GetPersonalKnowledge();
+
 	UFUNCTION(BlueprintCallable) const AAIZone* GetAIZone() const;
 	
 #pragma region SENSORS_PUBLIC_CONTROLS

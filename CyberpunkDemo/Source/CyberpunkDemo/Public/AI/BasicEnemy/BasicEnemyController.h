@@ -13,24 +13,6 @@ class UBasicEnemyKnowledgeComponent;
 class UBasicEnemyPerceptionComponent;
 enum class EBasicEnemyState : uint8;
 
-UENUM(BlueprintType, Blueprintable)
-enum class EBasicEnemyBehaviour : uint8
-{
-	None,
-	Idle,
-	ReturnToSpawnPoint,
-	Patrol,
-	BlindInvestigation,
-	Investigation,
-	Shoot,
-	QuickMeleeAttack,
-	ThrowGrenade,
-	MoveToCover,
-	ShootFromCover,
-	ThrowGrenadeFromCover,
-	Max UMETA(Hidden)
-};
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams	(FOnStateChangedSignature, EBasicEnemyState, SourceState, EBasicEnemyState, NextState);
 
 /**
