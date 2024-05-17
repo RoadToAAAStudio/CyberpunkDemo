@@ -14,24 +14,6 @@ struct FKnowledgeConfigData;
 class USettableStateTreeComponent;
 class ABasicEnemyController;
 
-UENUM(BlueprintType, Blueprintable)
-enum class EBasicEnemyBehaviour : uint8
-{
-	None,
-	Idle,
-	ReturnToSpawnPoint,
-	Patrol,
-	BlindInvestigation,
-	Investigation,
-	Shoot,
-	QuickMeleeAttack,
-	ThrowGrenade,
-	MoveToCover,
-	ShootFromCover,
-	ThrowGrenadeFromCover,
-	Max UMETA(Hidden)
-};
-
 UCLASS()
 class CYBERPUNKDEMO_API ABasicEnemy : public ACharacter
 {

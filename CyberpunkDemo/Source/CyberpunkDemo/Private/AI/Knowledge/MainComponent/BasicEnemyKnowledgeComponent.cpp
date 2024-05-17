@@ -143,10 +143,10 @@ void UBasicEnemyKnowledgeComponent::SetUpFromData(const FSensorsConfigData& Sens
 	}
 }
 
-const FBasicEnemyPersonalKnowledge& UBasicEnemyKnowledgeComponent::GetPersonalKnowledge() const
-{
-	return PersonalKnowledge;
-}
+// FBasicEnemyPersonalKnowledge& UBasicEnemyKnowledgeComponent::GetPersonalKnowledge()
+// {
+// 	return PersonalKnowledge;
+// }
 const AAIZone* UBasicEnemyKnowledgeComponent::GetAIZone() const
 {
 	return AIZone;

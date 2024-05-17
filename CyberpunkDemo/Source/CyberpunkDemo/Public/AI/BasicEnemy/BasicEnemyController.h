@@ -13,14 +13,24 @@ class UBasicEnemyKnowledgeComponent;
 class UBasicEnemyPerceptionComponent;
 enum class EBasicEnemyState : uint8;
 
-// DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerEnteredInSightCone, const ABasicEnemyController*, Controller);
-// DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerExitedFromSightCone, const ABasicEnemyController*, Controller);
-// DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerSeenSignature, const ABasicEnemyController*, Controller);
-// DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSomethingWasHeardSignature, const FAIStimulus, Stimulus);
-// DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSightSenseToggleSignature, const bool, Enabled);
-// DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHearingSenseToggleSignature, const bool, Enabled);
-// DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGoalsChanged, const TSet<EBasicEnemyGoalType>&, NewGoals, const TSet<EBasicEnemyGoalType>&, RemovedGoal);
-// DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBasicEnemyStateChangedSignature, EBasicEnemyState, SourceState, EBasicEnemyState, NewState);
+UENUM(BlueprintType, Blueprintable)
+enum class EBasicEnemyBehaviour : uint8
+{
+	None,
+	Idle,
+	ReturnToSpawnPoint,
+	Patrol,
+	BlindInvestigation,
+	Investigation,
+	Shoot,
+	QuickMeleeAttack,
+	ThrowGrenade,
+	MoveToCover,
+	ShootFromCover,
+	ThrowGrenadeFromCover,
+	Max UMETA(Hidden)
+};
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams	(FOnStateChangedSignature, EBasicEnemyState, SourceState, EBasicEnemyState, NextState);
 
 /**

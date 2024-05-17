@@ -73,8 +73,8 @@ public:
 	UPROPERTY(BlueprintReadOnly)	TObjectPtr<UAttributeBar> SightBar;
 	UPROPERTY(BlueprintReadOnly)	TObjectPtr<UAttributeBar> HearingBar;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite) FBasicEnemyPersonalKnowledge PersonalKnowledge;
 private:
-	UPROPERTY(EditDefaultsOnly) FBasicEnemyPersonalKnowledge PersonalKnowledge;
 #pragma region INJECTED_DEPENDENCIES
 	UPROPERTY()	UBasicEnemyPerceptionComponent* PerceptionComponent = nullptr;
 	UPROPERTY() ABasicEnemyController* BasicEnemyController = nullptr;
@@ -105,7 +105,7 @@ public:
 	void Initialize(UBasicEnemyPerceptionComponent* PerceptionComponent,
 					ABasicEnemyController* BasicEnemyController,
 					AAIZone* AIZone);
-	UFUNCTION(BlueprintCallable) const FBasicEnemyPersonalKnowledge& GetPersonalKnowledge() const;
+	// UFUNCTION(BlueprintCallable) FBasicEnemyPersonalKnowledge& GetPersonalKnowledge();
 	UFUNCTION(BlueprintCallable) const AAIZone* GetAIZone() const;
 	
 #pragma region SENSORS_PUBLIC_CONTROLS
