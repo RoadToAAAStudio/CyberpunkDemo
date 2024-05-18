@@ -120,7 +120,6 @@ private:
 
 public:
 	AAIZone();
-	UFUNCTION(BlueprintCallable) const FBasicEnemySharedKnowledge& GetSharedKnowledge() const;
 
 #pragma region INTERFACE_METHODS
 	void GetChangeOfState_Implementation(const FName& SourceStateName, const FName& NextStateName) override;
@@ -149,106 +148,4 @@ private:
 	UFUNCTION()	void NotifyPlayerExitedInSightCone(const APawn* PawnOwner);
 	UFUNCTION()	void NotifyPlayerWasSeen(const APawn* PawnOwner);
 #pragma endregion
-// protected:
-// #pragma region PERSONAL_COMPONENTS
-// 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Personal")
-// 	TObjectPtr<UBoxComponent> BoxTrigger;
-// 	
-// 	UPROPERTY(EditAnywhere, Instanced, Category = "Personal")
-// 	TObjectPtr<UStateTreeComponent> StateTree;
-// #pragma endregion
-//
-// #pragma region SHARED_KNOWLEDGE
-// 	UPROPERTY()
-// 	FBasicEnemySharedKnowledge SharedKnowledge;
-// #pragma endregion
-// 	
-// public:	
-// 	// Sets default values for this actor's properties
-// 	AAIZone();
-// 	
-// #pragma region SHARED_KNOWLEDGE_GETTERS
-// 	// UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
-// 	// AActor* GetPlayer() const;
-// 	//
-// 	// UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
-// 	// FTimerHandle GetCombatTimerHandle() const;
-// 	//
-// 	// UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
-// 	// FTimerHandle GetAlertedTimerHandle() const;
-// 	//
-// 	// UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
-// 	// int GetNumberOfSightConesThePlayerIsIn() const; 
-// 	//
-// 	// UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
-// 	// TArray<ABasicEnemy*> GetEnemies() const;
-// 	//
-// 	// UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
-// 	// TArray<ALocation*> GetCoverLocations() const;
-// 	//
-// 	// UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Shared | Knowledge")
-// 	// EAIZoneState GetCurrentState() const;
-//
-// 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Knowledge | Personal")
-// 	const FBasicEnemySharedKnowledge& GetSharedKnowledge() const;
-// #pragma endregion
-// 	
-// 	// StateTree notifications acceptor
-// 	void AcceptStateTreeNotification_Implementation(const FName& SourceStateName, const FName& CurrentStateName) override;
-// 	
-// protected:
-//
-// #pragma region BLUEPRINT_EVENTS
-// 	// Hook for Derived Blueprints when a StateTree's state change
-// 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnPlayerIsSensed"))
-// 	void PlayerIsSensed();
-//
-// 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnPlayerIsForgotten"))
-// 	void PlayerIsForgotten();
-//
-// 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnCombatTimerStarted"))
-// 	void CombatTimerStarted();
-//
-// 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnCombatTimerFinished"))
-// 	void CombatTimerFinished();
-//
-// 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnAlertedTimerStarted"))
-// 	void AlertedTimerStarted();
-//
-// 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnAlertedTimerFinished"))
-// 	void AlertedTimerFinished();
-//
-// 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnPlayerIsInNoSightCone"))
-// 	void PlayerIsInNoSightCone();
-// 	
-// 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnStateChanged"))
-// 	void StateChanged(const EAIZoneState SourceState, const EAIZoneState NewState);
-// #pragma endregion
-// 	
-// private:
-//
-// #pragma region FUNCTIONS_LISTENERS
-// 	// Function listeners
-// 	UFUNCTION()
-// 	void NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
-// 	
-// 	UFUNCTION()
-// 	void NotifyPlayerEnteredInSightCone(const ABasicEnemyController* Controller);
-//
-// 	UFUNCTION()
-// 	void NotifyPlayerExitedInSightCone(const ABasicEnemyController* Controller);
-// 	
-// 	UFUNCTION()
-// 	void NotifyPlayerWasSeen(const ABasicEnemyController* Controller);
-// #pragma endregion 
-//
-// #pragma region FUNCTIONS_OVERRIDES	
-// public:	
-// 	// Called every frame
-// 	virtual void Tick(float DeltaTime) override;
-//
-// protected:
-// 	// Called when the game starts or when spawned
-// 	virtual void BeginPlay() override;
-// #pragma endregion 
 };

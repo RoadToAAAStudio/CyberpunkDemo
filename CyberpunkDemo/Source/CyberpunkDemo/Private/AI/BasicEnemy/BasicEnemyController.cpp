@@ -122,26 +122,42 @@ void ABasicEnemyController::NotifyPlayerWasSeen(const APawn* Notifier)
 	 * This means that it will be called twice on the actor who actually saw the Player
 	 * So the message to the StateTree should be called only once
 	 */
-	StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.PlayerWasSeen")));
+	if (StateMachine->IsRunning())
+	{
+		StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.PlayerWasSeen")));
+	}
 }
 
 void ABasicEnemyController::NotifyCombatTimerFinished()
 {
-	StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.CombatTimerFinished")));
+	if (StateMachine->IsRunning())
+	{
+		
+		StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.CombatTimerFinished")));
+	}
 }
 
 void ABasicEnemyController::NotifyAlertedTimerFinished()
 {
-	StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.AlertedTimerFinished")));
+	if (StateMachine->IsRunning())
+	{
+		StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.AlertedTimerFinished")));
+	}
 }
 
 void ABasicEnemyController::NotifySomethingWasHeard(const APawn* Notifier, const FAIStimulus Stimulus)
 {
-	StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.SomethingWasHeard")));
+	if (StateMachine->IsRunning())
+	{
+		StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.SomethingWasHeard")));
+	}
 }
 
 void ABasicEnemyController::NotifySoundForgotten(const APawn* Notifier, const FAIStimulus Stimulus)
 {
-	StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.SoundForgotten")));
+	if (StateMachine->IsRunning())
+	{
+		StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.SoundForgotten")));
+	}
 }
 #pragma endregion 

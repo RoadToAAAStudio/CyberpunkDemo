@@ -224,9 +224,8 @@ void FSettableAIStimulus::operator=(const FAIStimulus& Stimulus)
 }
 
 // TimerHandle -------------------------------------------------------------------
-void FSettableTimerHandle::Set(const FTimerHandle& Timer)
+void FSettableTimerHandle::Set()
 {
-	Data = Timer;
 	bIsSet = true;
 }
 
@@ -243,10 +242,4 @@ FTimerHandle& FSettableTimerHandle::Get()
 bool FSettableTimerHandle::IsSet() const
 {
 	return Data.IsValid();
-}
-
-void FSettableTimerHandle::operator=(const FTimerHandle& Timer)
-{
-	Data = Timer;
-	bIsSet = true;
 }

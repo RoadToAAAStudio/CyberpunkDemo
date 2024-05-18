@@ -145,9 +145,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTimerHandle Data;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bIsSet = false;
 public:
-	void Set(const FTimerHandle& Timer);
+	void Set();
 	void UnSet();
 	FTimerHandle& Get();
 	bool IsSet() const;
-	void operator=(const FTimerHandle& Timer);
 };
