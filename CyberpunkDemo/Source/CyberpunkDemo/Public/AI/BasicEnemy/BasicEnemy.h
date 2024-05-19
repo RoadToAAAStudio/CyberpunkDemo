@@ -10,7 +10,6 @@
 class UBasicEnemyConfigData;
 class UStateTree;
 class AAIZone;
-struct FKnowledgeConfigData;
 class USettableStateTreeComponent;
 class ABasicEnemyController;
 

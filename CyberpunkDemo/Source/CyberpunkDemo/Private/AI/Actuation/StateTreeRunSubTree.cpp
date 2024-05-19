@@ -1,7 +1,6 @@
 #include "AI/Actuation/StateTreeRunSubTree.h"
 #include "VisualLogger/VisualLogger.h"
 #include "StateTreeExecutionContext.h"
-#include "AI/BasicEnemy/BasicEnemy.h"
 
 #define STATETREE_LOG(Verbosity, Format, ...) UE_VLOG(Context.GetOwner(), LogStateTree, Verbosity, Format, ##__VA_ARGS__)
 #define STATETREE_CLOG(Condition, Verbosity, Format, ...) UE_CVLOG((Condition), Context.GetOwner(), LogStateTree, Verbosity, Format, ##__VA_ARGS__)
@@ -9,6 +8,32 @@
 EStateTreeRunStatus FStateTreeRunSTTask::EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const
 {
     FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
+
+    if (!InstanceData.StateTreeRef.IsValid())
+    {
+        if (InstanceData.State == EBasicEnemyState::None && InstanceData.Behaviour == EBasicEnemyBehaviour::None)
+        {
+            return EStateTreeRunStatus::Failed;
+        }
+
+        FStateTreeReference* StateTreeRef = nullptr;
+        if (InstanceData.ConfigData && InstanceData.ConfigData->BrainConfigData)
+        {
+            if (InstanceData.State != EBasicEnemyState::None)
+            {
+                StateTreeRef = InstanceData.ConfigData->BrainConfigData->States.Find(InstanceData.State);
+            }
+            else
+            {
+                StateTreeRef = InstanceData.ConfigData->BrainConfigData->Behaviours.Find(InstanceData.Behaviour);
+            }
+        }
+
+        if (StateTreeRef != nullptr)
+        {
+            InstanceData.StateTreeRef = *StateTreeRef;
+        }
+    }
     
     if (!InstanceData.StateTreeRef.IsValid())
     {

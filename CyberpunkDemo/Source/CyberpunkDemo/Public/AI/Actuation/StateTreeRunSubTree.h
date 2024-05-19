@@ -1,8 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "StateTreeReference.h"
 #include "StateTreeInstanceData.h"
+#include "AI/BasicEnemy/BasicEnemyConfigData.h"
 #include "Blueprint/StateTreeTaskBlueprintBase.h"
 #include "StateTreeRunSubTree.generated.h"
 
@@ -15,8 +15,17 @@ USTRUCT()
 struct CYBERPUNKDEMO_API FStateTreeRunSTTaskInstanceData
 {
     GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category = "Parameter")
+	EBasicEnemyState State = EBasicEnemyState::None;
+
+	UPROPERTY(EditAnywhere, Category = "Parameter")
+	EBasicEnemyBehaviour Behaviour = EBasicEnemyBehaviour::None;
+
+	UPROPERTY(EditAnywhere, Category = "Parameter")
+	TObjectPtr<UBasicEnemyConfigData> ConfigData;
 	
-	UPROPERTY(EditAnywhere, Category = "Parameter", meta=(Schema="/Script/GameplayStateTreeModule.StateTreeComponentSchema"))
+	UPROPERTY(EditAnywhere, Category = "Parameter")
 	FStateTreeReference StateTreeRef;
 
     UPROPERTY(Transient)

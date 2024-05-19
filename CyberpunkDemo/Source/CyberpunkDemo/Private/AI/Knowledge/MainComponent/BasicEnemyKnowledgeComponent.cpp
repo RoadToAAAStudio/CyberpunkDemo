@@ -124,17 +124,17 @@ void UBasicEnemyKnowledgeComponent::Initialize(	UBasicEnemyPerceptionComponent* 
 	}
 }
 
-void UBasicEnemyKnowledgeComponent::SetUpFromData(const FSensorsConfigData& SensorsConfigData)
+void UBasicEnemyKnowledgeComponent::SetUpFromData(const UBasicEnemySensorsData* SensorsConfigData)
 {
 	// Set Up Sensors
 	{
-		SightBaseIncreaseRate		= SensorsConfigData.SightBaseIncreaseRate;			
-		SightBaseDecreaseRate		= SensorsConfigData.SightBaseDecreaseRate;			
-		SightCrouchMultiplier		= SensorsConfigData.SightCrouchMultiplier;			
-		SightDistanceMinMultiplier	= SensorsConfigData.SightDistanceMinMultiplier;	
-		SightDistanceMaxMultiplier	= SensorsConfigData.SightDistanceMaxMultiplier;
+		SightBaseIncreaseRate		= SensorsConfigData->SightBaseIncreaseRate;			
+		SightBaseDecreaseRate		= SensorsConfigData->SightBaseDecreaseRate;			
+		SightCrouchMultiplier		= SensorsConfigData->SightCrouchMultiplier;			
+		SightDistanceMinMultiplier	= SensorsConfigData->SightDistanceMinMultiplier;	
+		SightDistanceMaxMultiplier	= SensorsConfigData->SightDistanceMaxMultiplier;
 
-		HearingBaseDecreaseRate		= SensorsConfigData.HearingBaseDecreaseRate;
+		HearingBaseDecreaseRate		= SensorsConfigData->HearingBaseDecreaseRate;
 	}
 
 	// Set Up Knowledge

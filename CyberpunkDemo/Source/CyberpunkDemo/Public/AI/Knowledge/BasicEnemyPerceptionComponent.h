@@ -6,8 +6,7 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "BasicEnemyPerceptionComponent.generated.h"
 
-
-struct FPerceptionConfigData;
+class UBasicEnemyPerceptionData;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CYBERPUNKDEMO_API UBasicEnemyPerceptionComponent : public UAIPerceptionComponent
@@ -15,7 +14,7 @@ class CYBERPUNKDEMO_API UBasicEnemyPerceptionComponent : public UAIPerceptionCom
 	GENERATED_BODY()
 
 public:
-	void SetUpFromData(const FPerceptionConfigData& PerceptionConfigData);
+	void SetUpFromData(const UBasicEnemyPerceptionData* PerceptionConfigData);
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)		TArray<UAISenseConfig*>&	GetSenses();
 	UFUNCTION(BlueprintCallable, BlueprintPure)		UAISenseConfig*				GetSense(TSubclassOf<UAISenseConfig> Type);

@@ -60,17 +60,21 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 		if (ConfigData)
 		{
 			// Initialization of Perception Component
-			if (Cast<UBasicEnemyPerceptionComponent>(GetPerceptionComponent()))
+			if (Cast<UBasicEnemyPerceptionComponent>(GetPerceptionComponent()) && ConfigData->PerceptionConfigData)
 			{
 				Cast<UBasicEnemyPerceptionComponent>(GetPerceptionComponent())->SetUpFromData(ConfigData->PerceptionConfigData);
 			}
 			// Initialization of Knowledge Component From Data
-			if (KnowledgeComponent)
+			if (KnowledgeComponent && ConfigData->SensorsConfigData)
 			{
 				KnowledgeComponent->SetUpFromData(ConfigData->SensorsConfigData);
 			}
 
-			StateMachine->SetTree(ConfigData->Behaviour);
+			// Initialization of Brain
+			if (ConfigData->BrainConfigData)
+			{
+				StateMachine->SetTree(ConfigData->BrainConfigData->Brain.GetMutableStateTree());
+			}
 		}
 	}
 

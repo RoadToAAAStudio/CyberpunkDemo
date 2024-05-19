@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AI/BasicEnemy/BasicEnemyConfigData.h"
 #include "Components/StateTreeComponent.h"
 #include "SettableStateTreeComponent.generated.h"
 
