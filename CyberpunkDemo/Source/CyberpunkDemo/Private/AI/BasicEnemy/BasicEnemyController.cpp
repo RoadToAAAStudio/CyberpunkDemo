@@ -80,18 +80,23 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 
 	// Hook to AIZone
 	{
-
-		BasicEnemy->AIZone->OnPlayerIsSensedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyPlayerWasSeen);
-		BasicEnemy->AIZone->OnCombatTimerFinishedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyCombatTimerFinished);
-		BasicEnemy->AIZone->OnAlertedTimerFinishedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyAlertedTimerFinished);
+		if (BasicEnemy->AIZone)
+		{
+			BasicEnemy->AIZone->OnPlayerIsSensedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyPlayerWasSeen);
+			BasicEnemy->AIZone->OnCombatTimerFinishedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyCombatTimerFinished);
+			BasicEnemy->AIZone->OnAlertedTimerFinishedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyAlertedTimerFinished);
+		}
 	}
 	
 	// Initialization of Knowledge Component
 	{
-		KnowledgeComponent->Initialize(Cast<UBasicEnemyPerceptionComponent>(PerceptionComponent), this, BasicEnemy->AIZone);
-		KnowledgeComponent->OnPlayerSeenDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyPlayerWasSeen);
-		KnowledgeComponent->OnSomethingHeardDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifySomethingWasHeard);
-		KnowledgeComponent->OnSoundForgottenDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifySoundForgotten);
+		if (KnowledgeComponent)
+		{
+			KnowledgeComponent->Initialize(Cast<UBasicEnemyPerceptionComponent>(PerceptionComponent), this, BasicEnemy->AIZone);
+			KnowledgeComponent->OnPlayerSeenDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyPlayerWasSeen);
+			KnowledgeComponent->OnSomethingHeardDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifySomethingWasHeard);
+			KnowledgeComponent->OnSoundForgottenDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifySoundForgotten);
+		}
 	}
 
 	// Initialize State Machine
