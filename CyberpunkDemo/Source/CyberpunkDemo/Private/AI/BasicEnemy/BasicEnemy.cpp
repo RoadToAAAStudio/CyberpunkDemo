@@ -9,12 +9,6 @@ void ABasicEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BasicEnemyController = Cast<ABasicEnemyController>(GetController());
-	if (BasicEnemyController)
-	{
-		BasicEnemyController->Initialize(this);
-	}
-	
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABasicEnemy::NotifySomethingEnteredInTheTrigger);
 }
 
@@ -24,6 +18,12 @@ void ABasicEnemy::NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* Overla
 	if (Cast<AAIZone>(OtherActor))
 	{
 		this->AIZone = Cast<AAIZone>(OtherActor);
+	}
+
+	BasicEnemyController = Cast<ABasicEnemyController>(GetController());
+	if (BasicEnemyController)
+	{
+		BasicEnemyController->Initialize(this);
 	}
 }
 #pragma endregion 

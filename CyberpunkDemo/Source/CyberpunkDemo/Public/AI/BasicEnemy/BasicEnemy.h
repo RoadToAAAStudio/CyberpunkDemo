@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "BasicEnemy.generated.h"
 
+class UAIWeaponConfigData;
 class UBasicEnemyConfigData;
 class UStateTree;
 class AAIZone;
@@ -25,7 +26,7 @@ public:
 #pragma region DEFINE_ARCHETYPE
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")	TObjectPtr<UBasicEnemyConfigData> ConfigData;
 #pragma endregion
-	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "AI") TObjectPtr<UAIWeaponConfigData> WeaponConfig;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")	TObjectPtr<ASplineContainer> PatrolSpline;
 #pragma endregion
 
