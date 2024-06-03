@@ -30,9 +30,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")	TObjectPtr<ASplineContainer> PatrolSpline;
 #pragma endregion
 
-private:
-
 public:
+	ABasicEnemy();
+	UFUNCTION(BlueprintCallable) void RegisterAIZone(AAIZone* NewAIZone);
+	
+	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
 
 private:

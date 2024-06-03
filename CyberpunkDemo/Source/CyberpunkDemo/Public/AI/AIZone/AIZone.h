@@ -110,16 +110,18 @@ public:
 	UPROPERTY(EditAnywhere) float AlertedTimerDuration;
 #pragma endregion
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite) FBasicEnemySharedKnowledge SharedKnowledge;
-private:
 #pragma region PERSONAL_COMPONENTS
-	UPROPERTY(EditAnywhere) TObjectPtr<UBoxComponent>		BoxTrigger;
-	UPROPERTY(EditAnywhere) TObjectPtr<UStateTreeComponent>	StateMachine;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UBoxComponent>		BoxTrigger;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStateTreeComponent>	StateMachine;
 #pragma endregion
-
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite) FBasicEnemySharedKnowledge SharedKnowledge;
 
 public:
 	AAIZone();
+
+	UFUNCTION(BlueprintCallable) void RegisterBasicEnemy(ABasicEnemy* NewBasicEnemy);
+	UFUNCTION(BlueprintCallable) void RegisterCover(ALocation* NewCover);
 
 #pragma region INTERFACE_METHODS
 	void GetChangeOfState_Implementation(const FName& SourceStateName, const FName& NextStateName) override;

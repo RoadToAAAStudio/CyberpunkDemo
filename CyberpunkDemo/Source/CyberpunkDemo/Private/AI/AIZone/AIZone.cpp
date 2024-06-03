@@ -16,8 +16,31 @@ AAIZone::AAIZone()
 
 	StateMachine = CreateDefaultSubobject<UStateTreeComponent>(TEXT("StateTree"));
 	BoxTrigger = CreateDefaultSubobject<UBoxComponent>("BoxTrigger");
-	bGenerateOverlapEventsDuringLevelStreaming = true;
-	BoxTrigger->OnComponentBeginOverlap.AddDynamic(this, &AAIZone::NotifySomethingEnteredInTheTrigger);
+	// bGenerateOverlapEventsDuringLevelStreaming = true;
+	// BoxTrigger->OnComponentBeginOverlap.AddDynamic(this, &AAIZone::NotifySomethingEnteredInTheTrigger);
+}
+
+void AAIZone::RegisterBasicEnemy(ABasicEnemy* NewBasicEnemy)
+{
+	if (NewBasicEnemy == nullptr) return;
+
+	SharedKnowledge.Enemies.AddUnique(NewBasicEnemy);
+
+	ABasicEnemyController* EnemyController = Cast<ABasicEnemyController>(NewBasicEnemy->GetController());
+	if (EnemyController)
+	{
+		EnemyController->KnowledgeComponent->OnPlayerEnteredSightConeDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerEnteredInSightCone);
+		EnemyController->KnowledgeComponent->OnPlayerExitedSightConeDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerExitedInSightCone);
+		EnemyController->KnowledgeComponent->OnPlayerSeenDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerWasSeen);
+	}
+}
+
+void AAIZone::RegisterCover(ALocation* NewCover)
+{
+	if (NewCover == nullptr) return;
+
+	ALocation* Location = Cast<ALocation>(NewCover);
+	SharedKnowledge.CoverPerLocations.Add(Location->GetActorLocation(), Location);
 }
 
 void AAIZone::GetChangeOfState_Implementation(const FName& SourceStateName, const FName& CurrentStateName)
@@ -98,24 +121,24 @@ void AAIZone::BeginPlay()
 #pragma region FUNCTIONS_LISTENERS
 void AAIZone::NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (Cast<ALocation>(OtherActor))
-	{
-		ALocation* Location = Cast<ALocation>(OtherActor);
-		SharedKnowledge.CoverPerLocations.Add(Location->GetActorLocation(), Location);
-	}
-	else if (Cast<ABasicEnemy>(OtherActor))
-	{
-		ABasicEnemy* Enemy = Cast<ABasicEnemy>(OtherActor);
-		SharedKnowledge.Enemies.Add(Enemy);
-		
-		ABasicEnemyController* EnemyController = Cast<ABasicEnemyController>(Enemy->GetController());
-		if (EnemyController)
-		{
-			EnemyController->KnowledgeComponent->OnPlayerEnteredSightConeDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerEnteredInSightCone);
-			EnemyController->KnowledgeComponent->OnPlayerExitedSightConeDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerExitedInSightCone);
-			EnemyController->KnowledgeComponent->OnPlayerSeenDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerWasSeen);
-		}
-	}
+	// if (Cast<ALocation>(OtherActor))
+	// {
+	// 	ALocation* Location = Cast<ALocation>(OtherActor);
+	// 	SharedKnowledge.CoverPerLocations.Add(Location->GetActorLocation(), Location);
+	// }
+	// else if (Cast<ABasicEnemy>(OtherActor))
+	// {
+	// 	ABasicEnemy* Enemy = Cast<ABasicEnemy>(OtherActor);
+	// 	SharedKnowledge.Enemies.Add(Enemy);
+	// 	
+	// 	ABasicEnemyController* EnemyController = Cast<ABasicEnemyController>(Enemy->GetController());
+	// 	if (EnemyController)
+	// 	{
+	// 		EnemyController->KnowledgeComponent->OnPlayerEnteredSightConeDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerEnteredInSightCone);
+	// 		EnemyController->KnowledgeComponent->OnPlayerExitedSightConeDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerExitedInSightCone);
+	// 		EnemyController->KnowledgeComponent->OnPlayerSeenDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerWasSeen);
+	// 	}
+	// }
 }
 
 void AAIZone::NotifyPlayerEnteredInSightCone(const APawn* PawnOwner)

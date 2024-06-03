@@ -5,11 +5,40 @@
 #include "AI/BasicEnemy/BasicEnemyController.h"
 #include "Components/CapsuleComponent.h"
 
+ABasicEnemy::ABasicEnemy()
+{
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABasicEnemy::NotifySomethingEnteredInTheTrigger);
+}
+
+void ABasicEnemy::RegisterAIZone(AAIZone* NewAIZone)
+{
+	if (NewAIZone == nullptr) return;
+	AIZone = NewAIZone;
+}
+
+void ABasicEnemy::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+	TArray<AActor*> overlappedActors;
+	GetCapsuleComponent()->GetOverlappingActors(overlappedActors);
+	if(GEngine)
+	{
+		for (int i = 0; i < overlappedActors.Num(); i++)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, overlappedActors[i]->GetName());
+		}
+	}
+}
+
 void ABasicEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABasicEnemy::NotifySomethingEnteredInTheTrigger);
+	BasicEnemyController = Cast<ABasicEnemyController>(GetController());
+	if (BasicEnemyController)
+	{
+		BasicEnemyController->Initialize(this);
+	}
 }
 
 #pragma region FUNCTIONS_LISTENERS
@@ -18,12 +47,6 @@ void ABasicEnemy::NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* Overla
 	if (Cast<AAIZone>(OtherActor))
 	{
 		this->AIZone = Cast<AAIZone>(OtherActor);
-	}
-
-	BasicEnemyController = Cast<ABasicEnemyController>(GetController());
-	if (BasicEnemyController)
-	{
-		BasicEnemyController->Initialize(this);
 	}
 }
 #pragma endregion 
