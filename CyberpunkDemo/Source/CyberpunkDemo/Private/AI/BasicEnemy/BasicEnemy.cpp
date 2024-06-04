@@ -14,19 +14,10 @@ void ABasicEnemy::RegisterAIZone(AAIZone* NewAIZone)
 {
 	if (NewAIZone == nullptr) return;
 	AIZone = NewAIZone;
-}
 
-void ABasicEnemy::OnConstruction(const FTransform& Transform)
-{
-	Super::OnConstruction(Transform);
-	TArray<AActor*> overlappedActors;
-	GetCapsuleComponent()->GetOverlappingActors(overlappedActors);
-	if(GEngine)
+	if (Cast<ABasicEnemyController>(GetController()))
 	{
-		for (int i = 0; i < overlappedActors.Num(); i++)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, overlappedActors[i]->GetName());
-		}
+		Cast<ABasicEnemyController>(GetController())->RegisterAIZone(NewAIZone);
 	}
 }
 

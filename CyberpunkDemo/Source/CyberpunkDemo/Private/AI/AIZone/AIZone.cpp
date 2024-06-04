@@ -7,6 +7,7 @@
 #include "AI/WorldInterfacing/Location.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values
 AAIZone::AAIZone()
@@ -16,8 +17,6 @@ AAIZone::AAIZone()
 
 	StateMachine = CreateDefaultSubobject<UStateTreeComponent>(TEXT("StateTree"));
 	BoxTrigger = CreateDefaultSubobject<UBoxComponent>("BoxTrigger");
-	// bGenerateOverlapEventsDuringLevelStreaming = true;
-	// BoxTrigger->OnComponentBeginOverlap.AddDynamic(this, &AAIZone::NotifySomethingEnteredInTheTrigger);
 }
 
 void AAIZone::RegisterBasicEnemy(ABasicEnemy* NewBasicEnemy)
@@ -27,7 +26,7 @@ void AAIZone::RegisterBasicEnemy(ABasicEnemy* NewBasicEnemy)
 	SharedKnowledge.Enemies.AddUnique(NewBasicEnemy);
 
 	ABasicEnemyController* EnemyController = Cast<ABasicEnemyController>(NewBasicEnemy->GetController());
-	if (EnemyController)
+	if (EnemyController && EnemyController->KnowledgeComponent)
 	{
 		EnemyController->KnowledgeComponent->OnPlayerEnteredSightConeDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerEnteredInSightCone);
 		EnemyController->KnowledgeComponent->OnPlayerExitedSightConeDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerExitedInSightCone);
@@ -116,29 +115,45 @@ void AAIZone::BeginPlay()
 
 	SharedKnowledge.CombatTimerDuration = CombatTimerDuration;
 	SharedKnowledge.AlertedTimerDuration = AlertedTimerDuration;
+
+	RegisterActors();
 }
 
 #pragma region FUNCTIONS_LISTENERS
-void AAIZone::NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AAIZone::RegisterActors()
 {
-	// if (Cast<ALocation>(OtherActor))
-	// {
-	// 	ALocation* Location = Cast<ALocation>(OtherActor);
-	// 	SharedKnowledge.CoverPerLocations.Add(Location->GetActorLocation(), Location);
-	// }
-	// else if (Cast<ABasicEnemy>(OtherActor))
-	// {
-	// 	ABasicEnemy* Enemy = Cast<ABasicEnemy>(OtherActor);
-	// 	SharedKnowledge.Enemies.Add(Enemy);
-	// 	
-	// 	ABasicEnemyController* EnemyController = Cast<ABasicEnemyController>(Enemy->GetController());
-	// 	if (EnemyController)
-	// 	{
-	// 		EnemyController->KnowledgeComponent->OnPlayerEnteredSightConeDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerEnteredInSightCone);
-	// 		EnemyController->KnowledgeComponent->OnPlayerExitedSightConeDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerExitedInSightCone);
-	// 		EnemyController->KnowledgeComponent->OnPlayerSeenDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerWasSeen);
-	// 	}
-	// }
+	TArray<TEnumAsByte<EObjectTypeQuery>> traceObjectTypes;
+	traceObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn)); // BasicEnemy
+	traceObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_GameTraceChannel2)); // Covers
+	TArray<AActor*> ignoreActors;
+	ignoreActors.Init(this, 1);
+	
+	TArray<AActor*> overlappingActors;
+	UKismetSystemLibrary::BoxOverlapActors(this->GetWorld(), BoxTrigger->GetComponentLocation(), BoxTrigger->GetScaledBoxExtent(), traceObjectTypes, nullptr, ignoreActors, overlappingActors);
+
+	for (int i = 0; i < overlappingActors.Num(); i++)
+	{
+		AActor* actor = overlappingActors[i];
+		if (Cast<ALocation>(actor))
+		{
+			ALocation* Location = Cast<ALocation>(actor);
+			SharedKnowledge.CoverPerLocations.Add(Location->GetActorLocation(), Location);
+		}
+		else if (Cast<ABasicEnemy>(actor))
+		{
+			ABasicEnemy* Enemy = Cast<ABasicEnemy>(actor);
+			Enemy->RegisterAIZone(this);
+			SharedKnowledge.Enemies.AddUnique(Enemy);
+			
+			ABasicEnemyController* EnemyController = Cast<ABasicEnemyController>(Enemy->GetController());
+			if (EnemyController)
+			{
+				EnemyController->KnowledgeComponent->OnPlayerEnteredSightConeDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerEnteredInSightCone);
+				EnemyController->KnowledgeComponent->OnPlayerExitedSightConeDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerExitedInSightCone);
+				EnemyController->KnowledgeComponent->OnPlayerSeenDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerWasSeen);
+			}
+		}
+	}
 }
 
 void AAIZone::NotifyPlayerEnteredInSightCone(const APawn* PawnOwner)

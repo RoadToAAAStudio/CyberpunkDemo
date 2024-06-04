@@ -33,8 +33,7 @@ public:
 public:
 	ABasicEnemy();
 	UFUNCTION(BlueprintCallable) void RegisterAIZone(AAIZone* NewAIZone);
-	
-	virtual void OnConstruction(const FTransform& Transform) override;
+
 	virtual void BeginPlay() override;
 
 private:

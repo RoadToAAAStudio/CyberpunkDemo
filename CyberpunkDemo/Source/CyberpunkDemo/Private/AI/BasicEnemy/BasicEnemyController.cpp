@@ -64,6 +64,7 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 			{
 				Cast<UBasicEnemyPerceptionComponent>(GetPerceptionComponent())->SetUpFromData(ConfigData->PerceptionConfigData);
 			}
+			
 			// Initialization of Knowledge Component From Data
 			if (KnowledgeComponent && ConfigData->SensorsConfigData)
 			{
@@ -75,16 +76,6 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 			{
 				StateMachine->SetTree(ConfigData->BrainConfigData->Brain.GetMutableStateTree());
 			}
-		}
-	}
-
-	// Hook to AIZone
-	{
-		if (BasicEnemy->AIZone)
-		{
-			BasicEnemy->AIZone->OnPlayerIsSensedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyPlayerWasSeen);
-			BasicEnemy->AIZone->OnCombatTimerFinishedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyCombatTimerFinished);
-			BasicEnemy->AIZone->OnAlertedTimerFinishedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyAlertedTimerFinished);
 		}
 	}
 	
@@ -106,6 +97,13 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 			StateMachine->StartLogic();
 		}
 	}
+}
+
+void ABasicEnemyController::RegisterAIZone(AAIZone* NewAIZone)
+{
+	NewAIZone->OnPlayerIsSensedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyPlayerWasSeen);
+	NewAIZone->OnCombatTimerFinishedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyCombatTimerFinished);
+	NewAIZone->OnAlertedTimerFinishedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyAlertedTimerFinished);
 }
 
 void ABasicEnemyController::GetChangeOfState_Implementation(const FName& SourceStateName, const FName& NextStateName)

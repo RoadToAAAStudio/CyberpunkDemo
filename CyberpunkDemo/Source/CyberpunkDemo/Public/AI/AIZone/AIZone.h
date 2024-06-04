@@ -143,6 +143,8 @@ protected:
 #pragma endregion
 
 private:
+	void RegisterActors();
+	
 #pragma region FUNCTIONS_LISTENERS
 	// Function listeners
 	UFUNCTION()	void NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);

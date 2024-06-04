@@ -35,12 +35,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly) TObjectPtr<UBasicEnemyKnowledgeComponent> KnowledgeComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly) TObjectPtr<USettableStateTreeComponent> StateMachine;
 #pragma endregion
-private:
-#pragma region INJECTED_DEPENDENCIES
-#pragma endregion
+	
 public:
 	explicit ABasicEnemyController(const FObjectInitializer& ObjectInitializer);
 	void Initialize(ABasicEnemy* BasicEnemy);
+	void RegisterAIZone(AAIZone* NewAIZone);
 	
 #pragma region INTERFACE_METHODS
 	void GetChangeOfState_Implementation(const FName& SourceStateName, const FName& NextStateName) override;
