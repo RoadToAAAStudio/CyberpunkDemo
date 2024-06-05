@@ -63,6 +63,7 @@ struct FBasicEnemyPersonalKnowledge
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FSettableFloat			            DistanceFromPlayer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FSettableVector						HeardStimulusLocation;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FSettableVector			            CoverLocation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FSettableVector			            MoveToLocation;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams	(FOnSenseToggledSignature,				const UClass*, SenseConfig, bool, Enabled);

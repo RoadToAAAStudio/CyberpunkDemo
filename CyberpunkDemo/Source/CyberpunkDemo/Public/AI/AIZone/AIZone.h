@@ -34,6 +34,7 @@ struct FBasicEnemySharedKnowledge
 	 * This is unset Combat state is exited
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FSettablePawn Player;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FSettableVector PlayerLocation;
 
 	/*
 	 * The Combat Timer is Set when CurrentState is Combat and the Player is in no BasicEnemy SightCone
@@ -120,8 +121,7 @@ public:
 public:
 	AAIZone();
 
-	UFUNCTION(BlueprintCallable) void RegisterBasicEnemy(ABasicEnemy* NewBasicEnemy);
-	UFUNCTION(BlueprintCallable) void RegisterCover(ALocation* NewCover);
+	virtual void Tick(float DeltaSeconds) override;
 
 #pragma region INTERFACE_METHODS
 	void GetChangeOfState_Implementation(const FName& SourceStateName, const FName& NextStateName) override;
@@ -147,7 +147,6 @@ private:
 	
 #pragma region FUNCTIONS_LISTENERS
 	// Function listeners
-	UFUNCTION()	void NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 	UFUNCTION()	void NotifyPlayerEnteredInSightCone(const APawn* PawnOwner);
 	UFUNCTION()	void NotifyPlayerExitedInSightCone(const APawn* PawnOwner);
 	UFUNCTION()	void NotifyPlayerWasSeen(const APawn* PawnOwner);

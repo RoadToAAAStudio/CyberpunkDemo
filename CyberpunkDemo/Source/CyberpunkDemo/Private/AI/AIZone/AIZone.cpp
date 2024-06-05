@@ -19,27 +19,18 @@ AAIZone::AAIZone()
 	BoxTrigger = CreateDefaultSubobject<UBoxComponent>("BoxTrigger");
 }
 
-void AAIZone::RegisterBasicEnemy(ABasicEnemy* NewBasicEnemy)
+void AAIZone::Tick(float DeltaSeconds)
 {
-	if (NewBasicEnemy == nullptr) return;
+	Super::Tick(DeltaSeconds);
 
-	SharedKnowledge.Enemies.AddUnique(NewBasicEnemy);
-
-	ABasicEnemyController* EnemyController = Cast<ABasicEnemyController>(NewBasicEnemy->GetController());
-	if (EnemyController && EnemyController->KnowledgeComponent)
+	// Update Shared Knowledge
 	{
-		EnemyController->KnowledgeComponent->OnPlayerEnteredSightConeDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerEnteredInSightCone);
-		EnemyController->KnowledgeComponent->OnPlayerExitedSightConeDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerExitedInSightCone);
-		EnemyController->KnowledgeComponent->OnPlayerSeenDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerWasSeen);
+		APawn* Player = SharedKnowledge.Player.Get();
+		if (Player)
+		{
+			SharedKnowledge.PlayerLocation = Player->GetActorLocation();
+		}
 	}
-}
-
-void AAIZone::RegisterCover(ALocation* NewCover)
-{
-	if (NewCover == nullptr) return;
-
-	ALocation* Location = Cast<ALocation>(NewCover);
-	SharedKnowledge.CoverPerLocations.Add(Location->GetActorLocation(), Location);
 }
 
 void AAIZone::GetChangeOfState_Implementation(const FName& SourceStateName, const FName& CurrentStateName)
