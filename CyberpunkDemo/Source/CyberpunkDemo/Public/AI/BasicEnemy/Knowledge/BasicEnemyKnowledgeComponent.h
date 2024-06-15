@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AI/AIZone/AIZone.h"
-#include "AI/Knowledge/KnowledgeTypes.h"
+#include "AI/BasicEnemy/Knowledge/KnowledgeTypes.h"
 #include "Components/ActorComponent.h"
 #include "BasicEnemyKnowledgeComponent.generated.h"
 
@@ -35,7 +35,7 @@ enum class EBasicEnemyBehaviour : uint8
 	Patrol,
 	BlindInvestigation,
 	Investigation,
-	Shoot,
+	MoveToBetterPosition,
 	QuickMeleeAttack,
 	ThrowGrenade,
 	MoveToCover,

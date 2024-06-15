@@ -3,7 +3,7 @@
 #include "AI/AIZone/AIZone.h"
 #include "AI/BasicEnemy/BasicEnemy.h"
 #include "AI/BasicEnemy/BasicEnemyController.h"
-#include "AI/Knowledge/MainComponent/BasicEnemyKnowledgeComponent.h"
+#include "AI/BasicEnemy/Knowledge/BasicEnemyKnowledgeComponent.h"
 #include "AI/WorldInterfacing/Location.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"

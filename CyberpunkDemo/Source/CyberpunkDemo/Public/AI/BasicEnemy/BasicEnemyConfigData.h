@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AI/Knowledge/MainComponent/BasicEnemyKnowledgeComponent.h"
+#include "AI/BasicEnemy/Knowledge/BasicEnemyKnowledgeComponent.h"
 #include "UObject/Object.h"
 #include "BasicEnemyConfigData.generated.h"
 

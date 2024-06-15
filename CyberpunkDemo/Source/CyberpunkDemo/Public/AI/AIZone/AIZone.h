@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AI/Knowledge/KnowledgeTypes.h"
+#include "AI/BasicEnemy/Knowledge/KnowledgeTypes.h"
 #include "Components/StateTreeComponent.h"
 #include "AI/Utility/IStateTreeNotificationsAcceptor.h"
 #include "GameFramework/Actor.h"

@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "AI/Knowledge/MainComponent/BasicEnemyKnowledgeComponent.h"
+#include "AI/BasicEnemy/Knowledge/BasicEnemyKnowledgeComponent.h"
 #include "AI/BasicEnemy/BasicEnemy.h"
 #include "AI/BasicEnemy/BasicEnemyConfigData.h"
 #include "AI/BasicEnemy/BasicEnemyController.h"
-#include "AI/Knowledge/AttributeBar.h"
-#include "AI/Knowledge/BasicEnemyPerceptionComponent.h"
+#include "AI/BasicEnemy/Knowledge/AttributeBar.h"
+#include "AI/BasicEnemy/Knowledge/BasicEnemyPerceptionComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "MainCharacter/MainCharacter.h"
 #include "Perception/AISenseConfig_Hearing.h"
@@ -88,7 +88,6 @@ void UBasicEnemyKnowledgeComponent::Initialize(	UBasicEnemyPerceptionComponent* 
 {
 	SightBar = NewObject<UAttributeBar>();
 	HearingBar = NewObject<UAttributeBar>();
-
 	
 	PerceptionComponent = PerceptionComponentInput;
 	BasicEnemyController = BasicEnemyControllerInput;

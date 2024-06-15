@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "AI/Knowledge/AttributeBar.h"
+#include "AI/BasicEnemy/Knowledge/AttributeBar.h"
 
 void UAttributeBar::Add(float Amount)
 {
