@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagAssetInterface.h"
+#include "AI/Utility/IClaimable.h"
 #include "GameFramework/Actor.h"
 #include "Location.generated.h"
 
 class USphereComponent;
 
 UCLASS()
-class CYBERPUNKDEMO_API ALocation : public AActor, public IGameplayTagAssetInterface
+class CYBERPUNKDEMO_API ALocation : public AActor, public IGameplayTagAssetInterface, public IClaimable
 {
 private:
 	GENERATED_BODY()
@@ -24,13 +25,19 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FGameplayTagContainer GameplayTagContainer;
-	
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<AActor> ClaimOwner;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+#pragma region INTERFACE_METHODS
 	virtual void GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const override;
+	bool Claim_Implementation(AActor* NewOwner) override;
+	bool Release_Implementation(const AActor* OldOwner) override;
+	bool IsUsed_Implementation() const override;
+	bool IsUsedBy_Implementation(const AActor* PotentialOwner) const override;
+	bool IsClaimable_Implementation(const AActor* PotentialOwner) const override;
+#pragma endregion
 };
+
+
