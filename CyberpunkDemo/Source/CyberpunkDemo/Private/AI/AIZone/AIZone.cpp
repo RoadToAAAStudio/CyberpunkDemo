@@ -8,6 +8,7 @@
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "CyberpunkDemo/DebugMacros.h"
 
 // Sets default values
 AAIZone::AAIZone()
@@ -17,6 +18,21 @@ AAIZone::AAIZone()
 
 	StateMachine = CreateDefaultSubobject<UStateTreeComponent>(TEXT("StateTree"));
 	BoxTrigger = CreateDefaultSubobject<UBoxComponent>("BoxTrigger");
+}
+
+void AAIZone::Debug() const
+{
+	for (auto& Enemy : SharedKnowledge.Enemies)
+	{
+		FVector EnemyLocation = Enemy->GetActorLocation();
+		DRAW_LINE(GetActorLocation(), EnemyLocation, FColor::Yellow, 0.0f);
+	}
+
+	for (auto& CoverData : SharedKnowledge.CoverPerLocations)
+	{
+		FVector CoverLocation = CoverData.Key;
+		DRAW_SPHERE(CoverLocation, 25.0f, 8, FColor::Yellow, 0.0f);
+	}
 }
 
 void AAIZone::Tick(float DeltaSeconds)
@@ -31,6 +47,13 @@ void AAIZone::Tick(float DeltaSeconds)
 			SharedKnowledge.PlayerLocation = Player->GetActorLocation();
 		}
 	}
+
+#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
+	if (bDebug)
+	{
+		Debug();
+	}
+#endif
 }
 
 void AAIZone::GetChangeOfState_Implementation(const FName& SourceStateName, const FName& CurrentStateName)

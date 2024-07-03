@@ -119,8 +119,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite) FBasicEnemySharedKnowledge SharedKnowledge;
 
 public:
-	AAIZone();
+	UPROPERTY(EditAnywhere) bool bDebug = false;
 
+	AAIZone();
+	void Debug() const;
 	virtual void Tick(float DeltaSeconds) override;
 
 #pragma region INTERFACE_METHODS
