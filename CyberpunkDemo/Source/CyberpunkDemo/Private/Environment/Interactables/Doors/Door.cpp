@@ -29,7 +29,6 @@ void ADoor::BeginPlay()
 			Conditions[i]->AddUnlockInput(InspectInputs);
 			ChecksResults.Add(Conditions[i]->Check());
 		}
-		OnInspectDelegate.Execute(InspectInputs,ChecksResults);
 	}
 }
 
@@ -77,6 +76,17 @@ void ADoor::Inspect()
 		}
 	}
 }
+
+TArray<EInspectInput> ADoor::GetInspectInputs()
+{
+	return InspectInputs;
+}
+
+TArray<bool> ADoor::GetChecksResults()
+{
+	return ChecksResults;
+}
+
 
 void ADoor::Interact()
 {

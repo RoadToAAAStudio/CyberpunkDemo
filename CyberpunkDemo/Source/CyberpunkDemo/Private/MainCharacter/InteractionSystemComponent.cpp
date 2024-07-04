@@ -66,6 +66,7 @@ void UInteractionSystemComponent::Inspect()
 				DrawDebugSphere(GetWorld(),Hit.Location, 10, 16, FColor::Green ,false, 0,0,1);
 				GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Yellow, TEXT("It's inspectable!"));
 				Cast<IInspectable>(InspectedActor)->Inspect();
+				OnActorInspectedDelegate.Broadcast(Cast<IInspectable>(InspectedActor)->GetInspectInputs(), Cast<IInspectable>(InspectedActor)->GetChecksResults());
 			}
 			else
 			{

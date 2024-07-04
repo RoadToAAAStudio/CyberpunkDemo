@@ -9,3 +9,15 @@ void IInspectable::Inspect()
 {
 	
 }
+
+TArray<EInspectInput> IInspectable::GetInspectInputs()
+{
+	return TArray<EInspectInput>();
+}
+
+TArray<bool> IInspectable::GetChecksResults()
+{
+	return TArray<bool>();
+}
+
+

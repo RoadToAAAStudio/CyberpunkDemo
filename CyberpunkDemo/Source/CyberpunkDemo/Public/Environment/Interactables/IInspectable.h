@@ -24,11 +24,9 @@ class CYBERPUNKDEMO_API IInspectable
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 
-protected:
-	TArray<EInspectInput> InspectInputs;
-	TArray<bool> ChecksResults;
-
 	
 public:
 	virtual void Inspect();
+	virtual TArray<EInspectInput> GetInspectInputs();
+	virtual TArray<bool> GetChecksResults();
 };

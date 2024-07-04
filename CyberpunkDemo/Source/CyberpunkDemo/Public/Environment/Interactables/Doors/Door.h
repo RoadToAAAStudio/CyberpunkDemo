@@ -9,8 +9,6 @@
 #include "Environment/Interactables/IInspectable.h"
 #include "Door.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnInspect, TArray<EInspectInput>, Inputs, TArray<bool>, ActiveOption);
-
 UCLASS()
 class CYBERPUNKDEMO_API ADoor : public AActor, public IInspectable
 {
@@ -22,8 +20,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	FGameplayTag ActiveState;
 
-	FOnInspect OnInspectDelegate;
-
+private:
+	TArray<EInspectInput> InspectInputs;
+	TArray<bool> ChecksResults;
 
 protected:
 	// Called when the game starts or when spawned
@@ -40,6 +39,8 @@ public:
 	void Unlock();
 	
 	void Inspect() override;
+	TArray<EInspectInput> GetInspectInputs() override;
+	TArray<bool> GetChecksResults() override;
 	
 	UFUNCTION(BlueprintCallable)
 	void Interact();

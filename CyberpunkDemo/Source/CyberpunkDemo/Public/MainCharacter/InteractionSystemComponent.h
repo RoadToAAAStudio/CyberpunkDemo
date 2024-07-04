@@ -6,8 +6,10 @@
 #include "GameplayTagContainer.h"
 #include "Components/SceneComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Environment/Interactables/IInspectable.h"
 #include "InteractionSystemComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorInspected, TArray<EInspectInput>, InspectInputs, TArray<bool>, CheckResults);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CYBERPUNKDEMO_API UInteractionSystemComponent : public USceneComponent
@@ -42,4 +44,7 @@ public:
 
 	void Inspect();
 	void Interact();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnActorInspected OnActorInspectedDelegate;
 };
