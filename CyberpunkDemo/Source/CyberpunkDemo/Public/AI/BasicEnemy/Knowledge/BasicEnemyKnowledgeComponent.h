@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AI/AIZone/AIZone.h"
 #include "AI/BasicEnemy/Knowledge/KnowledgeTypes.h"
 #include "Components/ActorComponent.h"
 #include "BasicEnemyKnowledgeComponent.generated.h"
@@ -15,6 +14,7 @@ class UBasicEnemyPerceptionComponent;
 class USplineComponent;
 class AMainCharacter;
 class ABasicEnemyController;
+class AIZone;
 
 UENUM(BlueprintType)
 enum class EBasicEnemyState : uint8
@@ -132,7 +132,7 @@ public:
 	UFUNCTION(BlueprintCallable)    bool IsSightEnabled		() const;
 	UFUNCTION(BlueprintCallable)    bool IsHearingEnabled	() const;
 	UFUNCTION(BlueprintCallable)    float GetSightBarValue	() const;
-	UFUNCTION(BlueprintCallable)    float GetHearingValue	() const;
+	UFUNCTION(BlueprintCallable)    float GetHearingBarValue() const;
 	UFUNCTION(BlueprintCallable)    void ToggleSight		(bool Enable);
 	UFUNCTION(BlueprintCallable)    void ToggleHearing		(bool Enable);
 #pragma endregion

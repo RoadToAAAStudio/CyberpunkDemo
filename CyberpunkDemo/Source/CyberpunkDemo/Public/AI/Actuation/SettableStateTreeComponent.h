@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AI/BasicEnemy/BasicEnemyConfigData.h"
 #include "Components/StateTreeComponent.h"
 #include "SettableStateTreeComponent.generated.h"
 
@@ -14,7 +13,7 @@ UCLASS()
 class CYBERPUNKDEMO_API USettableStateTreeComponent : public UStateTreeComponent
 {
 	GENERATED_BODY()
-	
+
 public:	
 	UFUNCTION(BlueprintCallable)
 	void SetTree(UStateTree* TargetTree);

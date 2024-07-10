@@ -11,6 +11,8 @@
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISense_Hearing.h"
+#include "AI/Utility/SplineContainer.h"
+#include "Components/SplineComponent.h"
 
 // Sets default values for this component's properties
 UBasicEnemyKnowledgeComponent::UBasicEnemyKnowledgeComponent()
@@ -151,7 +153,7 @@ const AAIZone* UBasicEnemyKnowledgeComponent::GetAIZone() const
 bool UBasicEnemyKnowledgeComponent::IsSightEnabled		()  const { return bSightEnabled;			}
 bool UBasicEnemyKnowledgeComponent::IsHearingEnabled	()  const { return bHearingEnabled;			}
 float UBasicEnemyKnowledgeComponent::GetSightBarValue	()  const { return SightBar->GetValue();	}
-float UBasicEnemyKnowledgeComponent::GetHearingValue	()  const { return HearingBar->GetValue();	}
+float UBasicEnemyKnowledgeComponent::GetHearingBarValue	()  const { return HearingBar->GetValue();	}
 
 void UBasicEnemyKnowledgeComponent::ToggleSight(bool Enable)
 {

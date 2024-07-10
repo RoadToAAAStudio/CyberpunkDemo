@@ -107,27 +107,28 @@ public:
 #pragma endregion
 
 #pragma region SETTINGS
-	UPROPERTY(EditAnywhere) float CombatTimerDuration;
-	UPROPERTY(EditAnywhere) float AlertedTimerDuration;
+	UPROPERTY(EditDefaultsOnly) float CombatTimerDuration;
+	UPROPERTY(EditDefaultsOnly) float AlertedTimerDuration;
 #pragma endregion
 	
 #pragma region PERSONAL_COMPONENTS
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UBoxComponent>		BoxTrigger;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStateTreeComponent>	StateMachine;
+	UPROPERTY(BlueprintReadWrite) TObjectPtr<UBoxComponent>		BoxTrigger;
+	UPROPERTY(BlueprintReadWrite) TObjectPtr<UStateTreeComponent>	StateMachine;
 #pragma endregion
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite) FBasicEnemySharedKnowledge SharedKnowledge;
+	UPROPERTY(BlueprintReadWrite) FBasicEnemySharedKnowledge SharedKnowledge;
 
 public:
-	UPROPERTY(EditAnywhere) bool bDebug = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bDebugEnemies = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bDebugCovers = false;
 
 	AAIZone();
-	void Debug() const;
 	virtual void Tick(float DeltaSeconds) override;
 
 #pragma region INTERFACE_METHODS
 	void GetChangeOfState_Implementation(const FName& SourceStateName, const FName& NextStateName) override;
 #pragma endregion
+
 	
 protected:
 	virtual void BeginPlay() override;
@@ -146,6 +147,8 @@ protected:
 
 private:
 	void RegisterActors();
+	void DebugEnemies() const;
+	void DebugCovers() const;
 	
 #pragma region FUNCTIONS_LISTENERS
 	// Function listeners

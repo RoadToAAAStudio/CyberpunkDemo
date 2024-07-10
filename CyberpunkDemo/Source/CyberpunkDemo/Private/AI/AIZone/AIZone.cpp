@@ -20,21 +20,6 @@ AAIZone::AAIZone()
 	BoxTrigger = CreateDefaultSubobject<UBoxComponent>("BoxTrigger");
 }
 
-void AAIZone::Debug() const
-{
-	for (auto& Enemy : SharedKnowledge.Enemies)
-	{
-		FVector EnemyLocation = Enemy->GetActorLocation();
-		DRAW_LINE(GetActorLocation(), EnemyLocation, FColor::Yellow, 0.0f);
-	}
-
-	for (auto& CoverData : SharedKnowledge.CoverPerLocations)
-	{
-		FVector CoverLocation = CoverData.Key;
-		DRAW_SPHERE(CoverLocation, 25.0f, 8, FColor::Yellow, 0.0f);
-	}
-}
-
 void AAIZone::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -49,9 +34,13 @@ void AAIZone::Tick(float DeltaSeconds)
 	}
 
 #if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
-	if (bDebug)
+	if (bDebugEnemies)
 	{
-		Debug();
+		DebugEnemies();
+	}
+	if (bDebugCovers)
+	{
+		DebugCovers();
 	}
 #endif
 }
@@ -133,7 +122,6 @@ void AAIZone::BeginPlay()
 	RegisterActors();
 }
 
-#pragma region FUNCTIONS_LISTENERS
 void AAIZone::RegisterActors()
 {
 	TArray<TEnumAsByte<EObjectTypeQuery>> traceObjectTypes;
@@ -170,6 +158,26 @@ void AAIZone::RegisterActors()
 	}
 }
 
+void AAIZone::DebugEnemies() const
+{
+	for (auto& Enemy : SharedKnowledge.Enemies)
+	{
+		FVector EnemyLocation = Enemy->GetActorLocation();
+		DRAW_LINE(GetActorLocation(), EnemyLocation, FColor::Yellow, -1.0f);
+		DRAW_STRING(EnemyLocation + FVector::UpVector * 250.0f, Enemy->GetActorNameOrLabel(), FColor::Yellow, 0.0f);
+	}
+}
+
+void AAIZone::DebugCovers() const
+{
+	for (auto& CoverData : SharedKnowledge.CoverPerLocations)
+	{
+		FVector CoverLocation = CoverData.Key;
+		DRAW_SPHERE(CoverLocation, 25.0f, 4, FColor::Yellow, -1.0f);
+	}
+}
+
+#pragma region FUNCTIONS_LISTENERS
 void AAIZone::NotifyPlayerEnteredInSightCone(const APawn* PawnOwner)
 {
 	SharedKnowledge.NumberOfSightConesThePlayerIsIn = SharedKnowledge.NumberOfSightConesThePlayerIsIn.Get() + 1;

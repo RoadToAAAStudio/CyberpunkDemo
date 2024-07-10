@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AI/BasicEnemy/Knowledge/BasicEnemyKnowledgeComponent.h"
+#include "AI/Actuation/SettableStateTreeComponent.h"
 #include "UObject/Object.h"
 #include "BasicEnemyConfigData.generated.h"
 
