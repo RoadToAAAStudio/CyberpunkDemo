@@ -22,22 +22,22 @@ class CYBERPUNKDEMO_API ABasicEnemy : public ACharacter
 public:
 	UPROPERTY() TObjectPtr<ABasicEnemyController> BasicEnemyController;
 	UPROPERTY(EditDefaultsOnly) TObjectPtr<AAIZone> AIZone;
-#pragma region INPUT_DATA
-#pragma region DEFINE_ARCHETYPE
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")	TObjectPtr<UBasicEnemyConfigData> ConfigData;
-#pragma endregion
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "AI") TObjectPtr<UAIWeaponConfigData> WeaponConfig;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")	TObjectPtr<ASplineContainer> PatrolSpline;
-#pragma endregion
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bDebugKnowledge = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bDebugBehaviours = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	bool bDebugKnowledge = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	bool bDebugBehaviours = false;
 
 	ABasicEnemy();
 	virtual void Tick(float DeltaSeconds) override;
 
-	UFUNCTION(BlueprintCallable) void RegisterAIZone(AAIZone* NewAIZone);
+	UFUNCTION(BlueprintCallable) 
+	void RegisterAIZone(AAIZone* NewAIZone);
 
 protected:
 	virtual void BeginPlay() override;

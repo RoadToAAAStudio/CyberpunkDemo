@@ -14,15 +14,18 @@ USTRUCT(BlueprintType)
 struct FSettableVector
 {
 	GENERATED_BODY()
-	
+
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector Data = FVector(INFINITY, INFINITY, INFINITY);
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bIsSet = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	FVector Data = FVector(INFINITY, INFINITY, INFINITY);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	bool bIsSet = false;
 	
-public:
 	void Set(const FVector& Vector);
 	void UnSet();
 	const FVector& Get() const;
+	FVector& Get();
 	bool IsSet() const;
 	void operator=(const FVector& Vector);
 };
@@ -31,15 +34,18 @@ USTRUCT(BlueprintType)
 struct FSettableRotator
 {
 	GENERATED_BODY()
-	
+
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) FRotator Data = FRotator(INFINITY, INFINITY, INFINITY);
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bIsSet = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	FRotator Data = FRotator(INFINITY, INFINITY, INFINITY);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	bool bIsSet = false;
 	
-public:
 	void Set(const FRotator& Rotator);
 	void UnSet();
 	const FRotator& Get() const;
+	FRotator& Get();
 	bool IsSet() const;
 	void operator=(const FRotator& Rotator);
 };
@@ -48,11 +54,14 @@ USTRUCT(BlueprintType)
 struct FSettableFloat
 {
 	GENERATED_BODY()
-	
+
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Data = INFINITY;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bIsSet	= false;
-public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	float Data = INFINITY;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	bool bIsSet	= false;
+
 	void Set(float Float);
 	void UnSet();
 	float Get() const;
@@ -65,12 +74,14 @@ USTRUCT(BlueprintType)
 struct FSettableInt
 {
 	GENERATED_BODY()
-	
+
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) int Data = 0;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bIsSet = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	int Data = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	bool bIsSet = false;
 	
-public:
 	void Set(int Int);
 	void UnSet();
 	int Get() const;
@@ -82,12 +93,15 @@ USTRUCT(BlueprintType)
 struct FSettablePawn
 {
 	GENERATED_BODY()
+
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<APawn> Data = nullptr;
-public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	TObjectPtr<APawn> Data = nullptr;
+
 	void Set(APawn* Object);
 	void UnSet();
-	APawn* Get() const;
+	const APawn* Get() const;
+	APawn* Get();
 	bool IsSet() const;
 	void operator=(APawn* Object);
 };
@@ -96,12 +110,15 @@ USTRUCT(BlueprintType)
 struct FSettableSpline
 {
 	GENERATED_BODY()
+
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<ASplineContainer> Data = nullptr;
-public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	TObjectPtr<ASplineContainer> Data = nullptr;
+
 	void Set(ASplineContainer* Object);
 	void UnSet();
-	ASplineContainer* Get() const;
+	const ASplineContainer* Get() const;
+	ASplineContainer* Get();
 	bool IsSet() const;
 	void operator=(ASplineContainer* Object);
 };
@@ -110,12 +127,15 @@ USTRUCT(BlueprintType)
 struct FSettableMainCharacter
 {
 	GENERATED_BODY()
+
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<AMainCharacter> Data = nullptr;
-public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	TObjectPtr<AMainCharacter> Data = nullptr;
+
 	void Set(AMainCharacter* Object);
 	void UnSet();
-	AMainCharacter* Get() const;
+	const AMainCharacter* Get() const;
+	AMainCharacter* Get();
 	bool IsSet() const;
 	void operator=(AMainCharacter* Object);
 };
@@ -126,12 +146,16 @@ struct FSettableAIStimulus
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) FAIStimulus Data;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bIsSet = false;
-public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	FAIStimulus Data;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	bool bIsSet = false;
+
 	void Set(const FAIStimulus& Stimulus);
 	void UnSet();
 	const FAIStimulus& Get() const;
+	FAIStimulus& Get();
 	bool IsSet() const;
 	void operator=(const FAIStimulus& Stimulus);
 };
@@ -142,11 +166,15 @@ struct FSettableTimerHandle
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTimerHandle Data;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bIsSet = false;
-public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	FTimerHandle Data;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	bool bIsSet = false;
+
 	void Set();
 	void UnSet();
+	const FTimerHandle& Get() const;
 	FTimerHandle& Get();
 	bool IsSet() const;
 };

@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "AI/BasicEnemy/Knowledge/KnowledgeTypes.h"
-#include "Components/StateTreeComponent.h"
 #include "AI/Utility/IStateTreeNotificationsAcceptor.h"
 #include "GameFramework/Actor.h"
 #include "AIZone.generated.h"
@@ -12,6 +11,7 @@
 class UBoxComponent;
 class ALocation;
 class ABasicEnemy;
+class UStateTreeComponent;
 
 UENUM(BlueprintType)
 enum class EAIZoneState : uint8
@@ -28,56 +28,35 @@ struct FBasicEnemySharedKnowledge
 {
 	GENERATED_BODY()
 	
-	/*
-	 * If Player is not null it means all enemies know where the main character is (i.e. Combat State).
-	 * This is set if AIZone is in Unaware or Alerted State and some BasicEnemy sees the player
-	 * This is unset Combat state is exited
-	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FSettablePawn Player;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FSettableVector PlayerLocation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
+	FSettablePawn Player;
 
-	/*
-	 * The Combat Timer is Set when CurrentState is Combat and the Player is in no BasicEnemy SightCone
-	 * This is cleared if the CurrentState is Combat and the Player enters some BasicEnemySightCone
-	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FSettableTimerHandle CombatTimer;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FSettableFloat CombatTimerDuration;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
+	FSettableVector PlayerLocation;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
+	FSettableTimerHandle CombatTimer;
 
-	/*
-	 * The Alerted Timer is Set when Alerted is entered
-	 * this is cleared if the Current State is Alerted and the Player is seen
-	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FSettableTimerHandle AlertedTimer;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FSettableFloat AlertedTimerDuration;
-	
-	/*
-	 * Increased/Decreased when the player enters/exits a sight cone
-	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FSettableInt NumberOfSightConesThePlayerIsIn;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
+	FSettableFloat CombatTimerDuration;
 
-	/*
-	 * List of Enemies (spawned) in the TriggerBox
-	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	TArray<TObjectPtr<ABasicEnemy>> Enemies;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
+	FSettableTimerHandle AlertedTimer;
 
-	/*
-	 * List of Cover Points (Spawned) in the TriggerBox
-	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	TMap<FVector, TObjectPtr<ALocation>> CoverPerLocations;
-	
-	/*
-	 * This reflects AIZone State Tree current state
-	 * Transitions:
-	 *		Unaware:
-	 *			To Combat: if some BasicEnemy sees the player
-	 *		Combat:
-	 *			To Alerted: if the combat timer expires
-	 *		Alerted:
-	 *			To Combat: if some BasicEnemy sees the player
-	 *			To Unaware: if the alerted timer expires
-	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	EAIZoneState AIZoneState;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
+	FSettableFloat AlertedTimerDuration;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
+	FSettableInt NumberOfSightConesThePlayerIsIn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
+	TArray<TObjectPtr<ABasicEnemy>> Enemies;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
+	TMap<FVector, TObjectPtr<ALocation>> CoverPerLocations;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
+	EAIZoneState AIZoneState;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam		(FOnPlayerSensedSignature,				const APawn*, Owner);
@@ -96,14 +75,14 @@ class CYBERPUNKDEMO_API AAIZone : public AActor, public IStateTreeNotificationsA
 
 public:
 #pragma region DELEGATES
-	UPROPERTY(BlueprintAssignable)	FOnPlayerSensedSignature				OnPlayerIsSensedDelegate;
-	UPROPERTY(BlueprintAssignable)	FOnPlayerForgottenSignature				OnPlayerIsForgottenDelegate;
-	UPROPERTY(BlueprintAssignable)	FOnCombatTimerStartedSignature			OnCombatTimerStartedDelegate;
-	UPROPERTY(BlueprintAssignable)	FOnCombatTimerFinishedSignature         OnCombatTimerFinishedDelegate;
-	UPROPERTY(BlueprintAssignable)	FOnAlertedTimerStartedSignature         OnAlertedTimerStartedDelegate;
-	UPROPERTY(BlueprintAssignable)	FOnAlertedTimerFinishedSignature		OnAlertedTimerFinishedDelegate;
-	UPROPERTY(BlueprintAssignable)	FOnPlayerInNoSightConeSignature			OnPlayerIsInNoSightConeDelegate;
-	UPROPERTY(BlueprintAssignable)	FOnAIZoneManagerStateChangedSignature	OnAIZoneManagerStateChangedDelegate;
+	UPROPERTY(BlueprintAssignable, Category = Delegates)	FOnPlayerSensedSignature				OnPlayerIsSensedDelegate;
+	UPROPERTY(BlueprintAssignable, Category = Delegates)	FOnPlayerForgottenSignature				OnPlayerIsForgottenDelegate;
+	UPROPERTY(BlueprintAssignable, Category = Delegates)	FOnCombatTimerStartedSignature			OnCombatTimerStartedDelegate;
+	UPROPERTY(BlueprintAssignable, Category = Delegates)	FOnCombatTimerFinishedSignature         OnCombatTimerFinishedDelegate;
+	UPROPERTY(BlueprintAssignable, Category = Delegates)	FOnAlertedTimerStartedSignature         OnAlertedTimerStartedDelegate;
+	UPROPERTY(BlueprintAssignable, Category = Delegates)	FOnAlertedTimerFinishedSignature		OnAlertedTimerFinishedDelegate;
+	UPROPERTY(BlueprintAssignable, Category = Delegates)	FOnPlayerInNoSightConeSignature			OnPlayerIsInNoSightConeDelegate;
+	UPROPERTY(BlueprintAssignable, Category = Delegates)	FOnAIZoneManagerStateChangedSignature	OnAIZoneManagerStateChangedDelegate;
 #pragma endregion
 
 #pragma region SETTINGS
@@ -119,8 +98,14 @@ public:
 	UPROPERTY(BlueprintReadWrite) FBasicEnemySharedKnowledge SharedKnowledge;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bDebugEnemies = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bDebugCovers = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
+	bool bDebugSharedKnowledge = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
+	bool bDebugEnemies = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
+	bool bDebugCovers = false;
 
 	AAIZone();
 	virtual void Tick(float DeltaSeconds) override;
@@ -147,6 +132,8 @@ protected:
 
 private:
 	void RegisterActors();
+
+	void DebugSharedKnowledge() const;
 	void DebugEnemies() const;
 	void DebugCovers() const;
 	

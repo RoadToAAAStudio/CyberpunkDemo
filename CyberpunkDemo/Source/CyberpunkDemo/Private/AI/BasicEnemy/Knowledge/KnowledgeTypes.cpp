@@ -20,6 +20,11 @@ const FVector& FSettableVector::Get() const
 	return	Data;
 }
 
+FVector& FSettableVector::Get()
+{
+	return	Data;
+}
+
 bool FSettableVector::IsSet() const
 {
 	return	bIsSet;
@@ -44,6 +49,11 @@ void FSettableRotator::UnSet()
 }
 
 const FRotator& FSettableRotator::Get() const
+{
+	return Data;
+}
+
+FRotator& FSettableRotator::Get()
 {
 	return Data;
 }
@@ -128,7 +138,12 @@ void FSettablePawn::UnSet()
 	Data = nullptr;
 }
 
-APawn* FSettablePawn::Get() const
+const APawn* FSettablePawn::Get() const
+{
+	return Data;
+}
+
+APawn* FSettablePawn::Get()
 {
 	return Data;
 }
@@ -154,7 +169,12 @@ void FSettableSpline::UnSet()
 	Data = nullptr;
 }
 
-ASplineContainer* FSettableSpline::Get() const
+const ASplineContainer* FSettableSpline::Get() const
+{
+	return Data;
+}
+
+ASplineContainer* FSettableSpline::Get()
 {
 	return Data;
 }
@@ -180,7 +200,12 @@ void FSettableMainCharacter::UnSet()
 	Data = nullptr;
 }
 
-AMainCharacter* FSettableMainCharacter::Get() const
+const AMainCharacter* FSettableMainCharacter::Get() const
+{
+	return Data;
+}
+
+AMainCharacter* FSettableMainCharacter::Get()
 {
 	return Data;
 }
@@ -212,6 +237,11 @@ const FAIStimulus& FSettableAIStimulus::Get() const
 	return	Data;
 }
 
+FAIStimulus& FSettableAIStimulus::Get()
+{
+	return	Data;
+}
+
 bool FSettableAIStimulus::IsSet() const
 {
 	return	bIsSet;
@@ -232,6 +262,11 @@ void FSettableTimerHandle::Set()
 void FSettableTimerHandle::UnSet()
 {
 	bIsSet = false;
+}
+
+const FTimerHandle& FSettableTimerHandle::Get() const
+{
+	return Data;
 }
 
 FTimerHandle& FSettableTimerHandle::Get()
