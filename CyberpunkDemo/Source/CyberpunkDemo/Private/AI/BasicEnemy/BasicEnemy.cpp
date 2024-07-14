@@ -210,7 +210,6 @@ void ABasicEnemy::DebugBehaviours() const
 	}
 }
 
-#pragma region FUNCTIONS_LISTENERS
 void ABasicEnemy::NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (Cast<AAIZone>(OtherActor))
@@ -218,4 +217,3 @@ void ABasicEnemy::NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* Overla
 		AIZone = Cast<AAIZone>(OtherActor);
 	}
 }
-#pragma endregion 
