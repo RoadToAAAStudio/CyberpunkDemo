@@ -11,7 +11,6 @@
 #include "Components/StateTreeComponent.h"
 #include "CyberpunkDemo/DebugMacros.h"
 
-// Sets default values
 AAIZone::AAIZone()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -34,20 +33,23 @@ void AAIZone::Tick(float DeltaSeconds)
 		}
 	}
 
+	// Update Debug
+	{
 #if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
-	if (bDebugSharedKnowledge)
-	{
-		DebugSharedKnowledge();
-	}
-	if (bDebugEnemies)
-	{
-		DebugEnemies();
-	}
-	if (bDebugCovers)
-	{
-		DebugCovers();
-	}
+		if (bDebugSharedKnowledge)
+		{
+			DebugSharedKnowledge();
+		}
+		if (bDebugEnemies)
+		{
+			DebugEnemies();
+		}
+		if (bDebugCovers)
+		{
+			DebugCovers();
+		}
 #endif
+	}
 }
 
 void AAIZone::GetChangeOfState_Implementation(const FName& SourceStateName, const FName& CurrentStateName)
@@ -56,10 +58,10 @@ void AAIZone::GetChangeOfState_Implementation(const FName& SourceStateName, cons
 	if (!GoalEnum) return;
 
 	int32 Index = GoalEnum->GetIndexByName(SourceStateName);
-	EAIZoneState SourceState = Index != INDEX_NONE? static_cast<EAIZoneState>(Index) : EAIZoneState::None;
+	EAIZoneState SourceState = Index != INDEX_NONE ? static_cast<EAIZoneState>(Index) : EAIZoneState::None;
 	
 	Index = GoalEnum->GetIndexByName(CurrentStateName);
-	EAIZoneState NewState = Index != INDEX_NONE? static_cast<EAIZoneState>(Index) : EAIZoneState::None;
+	EAIZoneState NewState = Index != INDEX_NONE ? static_cast<EAIZoneState>(Index) : EAIZoneState::None;
 	
 	SharedKnowledge.AIZoneState = NewState;
 	
@@ -141,14 +143,12 @@ void AAIZone::RegisterActors()
 	for (int i = 0; i < overlappingActors.Num(); i++)
 	{
 		AActor* actor = overlappingActors[i];
-		if (Cast<ALocation>(actor))
+		if (ALocation* Location = Cast<ALocation>(actor))
 		{
-			ALocation* Location = Cast<ALocation>(actor);
 			SharedKnowledge.CoverPerLocations.Add(Location->GetActorLocation(), Location);
 		}
-		else if (Cast<ABasicEnemy>(actor))
+		else if (ABasicEnemy* Enemy = Cast<ABasicEnemy>(actor))
 		{
-			ABasicEnemy* Enemy = Cast<ABasicEnemy>(actor);
 			Enemy->RegisterAIZone(this);
 			SharedKnowledge.Enemies.AddUnique(Enemy);
 			
@@ -216,7 +216,6 @@ void AAIZone::DebugCovers() const
 	}
 }
 
-#pragma region FUNCTIONS_LISTENERS
 void AAIZone::NotifyPlayerEnteredInSightCone(const APawn* PawnOwner)
 {
 	SharedKnowledge.NumberOfSightConesThePlayerIsIn = SharedKnowledge.NumberOfSightConesThePlayerIsIn.Get() + 1;
@@ -271,4 +270,3 @@ void AAIZone::NotifyPlayerWasSeen(const APawn* PawnOwner)
 		StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.PlayerWasSeen")));
 	}
 }
-#pragma endregion 

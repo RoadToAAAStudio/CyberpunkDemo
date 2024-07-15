@@ -5,57 +5,63 @@
 #include "CoreMinimal.h"
 #include "AIController.h"
 #include "AI/Utility/IStateTreeNotificationsAcceptor.h"
-#include "AI/AIZone/AIZone.h"
 #include "BasicEnemyController.generated.h"
 
 class USettableStateTreeComponent;
 class UBasicEnemyKnowledgeComponent;
 class UBasicEnemyPerceptionComponent;
+class ABasicEnemy;
+class AAIZone;
 enum class EBasicEnemyState : uint8;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams	(FOnStateChangedSignature, EBasicEnemyState, SourceState, EBasicEnemyState, NextState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams (FOnStateChangedSignature, EBasicEnemyState, SourceState, EBasicEnemyState, NextState);
 
-/**
- * Basic Enemy Controller
- * It encapsulates AI functionality and serves as interface for the extern
- */
 UCLASS()
 class CYBERPUNKDEMO_API ABasicEnemyController : public AAIController, public IStateTreeNotificationsAcceptor
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)	ABasicEnemy* BasicEnemy = nullptr;
-#pragma region DELEGATES
-	UPROPERTY(BlueprintAssignable) FOnStateChangedSignature OnBasicEnemyStateChangedDelegate;
-#pragma endregion
+	UPROPERTY(BlueprintAssignable, Category = "Delegates")
+	FOnStateChangedSignature OnBasicEnemyStateChangedDelegate;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
+	TObjectPtr<ABasicEnemy> BasicEnemy;
 	
-#pragma region AI_COMPONENTS
-	UPROPERTY(BlueprintReadOnly) TObjectPtr<UBasicEnemyPerceptionComponent> SenseComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly) TObjectPtr<UBasicEnemyKnowledgeComponent> KnowledgeComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly) TObjectPtr<USettableStateTreeComponent> StateMachine;
-#pragma endregion
+	UPROPERTY(BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UBasicEnemyPerceptionComponent> SenseComponent;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UBasicEnemyKnowledgeComponent> KnowledgeComponent;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Components")
+	TObjectPtr<USettableStateTreeComponent> StateMachine;
 	
-public:
-	explicit ABasicEnemyController(const FObjectInitializer& ObjectInitializer);
+	ABasicEnemyController();
+
 	void Initialize(ABasicEnemy* BasicEnemy);
+
 	void RegisterAIZone(AAIZone* NewAIZone);
 	
-#pragma region INTERFACE_METHODS
 	void GetChangeOfState_Implementation(const FName& SourceStateName, const FName& NextStateName) override;
-#pragma endregion
 
 protected:
-#pragma region BLUEPRINT_EVENT
-	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnStateChanged"))	void StateChanged(EBasicEnemyState SourceState, EBasicEnemyState NextState);
-#pragma endregion
-	
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnStateChanged"))	
+	void StateChanged(EBasicEnemyState SourceState, EBasicEnemyState NextState);
+
 private:
-#pragma region EVENT_LISTENERS
-	UFUNCTION() void NotifyPlayerWasSeen(const APawn* Notifier);
-	UFUNCTION() void NotifyCombatTimerFinished();
-	UFUNCTION() void NotifyAlertedTimerFinished();
-	UFUNCTION() void NotifySomethingWasHeard(const APawn* Notifier, const FAIStimulus Stimulus);
-	UFUNCTION() void NotifySoundForgotten(const APawn* Notifier, const FAIStimulus Stimulus);
-#pragma endregion 
+	UFUNCTION() 
+	void NotifyPlayerWasSeen(const APawn* Notifier);
+
+	UFUNCTION() 
+	void NotifyCombatTimerFinished();
+
+	UFUNCTION() 
+	void NotifyAlertedTimerFinished();
+
+	UFUNCTION() 
+	void NotifySomethingWasHeard(const APawn* Notifier, const FAIStimulus Stimulus);
+
+	UFUNCTION() 
+	void NotifySoundForgotten(const APawn* Notifier, const FAIStimulus Stimulus);
 };

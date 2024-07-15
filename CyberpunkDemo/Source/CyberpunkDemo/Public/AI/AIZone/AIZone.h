@@ -59,7 +59,7 @@ struct FBasicEnemySharedKnowledge
 	EAIZoneState AIZoneState;
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam		(FOnPlayerSensedSignature,				const APawn*, Owner);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam		(FOnPlayerSensedSignature, const APawn*, Owner);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE              (FOnPlayerForgottenSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE              (FOnCombatTimerStartedSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE              (FOnCombatTimerFinishedSignature);
@@ -74,73 +74,108 @@ class CYBERPUNKDEMO_API AAIZone : public AActor, public IStateTreeNotificationsA
 	GENERATED_BODY()
 
 public:
-#pragma region DELEGATES
-	UPROPERTY(BlueprintAssignable, Category = Delegates)	FOnPlayerSensedSignature				OnPlayerIsSensedDelegate;
-	UPROPERTY(BlueprintAssignable, Category = Delegates)	FOnPlayerForgottenSignature				OnPlayerIsForgottenDelegate;
-	UPROPERTY(BlueprintAssignable, Category = Delegates)	FOnCombatTimerStartedSignature			OnCombatTimerStartedDelegate;
-	UPROPERTY(BlueprintAssignable, Category = Delegates)	FOnCombatTimerFinishedSignature         OnCombatTimerFinishedDelegate;
-	UPROPERTY(BlueprintAssignable, Category = Delegates)	FOnAlertedTimerStartedSignature         OnAlertedTimerStartedDelegate;
-	UPROPERTY(BlueprintAssignable, Category = Delegates)	FOnAlertedTimerFinishedSignature		OnAlertedTimerFinishedDelegate;
-	UPROPERTY(BlueprintAssignable, Category = Delegates)	FOnPlayerInNoSightConeSignature			OnPlayerIsInNoSightConeDelegate;
-	UPROPERTY(BlueprintAssignable, Category = Delegates)	FOnAIZoneManagerStateChangedSignature	OnAIZoneManagerStateChangedDelegate;
-#pragma endregion
+	UPROPERTY(BlueprintAssignable, Category = "Delegates")	
+	FOnPlayerSensedSignature OnPlayerIsSensedDelegate;
 
-#pragma region SETTINGS
-	UPROPERTY(EditDefaultsOnly) float CombatTimerDuration;
-	UPROPERTY(EditDefaultsOnly) float AlertedTimerDuration;
-#pragma endregion
-	
-#pragma region PERSONAL_COMPONENTS
-	UPROPERTY(BlueprintReadWrite) TObjectPtr<UBoxComponent>		BoxTrigger;
-	UPROPERTY(BlueprintReadWrite) TObjectPtr<UStateTreeComponent>	StateMachine;
-#pragma endregion
-	
-	UPROPERTY(BlueprintReadWrite) FBasicEnemySharedKnowledge SharedKnowledge;
+	UPROPERTY(BlueprintAssignable, Category = "Delegates")	
+	FOnPlayerForgottenSignature	OnPlayerIsForgottenDelegate;
 
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
+	UPROPERTY(BlueprintAssignable, Category = "Delegates")	
+	FOnCombatTimerStartedSignature OnCombatTimerStartedDelegate;
+
+	UPROPERTY(BlueprintAssignable, Category = "Delegates")	
+	FOnCombatTimerFinishedSignature OnCombatTimerFinishedDelegate;
+
+	UPROPERTY(BlueprintAssignable, Category = "Delegates")	
+	FOnAlertedTimerStartedSignature OnAlertedTimerStartedDelegate;
+
+	UPROPERTY(BlueprintAssignable, Category = "Delegates")	
+	FOnAlertedTimerFinishedSignature OnAlertedTimerFinishedDelegate;
+
+	UPROPERTY(BlueprintAssignable, Category = "Delegates")	
+	FOnPlayerInNoSightConeSignature OnPlayerIsInNoSightConeDelegate;
+
+	UPROPERTY(BlueprintAssignable, Category = "Delegates")	
+	FOnAIZoneManagerStateChangedSignature OnAIZoneManagerStateChangedDelegate;
+
+	UPROPERTY(EditDefaultsOnly, Category = "AI | Configuration")
+	float CombatTimerDuration = 4.0f;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "AI | Configuration")
+	float AlertedTimerDuration = 4.0f;
+	
+	UPROPERTY(BlueprintReadWrite, Category = "AI | Knowledge")
+	FBasicEnemySharedKnowledge SharedKnowledge;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UBoxComponent> BoxTrigger;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStateTreeComponent>	StateMachine;
+	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugSharedKnowledge = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugEnemies = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugCovers = false;
 
 	AAIZone();
+
 	virtual void Tick(float DeltaSeconds) override;
 
-#pragma region INTERFACE_METHODS
 	void GetChangeOfState_Implementation(const FName& SourceStateName, const FName& NextStateName) override;
-#pragma endregion
 
 	
 protected:
 	virtual void BeginPlay() override;
 	
-#pragma region BLUEPRINT_EVENTS
 	// Hook for Derived Blueprints when a StateTree's state change
-	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnPlayerSensed"))			void PlayerSensed();
-	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnPlayerForgotten"))		void PlayerForgotten();
-	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnCombatTimerStarted"))		void CombatTimerStarted();
-	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnCombatTimerFinished"))	void CombatTimerFinished();
-	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnAlertedTimerStarted"))	void AlertedTimerStarted();
-	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnAlertedTimerFinished"))	void AlertedTimerFinished();
-	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnPlayerInNoSightCone"))	void PlayerInNoSightCone();
-	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnStateChanged"))			void StateChanged(const EAIZoneState SourceState, const EAIZoneState NewState);
-#pragma endregion
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnPlayerSensed"))			
+	void PlayerSensed();
+
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnPlayerForgotten"))		
+	void PlayerForgotten();
+
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnCombatTimerStarted"))		
+	void CombatTimerStarted();
+
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnCombatTimerFinished"))	
+	void CombatTimerFinished();
+
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnAlertedTimerStarted"))	
+	void AlertedTimerStarted();
+
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnAlertedTimerFinished"))	
+	void AlertedTimerFinished();
+
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnPlayerInNoSightCone"))	
+	void PlayerInNoSightCone();
+
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnStateChanged"))			
+	void StateChanged(const EAIZoneState SourceState, const EAIZoneState NewState);
 
 private:
 	void RegisterActors();
 
+#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
 	void DebugSharedKnowledge() const;
+
 	void DebugEnemies() const;
+
 	void DebugCovers() const;
-	
-#pragma region FUNCTIONS_LISTENERS
+#endif
+
 	// Function listeners
-	UFUNCTION()	void NotifyPlayerEnteredInSightCone(const APawn* PawnOwner);
-	UFUNCTION()	void NotifyPlayerExitedInSightCone(const APawn* PawnOwner);
-	UFUNCTION()	void NotifyPlayerWasSeen(const APawn* PawnOwner);
-#pragma endregion
+	UFUNCTION()	
+	void NotifyPlayerEnteredInSightCone(const APawn* PawnOwner);
+
+	UFUNCTION()	
+	void NotifyPlayerExitedInSightCone(const APawn* PawnOwner);
+
+	UFUNCTION()	
+	void NotifyPlayerWasSeen(const APawn* PawnOwner);
 };

@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AI/BasicEnemy/BasicEnemyController.h"
-
 #include "StateTree.h"
 #include "AI/Actuation/SettableStateTreeComponent.h"
 #include "AI/BasicEnemy/BasicEnemy.h"
@@ -11,8 +10,9 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "AI/AIZone/AIZone.h"
 
-ABasicEnemyController::ABasicEnemyController(const FObjectInitializer& ObjectInitializer)
+ABasicEnemyController::ABasicEnemyController()
 {
 	// Construct Perception Component
 	{
@@ -52,17 +52,17 @@ ABasicEnemyController::ABasicEnemyController(const FObjectInitializer& ObjectIni
 void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 {
 	// Initialize AI components
-	BasicEnemy = Cast<ABasicEnemy>(BasicEnemyInput);
-	if (BasicEnemy)
+	if (BasicEnemy = Cast<ABasicEnemy>(BasicEnemyInput))
 	{
-		//UDataTable* BasicEnemyConfigData = BasicEnemy->ConfigData;
-		UBasicEnemyConfigData* ConfigData = BasicEnemy->ConfigData;
-		if (ConfigData)
+		if (UBasicEnemyConfigData* ConfigData = BasicEnemy->ConfigData)
 		{
 			// Initialization of Perception Component
-			if (Cast<UBasicEnemyPerceptionComponent>(GetPerceptionComponent()) && ConfigData->PerceptionConfigData)
+			if (UBasicEnemyPerceptionComponent* BasicEnemyPerceptionComponent = Cast<UBasicEnemyPerceptionComponent>(GetPerceptionComponent()))
 			{
-				Cast<UBasicEnemyPerceptionComponent>(GetPerceptionComponent())->SetUpFromData(ConfigData->PerceptionConfigData);
+				if (ConfigData->PerceptionConfigData)
+				{
+					BasicEnemyPerceptionComponent->SetUpFromData(ConfigData->PerceptionConfigData);
+				}
 			}
 			
 			// Initialization of Knowledge Component From Data
@@ -83,7 +83,7 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 	{
 		if (KnowledgeComponent)
 		{
-			KnowledgeComponent->Initialize(Cast<UBasicEnemyPerceptionComponent>(PerceptionComponent), this, BasicEnemy->AIZone);
+			KnowledgeComponent->Initialize(Cast<UBasicEnemyPerceptionComponent>(PerceptionComponent), this);
 			KnowledgeComponent->OnPlayerSeenDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyPlayerWasSeen);
 			KnowledgeComponent->OnSomethingHeardDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifySomethingWasHeard);
 			KnowledgeComponent->OnSoundForgottenDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifySoundForgotten);
@@ -121,14 +121,8 @@ void ABasicEnemyController::GetChangeOfState_Implementation(const FName& SourceS
 	OnBasicEnemyStateChangedDelegate.Broadcast(SourceState, NextState);
 }
 
-#pragma region EVENT_LISTENERS
 void ABasicEnemyController::NotifyPlayerWasSeen(const APawn* Notifier)
 {
-	/*
-	 * This listener is called when this actor sees the player or someone else did (via AIZone shared knowledge)
-	 * This means that it will be called twice on the actor who actually saw the Player
-	 * So the message to the StateTree should be called only once
-	 */
 	if (StateMachine->IsRunning())
 	{
 		StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.PlayerWasSeen")));
@@ -167,4 +161,3 @@ void ABasicEnemyController::NotifySoundForgotten(const APawn* Notifier, const FA
 		StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.SoundForgotten")));
 	}
 }
-#pragma endregion 

@@ -25,17 +25,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "AI | Configuration")
 	TObjectPtr<UAIWeaponConfigData> WeaponConfig;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	TObjectPtr<ABasicEnemyController> BasicEnemyController;
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "AI")
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "AI")
 	TObjectPtr<AAIZone> AIZone;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "AI")
 	TObjectPtr<ASplineContainer> PatrolSpline;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI | Debug")
-	EBasicEnemyBehaviour BehaviourToDebug;
+	EBasicEnemyBehaviour BehaviourToTest;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Debug")
 	bool bDebugKnowledge = false;
@@ -44,9 +44,9 @@ public:
 	bool bDebugBehaviours = false;
 
 	ABasicEnemy();
+
 	virtual void Tick(float DeltaSeconds) override;
 
-	UFUNCTION(BlueprintCallable) 
 	void RegisterAIZone(AAIZone* NewAIZone);
 
 protected:
@@ -55,9 +55,11 @@ protected:
 private:
 #if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
 	void DebugKnowledge() const;
+
 	void DebugBehaviours() const;
 #endif
 
+	// Functions Listeners
 	UFUNCTION()	
 	void NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };

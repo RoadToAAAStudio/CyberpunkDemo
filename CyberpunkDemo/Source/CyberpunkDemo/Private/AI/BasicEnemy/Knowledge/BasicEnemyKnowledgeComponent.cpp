@@ -12,20 +12,12 @@
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISense_Hearing.h"
 #include "AI/Utility/SplineContainer.h"
-#include "Components/SplineComponent.h"
 
-// Sets default values for this component's properties
 UBasicEnemyKnowledgeComponent::UBasicEnemyKnowledgeComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-	
-	PersonalKnowledge = FBasicEnemyPersonalKnowledge();
-	AIZone = nullptr;
 }
 
-// Called every frame
 void UBasicEnemyKnowledgeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -84,22 +76,17 @@ void UBasicEnemyKnowledgeComponent::TickComponent(float DeltaTime, ELevelTick Ti
 	}
 }
 
-void UBasicEnemyKnowledgeComponent::Initialize(	UBasicEnemyPerceptionComponent* PerceptionComponentInput,
-												ABasicEnemyController* BasicEnemyControllerInput,
-												AAIZone* AIZoneInput)
+void UBasicEnemyKnowledgeComponent::Initialize(UBasicEnemyPerceptionComponent* PerceptionComponentInput, ABasicEnemyController* BasicEnemyController)
 {
-	SightBar = NewObject<UAttributeBar>();
-	HearingBar = NewObject<UAttributeBar>();
-	
 	PerceptionComponent = PerceptionComponentInput;
-	BasicEnemyController = BasicEnemyControllerInput;
-	AIZone = AIZoneInput;
 
 	PerceptionComponent->OnTargetPerceptionUpdated.AddUniqueDynamic(this, &UBasicEnemyKnowledgeComponent::NotifyReceiveStimulus);
 	BasicEnemyController->OnBasicEnemyStateChangedDelegate.AddUniqueDynamic(this, &UBasicEnemyKnowledgeComponent::NotifyStateChanged);
 
 	// Initialize Sensors
 	{
+		SightBar = NewObject<UAttributeBar>();
+		HearingBar = NewObject<UAttributeBar>();
 		ToggleSight(true);
 		ToggleHearing(true);
 	}
@@ -111,8 +98,7 @@ void UBasicEnemyKnowledgeComponent::Initialize(	UBasicEnemyPerceptionComponent* 
 		PersonalKnowledge.AgentSpawnRotation = PersonalKnowledge.Agent.Get()->GetActorRotation();
 		PersonalKnowledge.AgentState = EBasicEnemyState::Unaware;
 
-		ASplineContainer* SplineContainer = Cast<ABasicEnemy>(Cast<AController>(GetOwner())->GetPawn())->PatrolSpline;
-		if (SplineContainer)
+		if (ASplineContainer* SplineContainer = Cast<ABasicEnemy>(Cast<AController>(GetOwner())->GetPawn())->PatrolSpline)
 		{
 			PersonalKnowledge.PatrolSpline = SplineContainer;
 			USplineComponent* Spline = SplineContainer->Spline;
@@ -129,31 +115,35 @@ void UBasicEnemyKnowledgeComponent::SetUpFromData(const UBasicEnemySensorsData* 
 {
 	// Set Up Sensors
 	{
-		SightBaseIncreaseRate		= SensorsConfigData->SightBaseIncreaseRate;			
-		SightBaseDecreaseRate		= SensorsConfigData->SightBaseDecreaseRate;			
-		SightCrouchMultiplier		= SensorsConfigData->SightCrouchMultiplier;			
-		SightDistanceMinMultiplier	= SensorsConfigData->SightDistanceMinMultiplier;	
-		SightDistanceMaxMultiplier	= SensorsConfigData->SightDistanceMaxMultiplier;
+		SightBaseIncreaseRate = SensorsConfigData->SightBaseIncreaseRate;			
+		SightBaseDecreaseRate = SensorsConfigData->SightBaseDecreaseRate;			
+		SightCrouchMultiplier = SensorsConfigData->SightCrouchMultiplier;			
+		SightDistanceMinMultiplier = SensorsConfigData->SightDistanceMinMultiplier;	
+		SightDistanceMaxMultiplier = SensorsConfigData->SightDistanceMaxMultiplier;
 
-		HearingBaseDecreaseRate		= SensorsConfigData->HearingBaseDecreaseRate;
-	}
-
-	// Set Up Knowledge
-	{
-
+		HearingBaseDecreaseRate	= SensorsConfigData->HearingBaseDecreaseRate;
 	}
 }
 
-const AAIZone* UBasicEnemyKnowledgeComponent::GetAIZone() const
-{
-	return AIZone;
+bool UBasicEnemyKnowledgeComponent::IsSightEnabled() const 
+{ 
+	return bSightEnabled;
 }
 
-#pragma region SENSORS_PUBLIC_CONTROLS
-bool UBasicEnemyKnowledgeComponent::IsSightEnabled		()  const { return bSightEnabled;			}
-bool UBasicEnemyKnowledgeComponent::IsHearingEnabled	()  const { return bHearingEnabled;			}
-float UBasicEnemyKnowledgeComponent::GetSightBarValue	()  const { return SightBar->GetValue();	}
-float UBasicEnemyKnowledgeComponent::GetHearingBarValue	()  const { return HearingBar->GetValue();	}
+bool UBasicEnemyKnowledgeComponent::IsHearingEnabled() const 
+{ 
+	return bHearingEnabled;			
+}
+
+float UBasicEnemyKnowledgeComponent::GetSightBarValue() const 
+{ 
+	return SightBar->GetValue();	
+}
+
+float UBasicEnemyKnowledgeComponent::GetHearingBarValue()  const 
+{ 
+	return HearingBar->GetValue();	
+}
 
 void UBasicEnemyKnowledgeComponent::ToggleSight(bool Enable)
 {
@@ -190,9 +180,7 @@ void UBasicEnemyKnowledgeComponent::ToggleHearing(bool Enable)
 	SenseToggled(UAISense_Hearing::StaticClass(), Enable);
 	OnSenseToggledDelegate.Broadcast(UAISense_Hearing::StaticClass(), Enable);
 }
-#pragma endregion
 
-#pragma region EVENT_LISTENERS
 void UBasicEnemyKnowledgeComponent::NotifyReceiveStimulus(AActor* Actor, const FAIStimulus Stimulus)
 {
 	if (IsSightEnabled() && Cast<UAISenseConfig_Sight>(PerceptionComponent->GetSenseConfig(Stimulus.Type)))
@@ -257,4 +245,3 @@ void UBasicEnemyKnowledgeComponent::NotifyHearingBarFull()
 	SomethingHeard(TemporaryHeardStimulus);
 	OnSomethingHeardDelegate.Broadcast(PersonalKnowledge.Agent.Get(), TemporaryHeardStimulus);
 }
-#pragma endregion

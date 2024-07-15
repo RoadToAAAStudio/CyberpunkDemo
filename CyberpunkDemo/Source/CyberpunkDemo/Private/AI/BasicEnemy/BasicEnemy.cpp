@@ -12,7 +12,13 @@
 
 ABasicEnemy::ABasicEnemy()
 {
-	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABasicEnemy::NotifySomethingEnteredInTheTrigger);
+	BehaviourToTest = EBasicEnemyBehaviour::None;
+
+#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
+	PrimaryActorTick.bCanEverTick = true;
+#else
+	PrimaryActorTick = false;
+#endif
 }
 
 void ABasicEnemy::Tick(float DeltaSeconds)
@@ -43,6 +49,8 @@ void ABasicEnemy::RegisterAIZone(AAIZone* NewAIZone)
 void ABasicEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABasicEnemy::NotifySomethingEnteredInTheTrigger);
 
 	BasicEnemyController = Cast<ABasicEnemyController>(GetController());
 	if (BasicEnemyController)
