@@ -1,7 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
-using System.Collections.Generic;
 
 public class CyberpunkDemoTarget : TargetRules
 {
@@ -11,5 +10,9 @@ public class CyberpunkDemoTarget : TargetRules
 		DefaultBuildSettings = BuildSettingsVersion.V4;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_3;
 		ExtraModuleNames.Add("CyberpunkDemo");
-	}
+		if (bCompileAgainstEditor)
+		{
+			ExtraModuleNames.Add("CyberpunkDemoDebug");
+		}
+    }
 }

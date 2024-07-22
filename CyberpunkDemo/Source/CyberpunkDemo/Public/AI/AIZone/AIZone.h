@@ -56,7 +56,7 @@ struct FBasicEnemySharedKnowledge
 	TMap<FVector, TObjectPtr<ALocation>> CoverPerLocations;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
-	EAIZoneState AIZoneState;
+	EAIZoneState AIZoneState = EAIZoneState::None;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam		(FOnPlayerSensedSignature, const APawn*, Owner);

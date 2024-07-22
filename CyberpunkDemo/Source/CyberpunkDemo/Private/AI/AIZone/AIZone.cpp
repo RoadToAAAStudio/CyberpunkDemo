@@ -26,10 +26,9 @@ void AAIZone::Tick(float DeltaSeconds)
 
 	// Update Shared Knowledge
 	{
-		APawn* Player = SharedKnowledge.Player.Get();
-		if (Player)
+		if (SharedKnowledge.Player.IsSet())
 		{
-			SharedKnowledge.PlayerLocation = Player->GetActorLocation();
+			SharedKnowledge.PlayerLocation = SharedKnowledge.Player.Get()->GetActorLocation();
 		}
 	}
 
@@ -72,7 +71,8 @@ void AAIZone::GetChangeOfState_Implementation(const FName& SourceStateName, cons
 			
 		case EAIZoneState::Combat:
 		{
-			SharedKnowledge.Player = nullptr;
+			SharedKnowledge.Player.UnSet();
+			SharedKnowledge.PlayerLocation.UnSet();
 			PlayerForgotten();
 			OnPlayerIsForgottenDelegate.Broadcast();
 		}
@@ -123,8 +123,9 @@ void AAIZone::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SharedKnowledge.CombatTimerDuration = CombatTimerDuration;
-	SharedKnowledge.AlertedTimerDuration = AlertedTimerDuration;
+	SharedKnowledge.CombatTimerDuration.Set(CombatTimerDuration);
+	SharedKnowledge.AlertedTimerDuration.Set(AlertedTimerDuration);
+	SharedKnowledge.NumberOfSightConesThePlayerIsIn.Set(0);
 
 	RegisterActors();
 }
@@ -202,8 +203,8 @@ void AAIZone::DebugEnemies() const
 	for (auto& Enemy : SharedKnowledge.Enemies)
 	{
 		FVector EnemyLocation = Enemy->GetActorLocation();
-		DRAW_LINE(GetActorLocation(), EnemyLocation, FColor::Yellow, -1.0f);
-		DRAW_STRING(EnemyLocation + FVector::UpVector * 250.0f, Enemy->GetActorNameOrLabel(), FColor::Yellow, 0.0f);
+		DRAW_LINE(this, GetActorLocation(), EnemyLocation, FColor::Yellow, -1.0f);
+		DRAW_STRING(this, EnemyLocation + FVector::UpVector * 250.0f, Enemy->GetActorNameOrLabel(), FColor::Yellow, 0.0f);
 	}
 }
 
@@ -212,28 +213,28 @@ void AAIZone::DebugCovers() const
 	for (auto& CoverData : SharedKnowledge.CoverPerLocations)
 	{
 		FVector CoverLocation = CoverData.Key;
-		DRAW_SPHERE(CoverLocation, 25.0f, 4, FColor::Yellow, -1.0f);
+		DRAW_SPHERE(this, CoverLocation, 25.0f, 4, FColor::Yellow, -1.0f);
 	}
 }
 
 void AAIZone::NotifyPlayerEnteredInSightCone(const APawn* PawnOwner)
 {
-	SharedKnowledge.NumberOfSightConesThePlayerIsIn = SharedKnowledge.NumberOfSightConesThePlayerIsIn.Get() + 1;
+	SharedKnowledge.NumberOfSightConesThePlayerIsIn.Set(SharedKnowledge.NumberOfSightConesThePlayerIsIn.Get() + 1);
 
 	if (SharedKnowledge.NumberOfSightConesThePlayerIsIn.Get() == 1)
 	{
 		if (SharedKnowledge.AIZoneState == EAIZoneState::Combat)
 		{
-			GetWorld()->GetTimerManager().ClearTimer(SharedKnowledge.CombatTimer.Get());
 			SharedKnowledge.CombatTimer.UnSet();
+			GetWorld()->GetTimerManager().ClearTimer(SharedKnowledge.CombatTimer.Get());
 		}
 	}
 }
 
 void AAIZone::NotifyPlayerExitedInSightCone(const APawn* PawnOwner)
 {
-	SharedKnowledge.NumberOfSightConesThePlayerIsIn = SharedKnowledge.NumberOfSightConesThePlayerIsIn.Get() - 1;
-
+	SharedKnowledge.NumberOfSightConesThePlayerIsIn.Set(SharedKnowledge.NumberOfSightConesThePlayerIsIn.Get() - 1);
+ 
 	if (SharedKnowledge.NumberOfSightConesThePlayerIsIn.Get() > 0) return;
 
 	if (SharedKnowledge.AIZoneState == EAIZoneState::Combat)
@@ -264,7 +265,7 @@ void AAIZone::NotifyPlayerWasSeen(const APawn* PawnOwner)
 			GetWorld()->GetTimerManager().ClearTimer(SharedKnowledge.AlertedTimer.Get());
 			SharedKnowledge.AlertedTimer.UnSet();
 		}
-		SharedKnowledge.Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+		SharedKnowledge.Player.Set(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 		PlayerSensed();
 		OnPlayerIsSensedDelegate.Broadcast(PawnOwner);
 		StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.PlayerWasSeen")));

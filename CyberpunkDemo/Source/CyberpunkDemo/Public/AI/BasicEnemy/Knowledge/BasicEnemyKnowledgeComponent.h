@@ -64,16 +64,16 @@ struct FBasicEnemyPersonalKnowledge
 	FSettableFloat AgentDistanceFromSpawn;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
-	EBasicEnemyState AgentState;
+	EBasicEnemyState AgentState = EBasicEnemyState::None;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
-	EBasicEnemyBehaviour AgentBehaviour;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
-	TArray<FVector>	PatrolWaypoints;
+	EBasicEnemyBehaviour AgentBehaviour = EBasicEnemyBehaviour::None;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
 	FSettableSpline PatrolSpline;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
+	TArray<FVector>	PatrolWaypoints;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
 	FSettableMainCharacter PlayerInSightCone;
@@ -82,7 +82,7 @@ struct FBasicEnemyPersonalKnowledge
 	FSettableFloat DistanceFromPlayer;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
-	FSettableVector	HeardStimulusLocation;
+	FSettableVector	SensedLocation;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
 	FSettableVector CoverLocation;

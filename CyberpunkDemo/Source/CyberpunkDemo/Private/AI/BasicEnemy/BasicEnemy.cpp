@@ -73,7 +73,7 @@ void ABasicEnemy::DebugKnowledge() const
 		const EBasicEnemyBehaviour Behaviour = KnowledgeComponent->PersonalKnowledge.AgentBehaviour;
 		const FString String = FString::Printf(TEXT("%s\nState: %s\nBehaviour: %s"), *GetActorNameOrLabel(), *(UEnum::GetDisplayValueAsText(State).ToString()), *(UEnum::GetDisplayValueAsText(Behaviour).ToString()));
 
-		DRAW_STRING(GetActorLocation() + FVector::UpVector * 200.0f, String, FColor::White, 0.0f);	
+		DRAW_STRING(this, GetActorLocation() + FVector::UpVector * 200.0f, String, FColor::White, 0.0f);
 	}
 
 	// Debug Name
@@ -124,7 +124,7 @@ void ABasicEnemy::DebugKnowledge() const
 		const FSettableFloat& DistanceFromPlayerInCone = KnowledgeComponent->PersonalKnowledge.DistanceFromPlayer;
 		String += FString::Printf(TEXT("PlayerInSightCone (%s): %s - Distance (%s): %.2f\n"), PlayerInCone.IsSet() ? "*" : "-", bIsPlayerInSightCone ? TEXT("true") : TEXT("false"), DistanceFromPlayerInCone.IsSet() ? "*" : "-", DistanceFromPlayerInCone.Get());
 
-		const FSettableVector& SensedLocation = KnowledgeComponent->PersonalKnowledge.HeardStimulusLocation;
+		const FSettableVector& SensedLocation = KnowledgeComponent->PersonalKnowledge.SensedLocation;
 		String += FString::Printf(TEXT("SensedLocation (%s): (%.2f, %.2f, %.2f)\n"), SensedLocation.IsSet() ? "*" : "-", SensedLocation.Get().X, SensedLocation.Get().Y, SensedLocation.Get().Z);
 
 		const FSettableVector& CoverLocation = KnowledgeComponent->PersonalKnowledge.CoverLocation;
@@ -158,7 +158,7 @@ void ABasicEnemy::DebugBehaviours() const
 				{
 					const FString String = FString::Printf(TEXT("Performing: %s\n"), *AnimationAsset->GetName());
 
-					DRAW_STRING(GetActorLocation() + FVector::UpVector * 150.0f, String, FColor::Yellow, 0.0f);
+					DRAW_STRING(this, GetActorLocation() + FVector::UpVector * 150.0f, String, FColor::Yellow, 0.0f);
 				}
 			}
 		}	
@@ -169,9 +169,9 @@ void ABasicEnemy::DebugBehaviours() const
 		const FVector& SpawnLocation = KnowledgeComponent->PersonalKnowledge.AgentSpawnLocation.Get();
 		const float DistanceFromSpawn = KnowledgeComponent->PersonalKnowledge.AgentDistanceFromSpawn.Get();
 		const FString DistanceFromSpawnString = FString::Printf(TEXT("Distance: %.2f"), DistanceFromSpawn);
-		DRAW_SPHERE(SpawnLocation, 25, 12, FColor::Green, 0.0f);
-		DRAW_LINE(GetActorLocation(), SpawnLocation, FColor::Yellow, 0.0f);
-		DRAW_STRING(SpawnLocation + FVector::UpVector * 50.0f, DistanceFromSpawnString, FColor::White, 0.0f);
+		DRAW_SPHERE(this, SpawnLocation, 25, 12, FColor::Green, 0.0f);
+		DRAW_LINE(this, GetActorLocation(), SpawnLocation, FColor::Yellow, 0.0f);
+		DRAW_STRING(this, SpawnLocation + FVector::UpVector * 50.0f, DistanceFromSpawnString, FColor::White, 0.0f);
 		break;
 	}
 	case EBasicEnemyBehaviour::Patrol:
@@ -179,8 +179,8 @@ void ABasicEnemy::DebugBehaviours() const
 		const USplineComponent* Spline = KnowledgeComponent->PersonalKnowledge.PatrolSpline.Get()->Spline;
 		const FVector& FirstSplinePointLocation = KnowledgeComponent->PersonalKnowledge.PatrolWaypoints[0];
 		const FVector& LastSplinePointLocation = KnowledgeComponent->PersonalKnowledge.PatrolWaypoints[KnowledgeComponent->PersonalKnowledge.PatrolWaypoints.Num() - 1];
-		DRAW_STRING(FirstSplinePointLocation + FVector::UpVector * 50.0f, TEXT("Spline First Point"), FColor::White, 0.0f);
-		DRAW_STRING(LastSplinePointLocation + FVector::UpVector * 50.0f, TEXT("Spline Last Point"), FColor::White, 0.0f);
+		DRAW_STRING(this, FirstSplinePointLocation + FVector::UpVector * 50.0f, TEXT("Spline First Point"), FColor::White, 0.0f);
+		DRAW_STRING(this, LastSplinePointLocation + FVector::UpVector * 50.0f, TEXT("Spline Last Point"), FColor::White, 0.0f);
 		break;
 	}
 	case EBasicEnemyBehaviour::BlindInvestigation:

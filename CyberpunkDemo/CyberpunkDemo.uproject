@@ -14,6 +14,11 @@
 				"GameplayStateTreeModule",
 				"CoreUObject"
 			]
+		},
+		{
+			"Name": "CyberpunkDemoDebug",
+			"Type": "Runtime",
+			"LoadingPhase": "PostDefault"
 		}
 	],
 	"Plugins": [

@@ -22,12 +22,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
 	bool bIsSet = false;
 	
-	void Set(const FVector& Vector);
-	void UnSet();
-	const FVector& Get() const;
-	FVector& Get();
-	bool IsSet() const;
-	void operator=(const FVector& Vector);
+	CYBERPUNKDEMO_API void Set(const FVector& Vector);
+	CYBERPUNKDEMO_API void UnSet();
+	CYBERPUNKDEMO_API const FVector& Get() const;
+	CYBERPUNKDEMO_API FVector& Get();
+	CYBERPUNKDEMO_API bool IsSet() const;
+	CYBERPUNKDEMO_API void operator=(const FVector& Vector);
 };
 
 USTRUCT(BlueprintType)
@@ -42,12 +42,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
 	bool bIsSet = false;
 	
-	void Set(const FRotator& Rotator);
-	void UnSet();
-	const FRotator& Get() const;
-	FRotator& Get();
-	bool IsSet() const;
-	void operator=(const FRotator& Rotator);
+	CYBERPUNKDEMO_API void Set(const FRotator& Rotator);
+	CYBERPUNKDEMO_API void UnSet();
+	CYBERPUNKDEMO_API const FRotator& Get() const;
+	CYBERPUNKDEMO_API FRotator& Get();
+	CYBERPUNKDEMO_API bool IsSet() const;
+	CYBERPUNKDEMO_API void operator=(const FRotator& Rotator);
 };
 
 USTRUCT(BlueprintType)
@@ -62,12 +62,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
 	bool bIsSet	= false;
 
-	void Set(float Float);
-	void UnSet();
-	float Get() const;
-	bool IsSet() const;
-
-	void operator=(float Float);
+	CYBERPUNKDEMO_API void Set(float Float);
+	CYBERPUNKDEMO_API void UnSet();
+	CYBERPUNKDEMO_API float Get() const;
+	CYBERPUNKDEMO_API bool IsSet() const;
+	CYBERPUNKDEMO_API void operator=(float Float);
 };
 
 USTRUCT(BlueprintType)
@@ -82,11 +81,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
 	bool bIsSet = false;
 	
-	void Set(int Int);
-	void UnSet();
-	int Get() const;
-	bool IsSet() const;
-	void operator=(int Int);
+	CYBERPUNKDEMO_API void Set(int Int);
+	CYBERPUNKDEMO_API void UnSet();
+	CYBERPUNKDEMO_API int Get() const;
+	CYBERPUNKDEMO_API bool IsSet() const;
+	CYBERPUNKDEMO_API void operator=(int Int);
 };
 
 USTRUCT(BlueprintType)
@@ -98,12 +97,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
 	TObjectPtr<APawn> Data = nullptr;
 
-	void Set(APawn* Object);
-	void UnSet();
-	const APawn* Get() const;
-	APawn* Get();
-	bool IsSet() const;
-	void operator=(APawn* Object);
+	CYBERPUNKDEMO_API void Set(APawn* Object);
+	CYBERPUNKDEMO_API void UnSet();
+	CYBERPUNKDEMO_API const APawn* Get() const;
+	CYBERPUNKDEMO_API APawn* Get();
+	CYBERPUNKDEMO_API bool IsSet() const;
+	CYBERPUNKDEMO_API void operator=(APawn* Object);
 };
 
 USTRUCT(BlueprintType)
@@ -115,12 +114,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
 	TObjectPtr<ASplineContainer> Data = nullptr;
 
-	void Set(ASplineContainer* Object);
-	void UnSet();
-	const ASplineContainer* Get() const;
-	ASplineContainer* Get();
-	bool IsSet() const;
-	void operator=(ASplineContainer* Object);
+	CYBERPUNKDEMO_API void Set(ASplineContainer* Object);
+	CYBERPUNKDEMO_API void UnSet();
+	CYBERPUNKDEMO_API const ASplineContainer* Get() const;
+	CYBERPUNKDEMO_API ASplineContainer* Get();
+	CYBERPUNKDEMO_API bool IsSet() const;
+	CYBERPUNKDEMO_API void operator=(ASplineContainer* Object);
 };
 
 USTRUCT(BlueprintType)
@@ -132,12 +131,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
 	TObjectPtr<AMainCharacter> Data = nullptr;
 
-	void Set(AMainCharacter* Object);
-	void UnSet();
-	const AMainCharacter* Get() const;
-	AMainCharacter* Get();
-	bool IsSet() const;
-	void operator=(AMainCharacter* Object);
+	CYBERPUNKDEMO_API void Set(AMainCharacter* Object);
+	CYBERPUNKDEMO_API void UnSet();
+	CYBERPUNKDEMO_API const AMainCharacter* Get() const;
+	CYBERPUNKDEMO_API AMainCharacter* Get();
+	CYBERPUNKDEMO_API bool IsSet() const;
+	CYBERPUNKDEMO_API void operator=(AMainCharacter* Object);
 };
 
 USTRUCT(BlueprintType)
@@ -152,12 +151,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
 	bool bIsSet = false;
 
-	void Set(const FAIStimulus& Stimulus);
-	void UnSet();
-	const FAIStimulus& Get() const;
-	FAIStimulus& Get();
-	bool IsSet() const;
-	void operator=(const FAIStimulus& Stimulus);
+	CYBERPUNKDEMO_API void Set(const FAIStimulus& Stimulus);
+	CYBERPUNKDEMO_API void UnSet();
+	CYBERPUNKDEMO_API const FAIStimulus& Get() const;
+	CYBERPUNKDEMO_API FAIStimulus& Get();
+	CYBERPUNKDEMO_API bool IsSet() const;
+	CYBERPUNKDEMO_API void operator=(const FAIStimulus& Stimulus);
 };
 
 USTRUCT(BlueprintType)
@@ -172,9 +171,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
 	bool bIsSet = false;
 
-	void Set();
-	void UnSet();
-	const FTimerHandle& Get() const;
-	FTimerHandle& Get();
-	bool IsSet() const;
+	CYBERPUNKDEMO_API void Set();
+	CYBERPUNKDEMO_API void UnSet();
+	CYBERPUNKDEMO_API const FTimerHandle& Get() const;
+	CYBERPUNKDEMO_API FTimerHandle& Get();
+	CYBERPUNKDEMO_API bool IsSet() const;
 };

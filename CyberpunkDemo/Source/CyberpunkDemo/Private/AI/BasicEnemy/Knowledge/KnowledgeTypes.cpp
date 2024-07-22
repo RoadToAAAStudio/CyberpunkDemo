@@ -276,5 +276,5 @@ FTimerHandle& FSettableTimerHandle::Get()
 
 bool FSettableTimerHandle::IsSet() const
 {
-	return Data.IsValid();
+	return bIsSet;
 }

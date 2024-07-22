@@ -196,6 +196,7 @@ void UBasicEnemyKnowledgeComponent::NotifyReceiveStimulus(AActor* Actor, const F
 			}
 			else
 			{
+				PersonalKnowledge.DistanceFromPlayer.UnSet();
 				PersonalKnowledge.PlayerInSightCone.UnSet();
 				PlayerExitedSightCone();
 				OnPlayerExitedSightConeDelegate.Broadcast(PersonalKnowledge.Agent.Get());
@@ -212,9 +213,9 @@ void UBasicEnemyKnowledgeComponent::NotifyReceiveStimulus(AActor* Actor, const F
 		}
 		else
 		{
-			if (Stimulus.StimulusLocation == PersonalKnowledge.HeardStimulusLocation.Get())
+			if (Stimulus.StimulusLocation == PersonalKnowledge.SensedLocation.Get())
 			{
-				PersonalKnowledge.HeardStimulusLocation.UnSet();
+				PersonalKnowledge.SensedLocation.UnSet();
 			}
 			SoundForgotten(Stimulus);
 			OnSoundForgottenDelegate.Broadcast(PersonalKnowledge.Agent.Get(), Stimulus);
@@ -241,7 +242,7 @@ void UBasicEnemyKnowledgeComponent::NotifySightBarEmpty()
 
 void UBasicEnemyKnowledgeComponent::NotifyHearingBarFull()
 {
-	PersonalKnowledge.HeardStimulusLocation.Set(TemporaryHeardStimulus.StimulusLocation);
+	PersonalKnowledge.SensedLocation.Set(TemporaryHeardStimulus.StimulusLocation);
 	SomethingHeard(TemporaryHeardStimulus);
 	OnSomethingHeardDelegate.Broadcast(PersonalKnowledge.Agent.Get(), TemporaryHeardStimulus);
 }
