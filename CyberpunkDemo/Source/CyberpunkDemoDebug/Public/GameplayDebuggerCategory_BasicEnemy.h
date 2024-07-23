@@ -31,7 +31,7 @@ protected:
 		FVector PlayerLocation;
 		float CombatTimerValue;
 		float AlertedTimerValue;
-		int NumberOfSightConePlayerIsIn;
+		int32 NumberOfSightConePlayerIsIn;
 		TArray<FString> Enemies;
 		TArray<FVector> Covers;
 		EAIZoneState AIZoneState;
