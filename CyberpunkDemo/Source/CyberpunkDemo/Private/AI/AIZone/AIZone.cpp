@@ -98,8 +98,8 @@ void AAIZone::GetChangeOfState_Implementation(const FName& SourceStateName, cons
 			// Start Alerted Timer
 			FTimerDelegate TimerCallback = FTimerDelegate::CreateLambda([this]()
 			{
-				StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.AlertedTimerFinished")));
 				SharedKnowledge.AlertedTimer.UnSet();
+				StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.AlertedTimerFinished")));
 				AlertedTimerFinished();
 				OnAlertedTimerFinishedDelegate.Broadcast();
 			});
@@ -241,8 +241,8 @@ void AAIZone::NotifyPlayerExitedInSightCone(const APawn* PawnOwner)
 	{
 		FTimerDelegate TimerCallback = FTimerDelegate::CreateLambda([this]()
 		{
-			StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.CombatTimerFinished")));
 			SharedKnowledge.CombatTimer.UnSet();
+			StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.CombatTimerFinished")));
 			CombatTimerFinished();
 			OnCombatTimerFinishedDelegate.Broadcast();
 		});
@@ -266,8 +266,8 @@ void AAIZone::NotifyPlayerWasSeen(const APawn* PawnOwner)
 			SharedKnowledge.AlertedTimer.UnSet();
 		}
 		SharedKnowledge.Player.Set(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+		StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.PlayerWasSeen")));
 		PlayerSensed();
 		OnPlayerIsSensedDelegate.Broadcast(PawnOwner);
-		StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.PlayerWasSeen")));
 	}
 }
