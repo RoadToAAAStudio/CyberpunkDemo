@@ -1,13 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AI/BasicEnemy/BasicEnemyController.h"
-#include "StateTree.h"
 #include "AI/Actuation/SettableStateTreeComponent.h"
 #include "AI/BasicEnemy/BasicEnemy.h"
 #include "AI/BasicEnemy/BasicEnemyConfigData.h"
 #include "AI/BasicEnemy/Knowledge/BasicEnemyKnowledgeComponent.h"
 #include "AI/BasicEnemy/Knowledge/BasicEnemyPerceptionComponent.h"
-#include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "AI/AIZone/AIZone.h"
@@ -49,11 +47,24 @@ ABasicEnemyController::ABasicEnemyController()
 	}
 }
 
-void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
+
+void ABasicEnemyController::OnPossess(APawn* InPawn)
 {
+	Super::OnPossess(InPawn);
+
+	if (!InPawn) return;
+
 	// Initialize AI components
-	if (BasicEnemy = Cast<ABasicEnemy>(BasicEnemyInput))
+	if (BasicEnemy = Cast<ABasicEnemy>(InPawn))
 	{
+		if (BasicEnemy->AIZone)
+		{
+			BasicEnemy->AIZone->OnPlayerIsSensedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyPlayerWasSeenAcrossNetwork);
+			BasicEnemy->AIZone->OnCombatTimerFinishedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyCombatTimerFinished);
+			BasicEnemy->AIZone->OnAlertedTimerFinishedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyAlertedTimerFinished);
+		}
+
+
 		if (UBasicEnemyConfigData* ConfigData = BasicEnemy->ConfigData)
 		{
 			// Initialization of Perception Component
@@ -64,7 +75,7 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 					BasicEnemyPerceptionComponent->SetUpFromData(ConfigData->PerceptionConfigData);
 				}
 			}
-			
+
 			// Initialization of Knowledge Component From Data
 			if (KnowledgeComponent && ConfigData->SensorsConfigData)
 			{
@@ -78,7 +89,7 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 			}
 		}
 	}
-	
+
 	// Initialization of Knowledge Component
 	{
 		if (KnowledgeComponent)
@@ -97,13 +108,6 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 			StateMachine->StartLogic();
 		}
 	}
-}
-
-void ABasicEnemyController::RegisterAIZone(AAIZone* NewAIZone)
-{
-	NewAIZone->OnPlayerIsSensedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyPlayerWasSeenAcrossNetwork);
-	NewAIZone->OnCombatTimerFinishedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyCombatTimerFinished);
-	NewAIZone->OnAlertedTimerFinishedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyAlertedTimerFinished);
 }
 
 void ABasicEnemyController::GetChangeOfState_Implementation(const FName& SourceStateName, const FName& NextStateName)

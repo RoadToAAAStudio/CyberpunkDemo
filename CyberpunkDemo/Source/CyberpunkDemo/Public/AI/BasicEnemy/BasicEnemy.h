@@ -24,18 +24,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "AI | Configuration")
 	TObjectPtr<UAIWeaponConfigData> WeaponConfig;
 
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI | Configuration")
+	TObjectPtr<AAIZone> AIZone;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI | Configuration")
+	TObjectPtr<ASplineContainer> PatrolSpline;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	TObjectPtr<ABasicEnemyController> BasicEnemyController;
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "AI")
-	TObjectPtr<AAIZone> AIZone;
-
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "AI")
-	TObjectPtr<ASplineContainer> PatrolSpline;
-
 	ABasicEnemy();
-
-	void RegisterAIZone(AAIZone* NewAIZone);
 
 protected:
 	virtual void BeginPlay() override;

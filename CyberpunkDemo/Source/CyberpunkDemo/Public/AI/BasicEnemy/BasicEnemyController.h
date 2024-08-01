@@ -39,9 +39,7 @@ public:
 	
 	ABasicEnemyController();
 
-	void Initialize(ABasicEnemy* BasicEnemy);
-
-	void RegisterAIZone(AAIZone* NewAIZone);
+	virtual void OnPossess(APawn* InPawn) override;
 	
 	void GetChangeOfState_Implementation(const FName& SourceStateName, const FName& NextStateName) override;
 

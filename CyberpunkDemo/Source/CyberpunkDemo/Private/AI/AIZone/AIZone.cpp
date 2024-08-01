@@ -123,40 +123,24 @@ void AAIZone::BeginPlay()
 	SharedKnowledge.AlertedTimerDuration.Set(AlertedTimerDuration);
 	SharedKnowledge.NumberOfSightConesThePlayerIsIn.Set(0);
 
-	RegisterActors();
-}
-
-void AAIZone::RegisterActors()
-{
-	TArray<TEnumAsByte<EObjectTypeQuery>> traceObjectTypes;
-	traceObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn)); // BasicEnemy
-	traceObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_GameTraceChannel2)); // Covers
-	TArray<AActor*> ignoreActors;
-	ignoreActors.Init(this, 1);
-	
-	TArray<AActor*> overlappingActors;
-	UKismetSystemLibrary::BoxOverlapActors(this->GetWorld(), BoxTrigger->GetComponentLocation(), BoxTrigger->GetScaledBoxExtent(), traceObjectTypes, nullptr, ignoreActors, overlappingActors);
-
-	for (int i = 0; i < overlappingActors.Num(); i++)
+	for (int i = 0; i < Enemies.Num(); i++)
 	{
-		AActor* actor = overlappingActors[i];
-		if (ALocation* Location = Cast<ALocation>(actor))
+		ABasicEnemy* Enemy = Enemies[i];
+
+		SharedKnowledge.Enemies.AddUnique(Enemy);
+
+		if (ABasicEnemyController* EnemyController = Cast<ABasicEnemyController>(Enemy->GetController()))
 		{
-			SharedKnowledge.CoverPerLocations.Add(Location->GetActorLocation(), Location);
+			EnemyController->KnowledgeComponent->OnPlayerEnteredSightConeDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerEnteredInSightCone);
+			EnemyController->KnowledgeComponent->OnPlayerExitedSightConeDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerExitedInSightCone);
+			EnemyController->KnowledgeComponent->OnPlayerSeenDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerWasSeen);
 		}
-		else if (ABasicEnemy* Enemy = Cast<ABasicEnemy>(actor))
-		{
-			Enemy->RegisterAIZone(this);
-			SharedKnowledge.Enemies.AddUnique(Enemy);
-			
-			ABasicEnemyController* EnemyController = Cast<ABasicEnemyController>(Enemy->GetController());
-			if (EnemyController)
-			{
-				EnemyController->KnowledgeComponent->OnPlayerEnteredSightConeDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerEnteredInSightCone);
-				EnemyController->KnowledgeComponent->OnPlayerExitedSightConeDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerExitedInSightCone);
-				EnemyController->KnowledgeComponent->OnPlayerSeenDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerWasSeen);
-			}
-		}
+	}
+
+	for (int i = 0; i < Covers.Num(); i++)
+	{
+		ALocation* Location = Covers[i];
+		SharedKnowledge.CoverPerLocations.Add(Location->GetActorLocation(), Location);
 	}
 }
 

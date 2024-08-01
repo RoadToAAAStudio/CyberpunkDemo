@@ -52,11 +52,17 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Delegates")	
 	FOnAIZoneManagerStateChangedSignature OnAIZoneManagerStateChangedDelegate;
 
-	UPROPERTY(EditDefaultsOnly, Category = "AI | Configuration")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI | Configuration")
 	float CombatTimerDuration = 4.0f;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "AI | Configuration")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI | Configuration")
 	float AlertedTimerDuration = 4.0f;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI | Configuration")
+	TArray<TObjectPtr<ABasicEnemy>> Enemies;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI | Configuration")
+	TArray<TObjectPtr<ALocation>> Covers;
 	
 	UPROPERTY(BlueprintReadWrite, Category = "AI | Knowledge")
 	FBasicEnemySharedKnowledge SharedKnowledge;
@@ -78,12 +84,11 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 	void GetChangeOfState_Implementation(const FName& SourceStateName, const FName& NextStateName) override;
-
 	
 protected:
 	virtual void BeginPlay() override;
 	
-	// Hook for Derived Blueprints when a StateTree's state change
+	// Hooks for Derived Blueprints when a StateTree's state change
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnPlayerSensed"))			
 	void PlayerSensed();
 
@@ -109,8 +114,6 @@ protected:
 	void StateChanged(const EAIZoneState SourceState, const EAIZoneState NewState);
 
 private:
-	void RegisterActors();
-
 #if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
 	void DebugEnemies() const;
 

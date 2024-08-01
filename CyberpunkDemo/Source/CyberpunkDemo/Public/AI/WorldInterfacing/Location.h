@@ -9,27 +9,29 @@
 #include "Location.generated.h"
 
 class USphereComponent;
+class AAIZone;
 
 UCLASS()
 class CYBERPUNKDEMO_API ALocation : public AActor, public IGameplayTagAssetInterface, public IClaimable
 {
-private:
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this actor's properties
 	ALocation();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USphereComponent> SphereTrigger;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI | Configuration")
+	TObjectPtr<AAIZone> AIZone;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "AI | Knowledge")
 	FGameplayTagContainer GameplayTagContainer;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "AI | Knowledge")
 	TObjectPtr<AActor> ClaimOwner;
 
-public:	
 #pragma region INTERFACE_METHODS
 	virtual void GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const override;
 	bool Claim_Implementation(AActor* NewOwner) override;
