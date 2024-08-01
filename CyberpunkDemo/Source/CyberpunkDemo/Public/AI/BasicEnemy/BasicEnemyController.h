@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "Knowledge/BasicEnemyKnowledgeTypes.h"
 #include "AI/Utility/IStateTreeNotificationsAcceptor.h"
 #include "BasicEnemyController.generated.h"
 
@@ -12,7 +13,6 @@ class UBasicEnemyKnowledgeComponent;
 class UBasicEnemyPerceptionComponent;
 class ABasicEnemy;
 class AAIZone;
-enum class EBasicEnemyState : uint8;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams (FOnStateChangedSignature, EBasicEnemyState, SourceState, EBasicEnemyState, NextState);
 
@@ -52,6 +52,9 @@ protected:
 private:
 	UFUNCTION() 
 	void NotifyPlayerWasSeen(const APawn* Notifier);
+
+	UFUNCTION()
+	void NotifyPlayerWasSeenAcrossNetwork(const APawn* Notifier);
 
 	UFUNCTION() 
 	void NotifyCombatTimerFinished();

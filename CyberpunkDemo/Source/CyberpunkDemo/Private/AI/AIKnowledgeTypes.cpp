@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "AI/BasicEnemy/Knowledge/KnowledgeTypes.h"
+#include "AI/AIKnowledgeTypes.h"
 
 // Vector -------------------------------------------------------------------
 void FSettableVector::Set(const FVector& Vector)

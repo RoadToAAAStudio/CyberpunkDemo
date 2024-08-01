@@ -101,7 +101,7 @@ void ABasicEnemyController::Initialize(ABasicEnemy* BasicEnemyInput)
 
 void ABasicEnemyController::RegisterAIZone(AAIZone* NewAIZone)
 {
-	NewAIZone->OnPlayerIsSensedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyPlayerWasSeen);
+	NewAIZone->OnPlayerIsSensedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyPlayerWasSeenAcrossNetwork);
 	NewAIZone->OnCombatTimerFinishedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyCombatTimerFinished);
 	NewAIZone->OnAlertedTimerFinishedDelegate.AddUniqueDynamic(this, &ABasicEnemyController::NotifyAlertedTimerFinished);
 }
@@ -116,7 +116,7 @@ void ABasicEnemyController::GetChangeOfState_Implementation(const FName& SourceS
 
 	Index = GoalEnum->GetIndexByName(NextStateName);
 	EBasicEnemyState NextState = Index != INDEX_NONE? static_cast<EBasicEnemyState>(Index) : EBasicEnemyState::None;
-	
+
 	StateChanged(SourceState, NextState);
 	OnBasicEnemyStateChangedDelegate.Broadcast(SourceState, NextState);
 }
@@ -129,11 +129,18 @@ void ABasicEnemyController::NotifyPlayerWasSeen(const APawn* Notifier)
 	}
 }
 
+void ABasicEnemyController::NotifyPlayerWasSeenAcrossNetwork(const APawn* Notifier)
+{
+	if (StateMachine->IsRunning() && Notifier != BasicEnemy)
+	{
+		StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.PlayerWasSeen")));
+	}
+}
+
 void ABasicEnemyController::NotifyCombatTimerFinished()
 {
 	if (StateMachine->IsRunning())
-	{
-		
+	{		
 		StateMachine->SendStateTreeEvent(FGameplayTag::RequestGameplayTag(FName("Character.Sensing.Sight.Events.CombatTimerFinished")));
 	}
 }

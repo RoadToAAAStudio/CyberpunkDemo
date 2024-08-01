@@ -3,93 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AI/BasicEnemy/Knowledge/KnowledgeTypes.h"
+#include "BasicEnemyKnowledgeTypes.h"
 #include "Components/ActorComponent.h"
 #include "BasicEnemyKnowledgeComponent.generated.h"
 
 class UBasicEnemySensorsData;
-class UGoalGenerator;
 class UAttributeBar;
 class UBasicEnemyPerceptionComponent;
 class ABasicEnemyController;
-class USplineComponent;
-class AMainCharacter;
-
-UENUM(BlueprintType)
-enum class EBasicEnemyState : uint8
-{
-	None,
-	Unaware,
-	Combat,
-	Alerted,
-	Max UMETA(Hidden)
-};
-
-UENUM(BlueprintType, Blueprintable)
-enum class EBasicEnemyBehaviour : uint8
-{
-	None,
-	Idle,
-	ReturnToSpawnPoint,
-	Patrol,
-	BlindInvestigation,
-	Investigation,
-	MoveToBetterPosition,
-	QuickMeleeAttack,
-	ThrowGrenade,
-	MoveToCover,
-	ShootFromCover,
-	ThrowGrenadeFromCover,
-	Max UMETA(Hidden)
-};
-
-USTRUCT(Blueprintable)
-struct FBasicEnemyPersonalKnowledge
-{
-	GENERATED_BODY()
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
-	FSettablePawn Agent;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
-	FSettableVector	AgentLocation;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
-	FSettableVector AgentSpawnLocation;
-
-    UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
-	FSettableRotator AgentSpawnRotation;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
-	FSettableFloat AgentDistanceFromSpawn;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
-	EBasicEnemyState AgentState = EBasicEnemyState::None;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
-	EBasicEnemyBehaviour AgentBehaviour = EBasicEnemyBehaviour::None;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
-	FSettableSpline PatrolSpline;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
-	TArray<FVector>	PatrolWaypoints;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
-	FSettableMainCharacter PlayerInSightCone;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
-	FSettableFloat DistanceFromPlayer;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
-	FSettableVector	SensedLocation;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
-	FSettableVector CoverLocation;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite) 
-	FSettableVector MoveToLocation;
-};
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams	(FOnSenseToggledSignature,				const UClass*, SenseConfig, bool, Enabled);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam     (FOnPlayerEnteredSightConeSignature,	const APawn*, Owner);
@@ -144,16 +65,16 @@ public:
 	void Initialize(UBasicEnemyPerceptionComponent* PerceptionComponent, ABasicEnemyController* BasicEnemyController);
 
 	UFUNCTION(BlueprintCallable, Category = "AI | Perception")
-	bool IsSightEnabled() const;
+	FORCEINLINE bool IsSightEnabled() const;
 
 	UFUNCTION(BlueprintCallable, Category = "AI | Perception")
-	bool IsHearingEnabled() const;
+	FORCEINLINE bool IsHearingEnabled() const;
 
 	UFUNCTION(BlueprintCallable, Category = "AI | Perception")
-	float GetSightBarValue() const;
+	FORCEINLINE float GetSightBarValue() const;
 
 	UFUNCTION(BlueprintCallable, Category = "AI | Perception")
-	float GetHearingBarValue() const;
+	FORCEINLINE float GetHearingBarValue() const;
 
 	UFUNCTION(BlueprintCallable, Category = "AI | Perception")
 	void ToggleSight(bool Enable);
@@ -187,8 +108,8 @@ private:
 	UPROPERTY()
 	TObjectPtr<UBasicEnemyPerceptionComponent> PerceptionComponent;
 
-	bool bSightEnabled = true;
-	bool bHearingEnabled = true;
+	bool bIsSightEnabled = true;
+	bool bIsHearingEnabled = true;
 	float SightBaseIncreaseRate = 1.0f;
 	float SightBaseDecreaseRate = 1.0f;
 	float SightCrouchMultiplier = 1.0f;

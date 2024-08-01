@@ -45,15 +45,18 @@ void UBasicEnemyKnowledgeComponent::TickComponent(float DeltaTime, ELevelTick Ti
 				UE::Math::TVector2<float> MultiplierRange = UE::Math::TVector2(SightDistanceMaxMultiplier, SightDistanceMinMultiplier);
 				DistanceMultiplier = FMath::GetMappedRangeValueClamped(DistanceRange, MultiplierRange, DistanceFromPlayer);
 			
-				SightBar->Add(SightBaseIncreaseRate * DistanceMultiplier * CrouchMultiplier * DeltaTime);
+				if (PersonalKnowledge.AgentState != EBasicEnemyState::Combat)
+				{
+					SightBar->Add(SightBaseIncreaseRate * DistanceMultiplier * CrouchMultiplier * DeltaTime);
+				}
 			}
-			else
+			else if (PersonalKnowledge.AgentState != EBasicEnemyState::Combat)
 			{
 				SightBar->Remove(SightBaseDecreaseRate * DeltaTime);
 			}
 		}
 	
-		if (IsHearingEnabled())
+		if (IsHearingEnabled() && PersonalKnowledge.AgentState != EBasicEnemyState::Combat)
 		{
 			HearingBar->Remove(HearingBaseDecreaseRate * DeltaTime);
 		}
@@ -127,12 +130,12 @@ void UBasicEnemyKnowledgeComponent::SetUpFromData(const UBasicEnemySensorsData* 
 
 bool UBasicEnemyKnowledgeComponent::IsSightEnabled() const 
 { 
-	return bSightEnabled;
+	return bIsSightEnabled;
 }
 
 bool UBasicEnemyKnowledgeComponent::IsHearingEnabled() const 
 { 
-	return bHearingEnabled;			
+	return bIsHearingEnabled;			
 }
 
 float UBasicEnemyKnowledgeComponent::GetSightBarValue() const 
@@ -158,7 +161,7 @@ void UBasicEnemyKnowledgeComponent::ToggleSight(bool Enable)
 		SightBar->OnBarEmptiedDelegate.RemoveDynamic(this, &UBasicEnemyKnowledgeComponent::NotifySightBarEmpty);
 	}
 	
-	bSightEnabled = Enable;
+	bIsSightEnabled = Enable;
 	SightBar->Reset();
 	SenseToggled(UAISense_Sight::StaticClass(), Enable);
 	OnSenseToggledDelegate.Broadcast(UAISense_Sight::StaticClass(), Enable);
@@ -175,7 +178,7 @@ void UBasicEnemyKnowledgeComponent::ToggleHearing(bool Enable)
 		HearingBar->OnBarFilledDelegate.RemoveDynamic(this, &UBasicEnemyKnowledgeComponent::NotifyHearingBarFull);
 	}
 	
-	bHearingEnabled = Enable;
+	bIsHearingEnabled = Enable;
 	HearingBar->Reset();
 	SenseToggled(UAISense_Hearing::StaticClass(), Enable);
 	OnSenseToggledDelegate.Broadcast(UAISense_Hearing::StaticClass(), Enable);
@@ -185,7 +188,6 @@ void UBasicEnemyKnowledgeComponent::NotifyReceiveStimulus(AActor* Actor, const F
 {
 	if (IsSightEnabled() && Cast<UAISenseConfig_Sight>(PerceptionComponent->GetSenseConfig(Stimulus.Type)))
 	{
-		// Was the player ?
 		if (Actor == UGameplayStatics::GetPlayerPawn(GetWorld(), 0) && Cast<AMainCharacter>(Actor))
 		{
 			if (Stimulus.WasSuccessfullySensed())
@@ -207,9 +209,12 @@ void UBasicEnemyKnowledgeComponent::NotifyReceiveStimulus(AActor* Actor, const F
 	{
 		if (Stimulus.WasSuccessfullySensed())
 		{
-			//TODO Amount depends on the Stimulus
-			TemporaryHeardStimulus = Stimulus;
-			HearingBar->Add(1.0f);
+			if (PersonalKnowledge.AgentState != EBasicEnemyState::Combat)
+			{
+				//TODO Amount depends on the Stimulus
+				TemporaryHeardStimulus = Stimulus;
+				HearingBar->Add(1.0f);
+			}
 		}
 		else
 		{
@@ -226,6 +231,23 @@ void UBasicEnemyKnowledgeComponent::NotifyReceiveStimulus(AActor* Actor, const F
 void UBasicEnemyKnowledgeComponent::NotifyStateChanged(EBasicEnemyState OldState, EBasicEnemyState NewState)
 {
 	PersonalKnowledge.AgentState = NewState;
+
+	switch (NewState)
+	{
+	case EBasicEnemyState::Unaware:
+	case EBasicEnemyState::Alerted:
+	{
+		SightBar->Reset();
+		HearingBar->Reset();
+		break;
+	}
+	case EBasicEnemyState::Combat:
+	{
+		SightBar->Fill();
+		HearingBar->Fill();
+		break;
+	}
+	}
 }
 
 void UBasicEnemyKnowledgeComponent::NotifySightBarFull()

@@ -35,10 +35,6 @@ void AAIZone::Tick(float DeltaSeconds)
 	// Update Debug
 	{
 #if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
-		if (bDebugSharedKnowledge)
-		{
-			DebugSharedKnowledge();
-		}
 		if (bDebugEnemies)
 		{
 			DebugEnemies();
@@ -161,40 +157,6 @@ void AAIZone::RegisterActors()
 				EnemyController->KnowledgeComponent->OnPlayerSeenDelegate.AddUniqueDynamic(this, &AAIZone::NotifyPlayerWasSeen);
 			}
 		}
-	}
-}
-
-void AAIZone::DebugSharedKnowledge() const
-{
-	// Debug Name
-	{
-		const FString String = FString::Printf(TEXT("LocalNetwork Name: %s----------------------------------------------"), *GetActorNameOrLabel());
-		PRINT_ON_SCREEN(0.0f, FColor::Yellow, String, false);
-	}
-
-	// Debug Shared Knowledge
-	{
-		FString String = FString::Printf(TEXT("[SHARED KNOWLEDGE]\n"));
-
-		const FSettablePawn& Player = SharedKnowledge.Player;
-		const bool bIsPlayerSet = Player.IsSet();
-		const FSettableVector& PlayerLocation = SharedKnowledge.PlayerLocation;
-		String += FString::Printf(TEXT("Player (%s): %s - Location (%s): (%.2f, %.2f, %.2f)\n"), Player.IsSet() ? "*" : "-", bIsPlayerSet ? *(Player.Get()->GetActorNameOrLabel()) : TEXT("null"), PlayerLocation.IsSet() ? "*" : "-", PlayerLocation.Get().X, PlayerLocation.Get().Y, PlayerLocation.Get().Z);
-
-		const FSettableTimerHandle& CombatTimer = SharedKnowledge.CombatTimer;
-		const FSettableTimerHandle& AlertedTimer = SharedKnowledge.AlertedTimer;
-		String += FString::Printf(TEXT("CombatTimer (%s): %.2f - AlertedTimer (%s): %.2f\n"), CombatTimer.IsSet() ? "*" : "-", GetWorldTimerManager().GetTimerRemaining(CombatTimer.Get()), AlertedTimer.IsSet() ? "*" : "-", GetWorldTimerManager().GetTimerRemaining(AlertedTimer.Get()));
-
-		const FSettableInt& NumberOfEnemiesConePlayerIsIn = SharedKnowledge.NumberOfSightConesThePlayerIsIn;
-		String += FString::Printf(TEXT("Enemies (player is in %d enemies' sight cone)\n"), NumberOfEnemiesConePlayerIsIn.Get());
-
-		const TMap<FVector, TObjectPtr<ALocation>>& CoverPerLocations = SharedKnowledge.CoverPerLocations;
-		String += FString::Printf(TEXT("Covers: %d\n"), CoverPerLocations.Num());
-
-		const EAIZoneState State = SharedKnowledge.AIZoneState;
-		String += FString::Printf(TEXT("State: %s"), *(UEnum::GetDisplayValueAsText(State).ToString()));
-
-		PRINT_ON_SCREEN(0.0f, FColor(0, 140, 255, 255), String, false);
 	}
 }
 

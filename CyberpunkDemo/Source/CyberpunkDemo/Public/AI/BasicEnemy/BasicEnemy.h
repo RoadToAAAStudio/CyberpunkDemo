@@ -11,7 +11,6 @@ class UBasicEnemyConfigData;
 class AAIZone;
 class ABasicEnemyController;
 class ASplineContainer;
-enum class EBasicEnemyBehaviour : uint8;
 
 UCLASS()
 class CYBERPUNKDEMO_API ABasicEnemy : public ACharacter
@@ -34,32 +33,10 @@ public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "AI")
 	TObjectPtr<ASplineContainer> PatrolSpline;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI | Debug")
-	EBasicEnemyBehaviour BehaviourToTest;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Debug")
-	bool bDebugKnowledge = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Debug")
-	bool bDebugBehaviours = false;
-
 	ABasicEnemy();
-
-	virtual void Tick(float DeltaSeconds) override;
 
 	void RegisterAIZone(AAIZone* NewAIZone);
 
 protected:
 	virtual void BeginPlay() override;
-
-private:
-#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
-	void DebugKnowledge() const;
-
-	void DebugBehaviours() const;
-#endif
-
-	// Functions Listeners
-	UFUNCTION()	
-	void NotifySomethingEnteredInTheTrigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };

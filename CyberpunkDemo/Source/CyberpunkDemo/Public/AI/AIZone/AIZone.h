@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AI/BasicEnemy/Knowledge/KnowledgeTypes.h"
+#include "AIZoneKnowledgeTypes.h"
 #include "AI/Utility/IStateTreeNotificationsAcceptor.h"
 #include "GameFramework/Actor.h"
 #include "AIZone.generated.h"
@@ -12,52 +12,6 @@ class UBoxComponent;
 class ALocation;
 class ABasicEnemy;
 class UStateTreeComponent;
-
-UENUM(BlueprintType)
-enum class EAIZoneState : uint8
-{
-	None,
-	Unaware,
-	Combat,
-	Alerted,
-	Max UMETA(Hidden)
-};
-
-USTRUCT(Blueprintable)
-struct FBasicEnemySharedKnowledge
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
-	FSettablePawn Player;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
-	FSettableVector PlayerLocation;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
-	FSettableTimerHandle CombatTimer;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
-	FSettableFloat CombatTimerDuration;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
-	FSettableTimerHandle AlertedTimer;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
-	FSettableFloat AlertedTimerDuration;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
-	FSettableInt NumberOfSightConesThePlayerIsIn;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
-	TArray<TObjectPtr<ABasicEnemy>> Enemies;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
-	TMap<FVector, TObjectPtr<ALocation>> CoverPerLocations;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
-	EAIZoneState AIZoneState = EAIZoneState::None;
-};
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam		(FOnPlayerSensedSignature, const APawn*, Owner);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE              (FOnPlayerForgottenSignature);
@@ -113,10 +67,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStateTreeComponent>	StateMachine;
 	
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
-	bool bDebugSharedKnowledge = false;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugEnemies = false;
 
@@ -162,8 +112,6 @@ private:
 	void RegisterActors();
 
 #if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
-	void DebugSharedKnowledge() const;
-
 	void DebugEnemies() const;
 
 	void DebugCovers() const;
