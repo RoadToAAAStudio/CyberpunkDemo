@@ -10,7 +10,7 @@ ABasicEnemy::ABasicEnemy()
 
 void ABasicEnemy::BeginPlay()
 {
-	Super::BeginPlay();
-
 	BasicEnemyController = Cast<ABasicEnemyController>(GetController());
+
+	Super::BeginPlay();
 }

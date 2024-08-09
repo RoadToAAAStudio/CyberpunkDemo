@@ -7,6 +7,7 @@
 #include "BasicEnemyAnimInstance.generated.h"
 
 class ABasicEnemy;
+class ABasicEnemyController;
 class UCharacterMovementComponent;
 
 UCLASS()
@@ -16,6 +17,7 @@ class CYBERPUNKDEMO_API UBasicEnemyAnimInstance : public UAnimInstance
 	
 public:
 	virtual void NativeInitializeAnimation() override;
+	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
 
 protected:
@@ -23,11 +25,20 @@ protected:
 	TObjectPtr<ABasicEnemy> BasicEnemy;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<ABasicEnemyController> BasicEnemyController;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCharacterMovementComponent> CharacterMovementComponent;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly)
+	FVector VelocityDirection;
+
+	UPROPERTY(BlueprintReadOnly)
 	float GroundSpeed = 0.0f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	bool bIsCrouching = false;
+	UPROPERTY(BlueprintReadOnly)
+	float RelativeRotationToFocalPoint = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bHasFocalPoint = false;
 };
